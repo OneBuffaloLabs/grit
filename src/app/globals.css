@@ -1,11 +1,11 @@
 @import 'tailwindcss';
 
 @theme {
-  /* --- Grit App Color Palette --- */
+  /* --- Grit App Color Palette (Red Theme) --- */
 
   /* Primary color for actions, highlights, and progress */
-  --color-primary: #ff7a00; /* Fiery Orange */
-  --color-primary-hover: #ff8d24; /* Lighter Orange for hover */
+  --color-primary: #e53e3e; /* Strong Red */
+  --color-primary-hover: #f56565; /* Lighter Red for hover */
 
   /* Secondary color for UI surfaces like cards and modals */
   --color-secondary: #2c2c2c; /* Lighter gray */
@@ -20,5 +20,5 @@
 
   /* Feedback colors */
   --color-success: #22c55e; /* Green */
-  --color-danger: #ef4444; /* Red */
+  --color-danger: var(--color-primary); /* The primary red now also serves as the danger color */
 }
