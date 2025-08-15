@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+@theme {
+  /* --- Grit App Color Palette --- */
+
+  /* Primary color for actions, highlights, and progress */
+  --color-primary: #ff7a00; /* Fiery Orange */
+  --color-primary-hover: #ff8d24; /* Lighter Orange for hover */
+
+  /* Secondary color for UI surfaces like cards and modals */
+  --color-secondary: #2c2c2c; /* Lighter gray */
+
+  /* Background colors */
+  --color-background: #1a1a1a; /* Deep Charcoal (almost black) */
+  --color-surface: var(--color-secondary); /* Alias for consistency */
+
+  /* Foreground/Text colors */
+  --color-foreground: #f5f5f5; /* Off-white for primary text */
+  --color-text-muted: #888888; /* Medium gray for secondary text */
+
+  /* Feedback colors */
+  --color-success: #22c55e; /* Green */
+  --color-danger: #ef4444; /* Red */
+}
