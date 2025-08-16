@@ -2,28 +2,19 @@ import type { ChallengeDoc } from '@/types';
 
 let dbInstance: PouchDB.Database<ChallengeDoc> | null = null;
 
-/**
- * Dynamically imports PouchDB and initializes the database instance.
- * This ensures PouchDB is only ever loaded on the client-side.
- */
 const getDb = async () => {
-  // Return the existing instance if it's already created
   if (dbInstance) {
     return dbInstance;
   }
-  // Check if we are in a browser environment
   if (typeof window !== 'undefined') {
     const PouchDB = (await import('pouchdb')).default;
     dbInstance = new PouchDB<ChallengeDoc>('grit-challenge');
     return dbInstance;
   }
-  // Return null on the server-side to prevent errors during build
   return null;
 };
 
-/**
- * Starts a new 75 Hard challenge in the database.
- */
+// --- (Existing functions: startNewChallenge, getCurrentChallenge, updateChallenge) ---
 export const startNewChallenge = async (): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
@@ -47,9 +38,6 @@ export const startNewChallenge = async (): Promise<ChallengeDoc | null> => {
   }
 };
 
-/**
- * Fetches the current challenge from the database.
- */
 export const getCurrentChallenge = async (): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
@@ -58,16 +46,13 @@ export const getCurrentChallenge = async (): Promise<ChallengeDoc | null> => {
     return await db.get('current_challenge');
   } catch (err) {
     if ((err as PouchDB.Core.Error).status === 404) {
-      return null; // No challenge started yet
+      return null;
     }
     console.error('Error fetching challenge:', err);
     throw err;
   }
 };
 
-/**
- * Updates the current challenge document in the database.
- */
 export const updateChallenge = async (challenge: ChallengeDoc): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
@@ -75,4 +60,70 @@ export const updateChallenge = async (challenge: ChallengeDoc): Promise<Challeng
   const response = await db.put(challenge);
   challenge._rev = response.rev;
   return challenge;
+};
+
+/**
+ * Adds a photo as an attachment and updates the document to reflect the upload.
+ */
+export const addPhotoAttachment = async (
+  doc: ChallengeDoc,
+  day: number,
+  photo: File
+): Promise<ChallengeDoc> => {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+
+  const rev = doc._rev;
+  if (!rev) throw new Error('Document revision is missing');
+
+  // First, add the attachment to the document
+  const attachmentResponse = await db.putAttachment(
+    doc._id,
+    `day-${day}.jpg`,
+    rev,
+    photo,
+    photo.type
+  );
+
+  // Now, fetch the latest version of the doc to update its properties
+  const latestDoc = await db.get(doc._id);
+
+  // Ensure the day object exists
+  if (!latestDoc.days[day]) {
+    latestDoc.days[day] = {
+      completed: false,
+      photoAttached: false,
+      tasks: {
+        diet: false,
+        workout1: false,
+        workout2: false,
+        water: false,
+        reading: false,
+        progressPhoto: false,
+      },
+    };
+  }
+
+  // **FIX:** Mark photo as attached AND check off the corresponding task
+  latestDoc.days[day].photoAttached = true;
+  latestDoc.days[day].tasks.progressPhoto = true;
+
+  // Save the updated document
+  const finalResponse = await db.put(latestDoc);
+  return { ...latestDoc, _rev: finalResponse.rev };
+};
+
+/**
+ * Retrieves a photo attachment for a specific day.
+ */
+export const getPhotoAttachment = async (day: number): Promise<string | null> => {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const blob = (await db.getAttachment('current_challenge', `day-${day}.jpg`)) as Blob;
+    return URL.createObjectURL(blob);
+  } catch (err) {
+    return null; // No attachment found
+  }
 };

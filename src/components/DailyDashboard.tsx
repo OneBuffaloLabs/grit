@@ -4,6 +4,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc } from '@/types';
+import GritGrid from './GritGrid';
+import PhotoGallery from './PhotoGallery';
 
 const initialTaskState = {
   diet: false,
@@ -17,7 +19,6 @@ const initialTaskState = {
 const DailyDashboard = () => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
-
   const [tasks, setTasks] = useState(initialTaskState);
 
   const currentDay = useMemo(() => {
@@ -37,7 +38,7 @@ const DailyDashboard = () => {
     } else {
       setTasks(initialTaskState);
     }
-  }, [challenge, currentDay]); // The dependency warning is now resolved.
+  }, [challenge, currentDay]);
 
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
     if (!challenge) return;
@@ -46,7 +47,11 @@ const DailyDashboard = () => {
 
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
     if (!updatedChallenge.days[currentDay]) {
-      updatedChallenge.days[currentDay] = { completed: false, tasks: initialTaskState };
+      updatedChallenge.days[currentDay] = {
+        completed: false,
+        photoAttached: false,
+        tasks: initialTaskState,
+      };
     }
     updatedChallenge.days[currentDay].tasks = newTasks;
 
@@ -71,7 +76,11 @@ const DailyDashboard = () => {
     if (updatedChallenge.days[currentDay]) {
       updatedChallenge.days[currentDay].completed = true;
     } else {
-      updatedChallenge.days[currentDay] = { completed: true, tasks };
+      updatedChallenge.days[currentDay] = {
+        completed: true,
+        photoAttached: false,
+        tasks,
+      };
     }
 
     try {
@@ -135,6 +144,8 @@ const DailyDashboard = () => {
             Complete Day
           </button>
         </div>
+        <GritGrid />
+        <PhotoGallery currentDay={currentDay} />
       </div>
     </section>
   );
