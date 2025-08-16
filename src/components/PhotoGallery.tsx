@@ -1,3 +1,4 @@
+// src/components/PhotoGallery.tsx
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -37,12 +38,17 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
     setIsFetching(false);
   }, [challenge]);
 
+  // This hook handles fetching data when the challenge changes.
   useEffect(() => {
     fetchPhotos();
+  }, [fetchPhotos]);
+
+  // This hook handles cleaning up object URLs to prevent memory leaks.
+  useEffect(() => {
     return () => {
       photos.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [challenge, fetchPhotos, photos]);
+  }, [photos]);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
