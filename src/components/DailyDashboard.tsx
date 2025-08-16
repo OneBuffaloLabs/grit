@@ -1,34 +1,105 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
+import { updateChallenge } from '@/lib/db';
+import type { ChallengeDoc } from '@/types';
 
 const DailyDashboard = () => {
-  const [tasks, setTasks] = useState({
+  const { challenge } = useChallengeState();
+  const dispatch = useChallengeDispatch();
+
+  // Defines the initial state for the tasks.
+  const initialTaskState = {
     diet: false,
     workout1: false,
     workout2: false,
     water: false,
     reading: false,
     progressPhoto: false,
-  });
+  };
 
-  const handleTaskChange = (taskName: keyof typeof tasks) => {
+  const [tasks, setTasks] = useState(initialTaskState);
+
+  // Calculates the current day of the challenge based on the start date.
+  const currentDay = useMemo(() => {
+    if (!challenge?.startDate) return 1;
+    const startDate = new Date(challenge.startDate);
+    const today = new Date();
+    // Set time to the beginning of the day for accurate day difference calculation
+    startDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffTime = Math.abs(today.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays + 1;
+  }, [challenge]);
+
+  // useEffect hook to load the current day's tasks from the database when the component mounts or the day changes.
+  useEffect(() => {
+    if (challenge && challenge.days[currentDay]) {
+      setTasks(challenge.days[currentDay].tasks);
+    } else {
+      // Reset tasks for the new day if no data exists
+      setTasks(initialTaskState);
+    }
+  }, [challenge, currentDay]);
+
+  // Handles changes to a task's completion status and updates the database.
+  const handleTaskChange = async (taskName: keyof typeof tasks) => {
+    if (!challenge) return;
+
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
     setTasks(newTasks);
-    // This is where you would add the PouchDB logic
-    // to instantly save the state of the checklist.
-    console.log('Saving task state to PouchDB:', newTasks);
+
+    // Create a deep copy of the challenge to avoid direct state mutation
+    const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+
+    if (!updatedChallenge.days[currentDay]) {
+      updatedChallenge.days[currentDay] = { completed: false, tasks: initialTaskState };
+    }
+    updatedChallenge.days[currentDay].tasks = newTasks;
+
+    try {
+      const newRev = await updateChallenge(updatedChallenge);
+      if (newRev) {
+        dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+      }
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      // Optionally, revert the UI state if the DB update fails
+      setTasks(tasks);
+    }
   };
 
   const allTasksCompleted = useMemo(() => {
     return Object.values(tasks).every(Boolean);
   }, [tasks]);
 
-  const handleCompleteDay = () => {
-    // This is where you would add the PouchDB logic
-    // to finalize the day's document and advance the counter.
-    console.log('Completing day and advancing to next day...');
-    alert('Day Completed! (PouchDB logic to be implemented)');
+  // Marks the current day as complete and advances the challenge.
+  const handleCompleteDay = async () => {
+    if (!challenge) return;
+
+    // Create a deep copy for modification
+    const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+
+    // Mark the current day as complete
+    if (updatedChallenge.days[currentDay]) {
+      updatedChallenge.days[currentDay].completed = true;
+    } else {
+      // This case handles if a user clicks complete without toggling any tasks first
+      updatedChallenge.days[currentDay] = { completed: true, tasks };
+    }
+
+    try {
+      // Save to PouchDB and update context
+      const newRev = await updateChallenge(updatedChallenge);
+      if (newRev) {
+        dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+      }
+      alert(`Day ${currentDay} Complete! Great work.`);
+    } catch (error) {
+      console.error('Failed to complete day:', error);
+    }
   };
 
   const taskItems = [
@@ -44,7 +115,9 @@ const DailyDashboard = () => {
     <section className="bg-[var(--color-surface)] py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-md">
         <header className="text-center mb-8">
-          <h1 className="text-6xl font-bold font-orbitron text-[var(--color-primary)]">Day 1</h1>
+          <h1 className="text-6xl font-bold font-orbitron text-[var(--color-primary)]">
+            Day {currentDay}
+          </h1>
           <p className="text-2xl text-[var(--color-text-muted)] font-orbitron">/ 75</p>
         </header>
 
