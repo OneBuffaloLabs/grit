@@ -10,47 +10,31 @@ import { getCurrentChallenge } from '@/lib/db';
 import Welcome from '@/components/Welcome';
 import DailyDashboard from '@/components/DailyDashboard';
 
-/**
- * This component handles the main application logic, deciding whether to show
- * the Welcome screen or the Daily Dashboard based on the challenge state.
- */
 const AppContent = () => {
   const { challenge, isLoading } = useChallengeState();
   const dispatch = useChallengeDispatch();
 
-  // This effect runs once on component mount on the client-side
   useEffect(() => {
     const fetchChallenge = async () => {
       dispatch({ type: 'START_LOADING' });
-      try {
-        const currentChallenge = await getCurrentChallenge();
-        dispatch({ type: 'SET_CHALLENGE', payload: currentChallenge });
-      } catch (error) {
-        console.error('Failed to fetch challenge data:', error);
-        dispatch({ type: 'STOP_LOADING' });
-      }
+      const currentChallenge = await getCurrentChallenge();
+      dispatch({ type: 'SET_CHALLENGE', payload: currentChallenge });
     };
 
     fetchChallenge();
   }, [dispatch]);
 
-  // Show a loading state while we check for an existing challenge
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <main className="flex-grow flex items-center justify-center">
         <p className="text-2xl font-orbitron">Loading...</p>
-      </div>
+      </main>
     );
   }
 
-  // If a challenge exists, show the dashboard. Otherwise, show the welcome screen.
-  return challenge ? <DailyDashboard /> : <Welcome />;
+  return <main className="flex-grow">{challenge ? <DailyDashboard /> : <Welcome />}</main>;
 };
 
-/**
- * The main HomePage component that wraps our application content
- * with the state provider.
- */
 export default function HomePage() {
   return (
     <ChallengeProvider>
