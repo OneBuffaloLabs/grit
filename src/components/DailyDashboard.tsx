@@ -6,6 +6,7 @@ import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc } from '@/types';
 import GritGrid from './GritGrid';
 import PhotoGallery from './PhotoGallery';
+import Journal from './Journal';
 
 const initialTaskState = {
   diet: false,
@@ -144,6 +145,8 @@ const DailyDashboard = () => {
             Complete Day
           </button>
         </div>
+        {/* Integrate the new components */}
+        <Journal currentDay={currentDay} />
         <GritGrid />
         <PhotoGallery currentDay={currentDay} />
       </div>

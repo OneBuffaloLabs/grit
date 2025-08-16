@@ -5,7 +5,8 @@ export interface ChallengeDoc {
   days: {
     [day: number]: {
       completed: boolean;
-      photoAttached: boolean; // New property to track photos
+      photoAttached: boolean;
+      journal?: string;
       tasks: {
         diet: boolean;
         workout1: boolean;
