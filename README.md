@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="public/assets/banners/logo-banner.png" alt="Grit Logo" />
+</div>
+
 # Grit: A Privacy-First Challenge Tracker
 
 ![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)
@@ -6,7 +10,7 @@
 
 Grit is a privacy-focused, client-only Progressive Web App (PWA) for tracking mental toughness challenges, starting with 75 Hard®. It's designed for radical simplicity and focus, helping you stay accountable without distractions or compromising your data.
 
-**Live Demo:** [https://grit.onebuffalolabs.com](https://grit.onebuffalolabs.com)
+**Live Site:** [https://grit.onebuffalolabs.com](https://grit.onebuffalolabs.com)
 
 ---
 
