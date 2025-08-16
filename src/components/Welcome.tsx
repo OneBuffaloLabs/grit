@@ -3,15 +3,21 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { useChallengeDispatch } from '@/context/ChallengeContext';
+import { startNewChallenge } from '@/lib/db';
 
 const Welcome = () => {
-  const handleStartChallenge = () => {
-    // This is where you would add the PouchDB logic
-    // to create the initial challenge document.
-    console.log('Starting 75 Hard Challenge...');
-    // After creating the document, you would redirect the user.
-    // For now, we'll just log to the console.
-    alert('Challenge Started! (PouchDB logic to be implemented)');
+  const dispatch = useChallengeDispatch();
+
+  const handleStartChallenge = async () => {
+    dispatch({ type: 'START_LOADING' });
+    try {
+      const newChallenge = await startNewChallenge();
+      dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
+    } catch (error) {
+      console.error('Failed to start challenge:', error);
+      dispatch({ type: 'STOP_LOADING' });
+    }
   };
 
   const rules = [
@@ -47,7 +53,7 @@ const Welcome = () => {
         </div>
         <button
           onClick={handleStartChallenge}
-          className="cursor-pointer w-full max-w-xs mx-auto bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-lg hover:bg-[var(--color-primary-hover)] transition-transform duration-300 transform hover:scale-105">
+          className="w-full max-w-xs mx-auto bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-lg hover:bg-[var(--color-primary-hover)] transition-transform duration-300 transform hover:scale-105 cursor-pointer">
           Start Challenge
         </button>
       </div>
