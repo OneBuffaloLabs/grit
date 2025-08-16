@@ -1,6 +1,6 @@
 import ReactGA from 'react-ga4';
 
-const GA_MEASUREMENT_ID = '';
+const GA_MEASUREMENT_ID = 'G-26VV8GVYEK';
 
 export const initGA = (): void => {
   // Check for production environment and if the GA ID exists

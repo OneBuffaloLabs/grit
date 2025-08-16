@@ -1,6 +1,6 @@
 // --- Next ---
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Orbitron, Geist_Mono } from 'next/font/google';
 // --- Components ---
 // import { Header } from '@/components/Header';
 // import { Footer } from '@/components/Footer';
@@ -17,7 +17,11 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 config.autoAddCss = false;
 
 // Font Definitions
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-orbitron',
+});
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata: Metadata = generateMetadata();
@@ -31,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
+        className={`${orbitron.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
         {/* <Header /> */}
         <main className="flex-grow">{children}</main>
         {/* <Footer /> */}
