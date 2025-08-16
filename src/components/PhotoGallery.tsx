@@ -5,7 +5,7 @@ import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeCont
 import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import PhotoModal from './PhotoModal'; // Import the new modal component
+import PhotoModal from './PhotoModal';
 
 interface PhotoGalleryProps {
   currentDay: number;
@@ -17,7 +17,7 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
   const [photos, setPhotos] = useState<Map<number, string>>(new Map());
   const [isFetching, setIsFetching] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<{ day: number; url: string } | null>(null); // State for the modal
+  const [selectedPhoto, setSelectedPhoto] = useState<{ day: number; url: string } | null>(null);
 
   const fetchPhotos = useCallback(async () => {
     if (!challenge) return;
@@ -42,7 +42,7 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
     return () => {
       photos.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [challenge, fetchPhotos]);
+  }, [challenge, fetchPhotos, photos]);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -62,7 +62,6 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
 
   return (
     <>
-      {/* The Modal is rendered here but only visible when selectedPhoto is set */}
       {selectedPhoto && (
         <PhotoModal
           imageUrl={selectedPhoto.url}
@@ -109,8 +108,8 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
                 <div
                   key={day}
                   className="relative aspect-square cursor-pointer"
-                  onClick={() => setSelectedPhoto({ day, url })} // Set the selected photo on click
-                >
+                  onClick={() => setSelectedPhoto({ day, url })}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={url}
                     alt={`Progress for day ${day}`}
