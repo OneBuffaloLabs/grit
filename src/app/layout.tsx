@@ -1,9 +1,9 @@
 // --- Next ---
 import type { Metadata, Viewport } from 'next';
-import { Orbitron, Geist_Mono } from 'next/font/google';
+import { Orbitron } from 'next/font/google';
 // --- Components ---
-// import { Header } from '@/components/Header';
-// import { Footer } from '@/components/Footer';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import AnalyticsInitializer from '@/components/AnalyticsInitializer';
 // --- Utils ---
 import { generateMetadata } from '@/utils/metadata';
@@ -19,10 +19,8 @@ config.autoAddCss = false;
 // Font Definitions
 const orbitron = Orbitron({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
   variable: '--font-orbitron',
 });
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata: Metadata = generateMetadata();
 export const viewport: Viewport = generateViewport();
@@ -35,10 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${orbitron.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
-        {/* <Header /> */}
+        className={`${orbitron.variable} font-sans antialiased flex flex-col min-h-screen bg-[var(--color-surface)] text-foreground`}>
+        <Header />
         <main className="flex-grow">{children}</main>
-        {/* <Footer /> */}
+        <Footer />
         <AnalyticsInitializer />
       </body>
     </html>
