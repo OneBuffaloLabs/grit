@@ -1,10 +1,16 @@
-// src/components/GritGrid.tsx
 'use client';
 
 import React from 'react';
 import { useChallengeState } from '@/context/ChallengeContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
-const GritGrid = () => {
+interface GritGridProps {
+  selectedDay: number;
+  onDaySelect: (day: number) => void;
+}
+
+const GritGrid = ({ selectedDay, onDaySelect }: GritGridProps) => {
   const { challenge } = useChallengeState();
 
   return (
@@ -15,14 +21,24 @@ const GritGrid = () => {
           const dayNumber = i + 1;
           const dayData = challenge?.days[dayNumber];
           const isCompleted = dayData?.completed || false;
-          // You can add another state for 'failed' days if needed
+          const isSelected = dayNumber === selectedDay;
+
           const cellColor = isCompleted ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface)]';
+
+          const borderStyle = isSelected
+            ? 'border-2 border-[var(--color-primary-hover)]'
+            : 'border-2 border-transparent';
 
           return (
             <div
               key={dayNumber}
-              className={`w-full aspect-square flex items-center justify-center rounded-md ${cellColor}`}>
-              <span className="text-sm font-mono">{dayNumber}</span>
+              onClick={() => onDaySelect(dayNumber)}
+              className={`w-full aspect-square flex items-center justify-center rounded-md cursor-pointer transition-all duration-200 ${cellColor} ${borderStyle}`}>
+              {isCompleted ? (
+                <FontAwesomeIcon icon={faTimes} className="text-white text-lg" />
+              ) : (
+                <span className="text-sm font-mono">{dayNumber}</span>
+              )}
             </div>
           );
         })}

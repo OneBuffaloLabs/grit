@@ -20,9 +20,13 @@ const initialTaskState = {
 const DailyDashboard = () => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
+
+  // This state now controls which day is being viewed and edited.
+  const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
 
-  const currentDay = useMemo(() => {
+  // This calculates the current calendar day. We use it to set the initial selected day.
+  const calendarDay = useMemo(() => {
     if (!challenge?.startDate) return 1;
     const startDate = new Date(challenge.startDate);
     const today = new Date();
@@ -33,13 +37,19 @@ const DailyDashboard = () => {
     return diffDays + 1;
   }, [challenge]);
 
+  // Set the selected day to the current calendar day on initial load.
   useEffect(() => {
-    if (challenge && challenge.days[currentDay]) {
-      setTasks(challenge.days[currentDay].tasks);
+    setSelectedDay(calendarDay);
+  }, [calendarDay]);
+
+  // This effect now loads the tasks for the currently *selected* day.
+  useEffect(() => {
+    if (challenge && challenge.days[selectedDay]) {
+      setTasks(challenge.days[selectedDay].tasks);
     } else {
       setTasks(initialTaskState);
     }
-  }, [challenge, currentDay]);
+  }, [challenge, selectedDay]);
 
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
     if (!challenge) return;
@@ -47,14 +57,14 @@ const DailyDashboard = () => {
     setTasks(newTasks);
 
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
-    if (!updatedChallenge.days[currentDay]) {
-      updatedChallenge.days[currentDay] = {
+    if (!updatedChallenge.days[selectedDay]) {
+      updatedChallenge.days[selectedDay] = {
         completed: false,
         photoAttached: false,
         tasks: initialTaskState,
       };
     }
-    updatedChallenge.days[currentDay].tasks = newTasks;
+    updatedChallenge.days[selectedDay].tasks = newTasks;
 
     try {
       const newRev = await updateChallenge(updatedChallenge);
@@ -63,7 +73,7 @@ const DailyDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to update task:', error);
-      setTasks(tasks);
+      setTasks(tasks); // Revert on error
     }
   };
 
@@ -74,10 +84,10 @@ const DailyDashboard = () => {
   const handleCompleteDay = async () => {
     if (!challenge) return;
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
-    if (updatedChallenge.days[currentDay]) {
-      updatedChallenge.days[currentDay].completed = true;
+    if (updatedChallenge.days[selectedDay]) {
+      updatedChallenge.days[selectedDay].completed = true;
     } else {
-      updatedChallenge.days[currentDay] = {
+      updatedChallenge.days[selectedDay] = {
         completed: true,
         photoAttached: false,
         tasks,
@@ -89,7 +99,7 @@ const DailyDashboard = () => {
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
       }
-      alert(`Day ${currentDay} Complete! Great work.`);
+      alert(`Day ${selectedDay} marked as complete!`);
     } catch (error) {
       console.error('Failed to complete day:', error);
     }
@@ -109,7 +119,7 @@ const DailyDashboard = () => {
       <div className="container mx-auto max-w-md">
         <header className="text-center mb-8">
           <h1 className="text-6xl font-bold font-orbitron text-[var(--color-primary)]">
-            Day {currentDay}
+            Day {selectedDay}
           </h1>
           <p className="text-2xl text-[var(--color-text-muted)] font-orbitron">/ 75</p>
         </header>
@@ -145,10 +155,9 @@ const DailyDashboard = () => {
             Complete Day
           </button>
         </div>
-        {/* Integrate the new components */}
-        <Journal currentDay={currentDay} />
-        <GritGrid />
-        <PhotoGallery currentDay={currentDay} />
+        <Journal currentDay={selectedDay} />
+        <GritGrid selectedDay={selectedDay} onDaySelect={setSelectedDay} />
+        <PhotoGallery currentDay={selectedDay} />
       </div>
     </section>
   );
