@@ -22,3 +22,12 @@
   --color-success: #22c55e; /* Green */
   --color-danger: var(--color-primary); /* The primary red now also serves as the danger color */
 }
+
+/* Utility to hide scrollbar across browsers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

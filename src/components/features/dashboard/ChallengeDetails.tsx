@@ -12,7 +12,7 @@ const ChallengeDetails = () => {
 
   const startDate = new Date(challenge.startDate);
   const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 74); // 75 days total
+  endDate.setDate(startDate.getDate() + 74);
 
   const formatDate = (date: Date) => {
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
@@ -22,7 +22,7 @@ const ChallengeDetails = () => {
   };
 
   return (
-    <div className="text-center my-4 text-sm text-[var(--color-text-muted)]">
+    <div className="text-center my-4 text-sm md:text-base text-[var(--color-text-muted)] md:flex md:items-center md:justify-center md:gap-4">
       <p>
         <span className="font-bold">Start:</span> {formatDate(startDate)}
       </p>
