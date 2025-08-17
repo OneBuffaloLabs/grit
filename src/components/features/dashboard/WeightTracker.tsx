@@ -5,7 +5,7 @@ import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeCont
 import { updateChallenge } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faSpinner, faWeightScale, faCheck } from '@fortawesome/free-solid-svg-icons';
-import WeightChangeIndicator from './WeightChangeIndicator';
+import WeightChangeIndicator from '@/components/ui/WeightChangeIndicator';
 
 interface WeightTrackerProps {
   currentDay: number;

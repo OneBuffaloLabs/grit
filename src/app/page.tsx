@@ -7,8 +7,8 @@ import {
   useChallengeDispatch,
 } from '@/context/ChallengeContext';
 import { getCurrentChallenge } from '@/lib/db';
-import Welcome from '@/components/Welcome';
-import DailyDashboard from '@/components/DailyDashboard';
+import Welcome from '@/components/features/welcome/Welcome';
+import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SettingsModal from '@/components/ui/SettingsModal';
