@@ -5,6 +5,7 @@ import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeCont
 import { updateChallenge } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faSpinner, faWeightScale, faCheck } from '@fortawesome/free-solid-svg-icons';
+import WeightChangeIndicator from './WeightChangeIndicator';
 
 interface WeightTrackerProps {
   currentDay: number;
@@ -19,7 +20,8 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState('');
 
-  // Syncs component state with context data when challenge or day changes.
+  const startingWeight = challenge?.days[1]?.weight;
+
   useEffect(() => {
     const dailyWeight = challenge?.days[currentDay]?.weight;
     const weightStr = dailyWeight != null ? String(dailyWeight) : '';
@@ -27,7 +29,6 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
     setOriginalWeight(weightStr);
   }, [challenge, currentDay]);
 
-  // Resets UI state (like "Saved!" confirmation) when the day changes.
   useEffect(() => {
     setIsSaved(false);
     setError('');
@@ -37,7 +38,6 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
     let value = e.target.value;
     const numValue = parseFloat(value);
 
-    // Prevent user from typing a number outside the allowed range.
     if (numValue > 1000) value = '1000';
     if (numValue < 0) value = '0';
 
@@ -75,16 +75,15 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
       };
     }
 
-    // Use undefined to remove the property if the weight is cleared.
     updatedChallenge.days[currentDay].weight = weight === '' ? undefined : weightValue;
 
     try {
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
-        setOriginalWeight(weight); // Update original weight to disable save until next change
+        setOriginalWeight(weight);
         setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000); // Show checkmark for 2 seconds
+        setTimeout(() => setIsSaved(false), 2000);
       }
     } catch (err) {
       console.error('Failed to save weight:', err);
@@ -134,6 +133,10 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
         </button>
       </div>
       {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+      <WeightChangeIndicator
+        startingWeight={startingWeight}
+        currentWeight={parseFloat(weight) || null}
+      />
     </div>
   );
 };
