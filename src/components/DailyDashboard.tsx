@@ -22,11 +22,9 @@ const DailyDashboard = () => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
 
-  // This state now controls which day is being viewed and edited.
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
 
-  // This calculates the current calendar day. We use it to set the initial selected day.
   const calendarDay = useMemo(() => {
     if (!challenge?.startDate) return 1;
     const startDate = new Date(challenge.startDate);
@@ -38,12 +36,10 @@ const DailyDashboard = () => {
     return diffDays + 1;
   }, [challenge]);
 
-  // Set the selected day to the current calendar day on initial load.
   useEffect(() => {
     setSelectedDay(calendarDay);
   }, [calendarDay]);
 
-  // This effect now loads the tasks for the currently *selected* day.
   useEffect(() => {
     if (challenge && challenge.days[selectedDay]) {
       setTasks(challenge.days[selectedDay].tasks);
@@ -52,8 +48,13 @@ const DailyDashboard = () => {
     }
   }, [challenge, selectedDay]);
 
+  const isDayComplete = challenge?.days[selectedDay]?.completed || false;
+  const isPreviousDayComplete =
+    selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
+
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
-    if (!challenge) return;
+    if (!challenge || isDayComplete) return;
+
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
     setTasks(newTasks);
 
@@ -131,12 +132,17 @@ const DailyDashboard = () => {
           {taskItems.map((task) => (
             <label
               key={task.id}
-              className="flex items-center text-lg p-4 bg-[var(--color-surface)] rounded-lg cursor-pointer transition-all duration-300 hover:bg-gray-700">
+              className={`flex items-center text-lg p-4 bg-[var(--color-surface)] rounded-lg transition-all duration-300 ${
+                isDayComplete || !isPreviousDayComplete
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer hover:bg-gray-700'
+              }`}>
               <input
                 type="checkbox"
                 checked={tasks[task.id as keyof typeof tasks]}
                 onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
-                className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] bg-gray-700 focus:ring-[var(--color-primary)] focus:ring-offset-gray-800"
+                disabled={isDayComplete || !isPreviousDayComplete}
+                className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] bg-gray-700 focus:ring-[var(--color-primary)] focus:ring-offset-gray-800 disabled:cursor-not-allowed"
               />
               <span
                 className={`ml-4 ${
@@ -153,9 +159,9 @@ const DailyDashboard = () => {
         <div className="mt-8">
           <button
             onClick={handleCompleteDay}
-            disabled={!allTasksCompleted}
+            disabled={!allTasksCompleted || isDayComplete || !isPreviousDayComplete}
             className="w-full bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-xl hover:bg-[var(--color-primary-hover)] transition-colors duration-300 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer">
-            Complete Day
+            {isDayComplete ? 'Day Complete' : 'Complete Day'}
           </button>
         </div>
         <Journal currentDay={selectedDay} />

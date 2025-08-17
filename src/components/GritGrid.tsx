@@ -23,17 +23,24 @@ const GritGrid = ({ selectedDay, onDaySelect }: GritGridProps) => {
           const isCompleted = dayData?.completed || false;
           const isSelected = dayNumber === selectedDay;
 
-          const cellColor = isCompleted ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface)]';
+          // A day is selectable if it's the first day, already completed,
+          // or the day before it is completed.
+          const isSelectable =
+            dayNumber === 1 || isCompleted || challenge?.days[dayNumber - 1]?.completed || false;
 
+          const cellColor = isCompleted ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface)]';
           const borderStyle = isSelected
             ? 'border-2 border-[var(--color-primary-hover)]'
             : 'border-2 border-transparent';
 
+          const cursorStyle = isSelectable ? 'cursor-pointer' : 'cursor-not-allowed';
+          const opacityStyle = isSelectable ? 'opacity-100' : 'opacity-50';
+
           return (
             <div
               key={dayNumber}
-              onClick={() => onDaySelect(dayNumber)}
-              className={`w-full aspect-square flex items-center justify-center rounded-md cursor-pointer transition-all duration-200 ${cellColor} ${borderStyle}`}>
+              onClick={() => isSelectable && onDaySelect(dayNumber)}
+              className={`w-full aspect-square flex items-center justify-center rounded-md transition-all duration-200 ${cellColor} ${borderStyle} ${cursorStyle} ${opacityStyle}`}>
               {isCompleted ? (
                 <FontAwesomeIcon icon={faTimes} className="text-white text-lg" />
               ) : (
