@@ -1,13 +1,18 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { useChallengeState } from '@/context/ChallengeContext';
 
 interface HeaderProps {
   onSettingsClick: () => void;
 }
 
 const Header = ({ onSettingsClick }: HeaderProps) => {
+  const { challenge } = useChallengeState();
+
   return (
     <header className="bg-[var(--color-background)] py-4 px-8 shadow-md">
       <nav className="container mx-auto flex items-center justify-between">
@@ -20,14 +25,16 @@ const Header = ({ onSettingsClick }: HeaderProps) => {
             priority
           />
         </div>
-        <div>
-          <button
-            onClick={onSettingsClick}
-            className="text-2xl text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer"
-            aria-label="Open settings">
-            <FontAwesomeIcon icon={faCog} />
-          </button>
-        </div>
+        {challenge && (
+          <div>
+            <button
+              onClick={onSettingsClick}
+              className="text-2xl text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer"
+              aria-label="Open settings">
+              <FontAwesomeIcon icon={faCog} />
+            </button>
+          </div>
+        )}
       </nav>
     </header>
   );

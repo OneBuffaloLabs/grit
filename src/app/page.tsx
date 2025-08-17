@@ -53,7 +53,9 @@ const AppContent = () => {
       <Header onSettingsClick={() => setIsSettingsOpen(true)} />
       <main className="flex-grow">{challenge ? <DailyDashboard /> : <Welcome />}</main>
       <Footer />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      {challenge && (
+        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      )}
       <AnalyticsInitializer />
     </div>
   );
