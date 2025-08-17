@@ -7,6 +7,7 @@ import type { ChallengeDoc } from '@/types';
 import GritGrid from './GritGrid';
 import PhotoGallery from './PhotoGallery';
 import Journal from './Journal';
+import ChallengeDetails from './ChallengeDetails';
 
 const initialTaskState = {
   diet: false,
@@ -123,6 +124,8 @@ const DailyDashboard = () => {
           </h1>
           <p className="text-2xl text-[var(--color-text-muted)] font-orbitron">/ 75</p>
         </header>
+
+        <ChallengeDetails />
 
         <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
           {taskItems.map((task) => (

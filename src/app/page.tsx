@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ChallengeProvider,
   useChallengeState,
@@ -9,6 +9,10 @@ import {
 import { getCurrentChallenge } from '@/lib/db';
 import Welcome from '@/components/Welcome';
 import DailyDashboard from '@/components/DailyDashboard';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import SettingsModal from '@/components/SettingsModal';
+import AnalyticsInitializer from '@/components/AnalyticsInitializer';
 
 /**
  * This component handles the main application logic, deciding whether to show
@@ -17,6 +21,7 @@ import DailyDashboard from '@/components/DailyDashboard';
 const AppContent = () => {
   const { challenge, isLoading } = useChallengeState();
   const dispatch = useChallengeDispatch();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // This effect runs once on component mount on the client-side
   useEffect(() => {
@@ -43,8 +48,15 @@ const AppContent = () => {
     );
   }
 
-  // If a challenge exists, show the dashboard. Otherwise, show the welcome screen.
-  return challenge ? <DailyDashboard /> : <Welcome />;
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header onSettingsClick={() => setIsSettingsOpen(true)} />
+      <main className="flex-grow">{challenge ? <DailyDashboard /> : <Welcome />}</main>
+      <Footer />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <AnalyticsInitializer />
+    </div>
+  );
 };
 
 /**
