@@ -25,21 +25,28 @@ const DailyDashboard = () => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
 
-  const calendarDay = useMemo(() => {
-    if (!challenge?.startDate) return 1;
-    const startDate = new Date(challenge.startDate);
-    const today = new Date();
-    startDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    const diffTime = Math.abs(today.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1;
+  // This calculates the next day to show based on the last completed day.
+  const nextDayToShow = useMemo(() => {
+    if (!challenge) return 1;
+
+    const completedDays = Object.keys(challenge.days)
+      .map(Number)
+      .filter((day) => challenge.days[day]?.completed);
+
+    if (completedDays.length === 0) {
+      return 1;
+    }
+
+    const highestCompletedDay = Math.max(...completedDays);
+    return Math.min(highestCompletedDay + 1, 75); // Go to the next day, max 75
   }, [challenge]);
 
+  // Set the selected day to the next logical day on initial load.
   useEffect(() => {
-    setSelectedDay(calendarDay);
-  }, [calendarDay]);
+    setSelectedDay(nextDayToShow);
+  }, [nextDayToShow]);
 
+  // This effect loads the tasks for the currently *selected* day.
   useEffect(() => {
     if (challenge && challenge.days[selectedDay]) {
       setTasks(challenge.days[selectedDay].tasks);
