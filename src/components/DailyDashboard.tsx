@@ -9,6 +9,7 @@ import PhotoGallery from './PhotoGallery';
 import Journal from './Journal';
 import ChallengeDetails from './ChallengeDetails';
 import CompletionAlert from './CompletionAlert';
+import WeightTracker from './WeightTracker';
 
 const initialTaskState = {
   diet: false,
@@ -106,7 +107,7 @@ const DailyDashboard = () => {
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
-        setShowCompletionAlert(true); // Show the alert
+        setShowCompletionAlert(true);
       }
     } catch (error) {
       console.error('Failed to complete day:', error);
@@ -184,6 +185,7 @@ const DailyDashboard = () => {
             {isDayComplete ? 'Day Complete' : 'Complete Day'}
           </button>
         </div>
+        <WeightTracker currentDay={selectedDay} />
         <Journal currentDay={selectedDay} />
         <GritGrid selectedDay={selectedDay} onDaySelect={setSelectedDay} />
         <PhotoGallery currentDay={selectedDay} />

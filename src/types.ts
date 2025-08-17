@@ -7,6 +7,7 @@ export interface ChallengeDoc {
       completed: boolean;
       photoAttached: boolean;
       journal?: string;
+      weight?: number;
       tasks: {
         diet: boolean;
         workout1: boolean;
