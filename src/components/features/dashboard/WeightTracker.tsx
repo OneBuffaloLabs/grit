@@ -96,7 +96,7 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
   const hasChanged = weight !== originalWeight;
 
   return (
-    <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 mt-8">
+    <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 mt-8 lg:mt-0">
       <h2 className="text-3xl font-bold font-orbitron text-center mb-6">Daily Weight</h2>
       <div className="flex items-center gap-4">
         <FontAwesomeIcon icon={faWeightScale} className="text-[var(--color-primary)]" size="2x" />
