@@ -9,9 +9,9 @@ import {
 import { getCurrentChallenge } from '@/lib/db';
 import Welcome from '@/components/Welcome';
 import DailyDashboard from '@/components/DailyDashboard';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import SettingsModal from '@/components/SettingsModal';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import SettingsModal from '@/components/ui/SettingsModal';
 import AnalyticsInitializer from '@/components/AnalyticsInitializer';
 
 /**

@@ -5,10 +5,10 @@ import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeCont
 import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc } from '@/types';
 import GritGrid from './GritGrid';
-import PhotoGallery from './PhotoGallery';
+import PhotoGallery from './ui/PhotoGallery';
 import Journal from './Journal';
 import ChallengeDetails from './ChallengeDetails';
-import CompletionAlert from './CompletionAlert';
+import CompletionAlert from './ui/CompletionAlert';
 import WeightTracker from './WeightTracker';
 
 const initialTaskState = {

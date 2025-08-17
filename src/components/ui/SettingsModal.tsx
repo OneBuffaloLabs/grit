@@ -6,7 +6,7 @@ import { updateChallenge } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faSave, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { version } from '../../package.json';
+import { version } from '../../../package.json';
 
 interface SettingsModalProps {
   isOpen: boolean;

@@ -1,4 +1,3 @@
-// src/components/PhotoModal.tsx
 'use client';
 
 import React from 'react';

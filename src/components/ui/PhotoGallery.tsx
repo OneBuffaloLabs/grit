@@ -1,4 +1,3 @@
-// src/components/PhotoGallery.tsx
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -6,7 +5,7 @@ import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeCont
 import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import PhotoModal from './PhotoModal';
+import PhotoModal from '../PhotoModal';
 
 interface PhotoGalleryProps {
   currentDay: number;
