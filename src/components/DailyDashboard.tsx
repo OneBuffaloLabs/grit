@@ -8,6 +8,7 @@ import GritGrid from './GritGrid';
 import PhotoGallery from './PhotoGallery';
 import Journal from './Journal';
 import ChallengeDetails from './ChallengeDetails';
+import CompletionAlert from './CompletionAlert';
 
 const initialTaskState = {
   diet: false,
@@ -24,8 +25,8 @@ const DailyDashboard = () => {
 
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
+  const [showCompletionAlert, setShowCompletionAlert] = useState(false);
 
-  // This calculates the next day to show based on the last completed day.
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
 
@@ -38,15 +39,13 @@ const DailyDashboard = () => {
     }
 
     const highestCompletedDay = Math.max(...completedDays);
-    return Math.min(highestCompletedDay + 1, 75); // Go to the next day, max 75
+    return Math.min(highestCompletedDay + 1, 75);
   }, [challenge]);
 
-  // Set the selected day to the next logical day on initial load.
   useEffect(() => {
     setSelectedDay(nextDayToShow);
   }, [nextDayToShow]);
 
-  // This effect loads the tasks for the currently *selected* day.
   useEffect(() => {
     if (challenge && challenge.days[selectedDay]) {
       setTasks(challenge.days[selectedDay].tasks);
@@ -82,7 +81,7 @@ const DailyDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to update task:', error);
-      setTasks(tasks); // Revert on error
+      setTasks(tasks);
     }
   };
 
@@ -107,10 +106,17 @@ const DailyDashboard = () => {
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+        setShowCompletionAlert(true); // Show the alert
       }
-      alert(`Day ${selectedDay} marked as complete!`);
     } catch (error) {
       console.error('Failed to complete day:', error);
+    }
+  };
+
+  const handleGoToNextDay = () => {
+    setShowCompletionAlert(false);
+    if (selectedDay < 75) {
+      setSelectedDay(selectedDay + 1);
     }
   };
 
@@ -125,6 +131,13 @@ const DailyDashboard = () => {
 
   return (
     <section className="bg-[var(--color-surface)] py-12 px-4 sm:px-6 lg:px-8">
+      {showCompletionAlert && (
+        <CompletionAlert
+          day={selectedDay}
+          onClose={() => setShowCompletionAlert(false)}
+          onGoToNextDay={handleGoToNextDay}
+        />
+      )}
       <div className="container mx-auto max-w-md">
         <header className="text-center mb-8">
           <h1 className="text-6xl font-bold font-orbitron text-[var(--color-primary)]">
