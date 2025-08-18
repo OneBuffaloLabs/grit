@@ -40,7 +40,7 @@ const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
 
   return (
     <Link href={`/app/challenge/?id=${challenge._id}`} className="block">
-      <div className="bg-[var(--color-secondary)] rounded-lg shadow-lg p-6 h-full flex flex-col justify-between transition-transform transform hover:scale-105 hover:shadow-2xl">
+      <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 h-full flex flex-col justify-between transition-transform transform hover:scale-105 hover:shadow-2xl">
         <div>
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-2xl font-bold font-orbitron text-[var(--color-foreground)]">
@@ -148,7 +148,7 @@ function ChallengeListPage() {
   return (
     <>
       {isModalOpen && <NewChallengeModal onClose={() => setIsModalOpen(false)} />}
-      <section className="bg-[var(--color-background)] text-[var(--color-foreground)] py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <section className="bg-[var(--color-secondary)] text-[var(--color-foreground)] py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
         <div className="container mx-auto max-w-7xl">
           <header className="text-center mb-12">
             <h2 className="text-5xl font-bold font-orbitron mb-4">Your Challenges</h2>
@@ -160,7 +160,7 @@ function ChallengeListPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="border-2 border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-800 hover:border-gray-500 transition-colors p-6 min-h-[180px]">
+              className="border-2 cursor-pointer border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-800 hover:border-gray-500 transition-colors p-6 min-h-[180px]">
               <FontAwesomeIcon icon={faPlus} className="text-4xl mb-2" />
               <span>Start New Challenge</span>
             </button>
