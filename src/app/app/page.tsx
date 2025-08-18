@@ -90,7 +90,7 @@ const NewChallengeModal = ({ onClose }: { onClose: () => void }) => {
           <button
             onClick={() => handleCreateChallenge('75 Hard')}
             disabled={isCreating}
-            className="w-full text-left p-4 bg-[var(--color-secondary)] rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-between disabled:cursor-not-allowed">
+            className="w-full cursor-pointer text-left p-4 bg-[var(--color-secondary)] rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-between disabled:cursor-not-allowed">
             <div>
               <p className="font-bold text-lg">75 Hard</p>
               <p className="text-sm text-[var(--color-text-muted)]">
