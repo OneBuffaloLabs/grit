@@ -161,3 +161,29 @@ export const getPhotoAttachment = async (day: number): Promise<string | null> =>
     return null;
   }
 };
+
+/**
+ * Fetches all archived challenges from the database.
+ * Archived challenges are identified by an ID starting with `challenge_`.
+ */
+export const getArchivedChallenges = async (): Promise<ChallengeDoc[]> => {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db.allDocs({
+      include_docs: true,
+      startkey: 'challenge_',
+      endkey: 'challenge_\\ufff0',
+    });
+
+    // Filter out any potential undefined docs and cast the result.
+    // The documents from the DB will have _id and _rev, matching our ChallengeDoc type.
+    const challenges = result.rows.map((row) => row.doc).filter((doc) => !!doc) as ChallengeDoc[];
+
+    return challenges;
+  } catch (err) {
+    console.error('Error fetching archived challenges:', err);
+    return [];
+  }
+};

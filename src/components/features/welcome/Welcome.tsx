@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { useChallengeDispatch } from '@/context/ChallengeContext';
@@ -8,12 +9,18 @@ import { startNewChallenge } from '@/lib/db';
 
 const Welcome = () => {
   const dispatch = useChallengeDispatch();
+  const router = useRouter();
 
   const handleStartChallenge = async () => {
     dispatch({ type: 'START_LOADING' });
     try {
       const newChallenge = await startNewChallenge();
       dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
+
+      // Navigate to the main app page upon success
+      if (newChallenge) {
+        router.push('/app');
+      }
     } catch (error) {
       console.error('Failed to start challenge:', error);
       dispatch({ type: 'STOP_LOADING' });
@@ -37,7 +44,7 @@ const Welcome = () => {
           The privacy-first tracker for the 75 Hard challenge. Your data stays on your device,
           always.
         </p>
-        <div className="bg-[var(--color-secondary)] rounded-lg shadow-lg p-8 text-left mb-8">
+        <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-8 text-left mb-8">
           <h2 className="text-3xl font-bold font-orbitron text-center mb-6">The 75 Hard Rules</h2>
           <ul className="space-y-4">
             {rules.map((rule, index) => (

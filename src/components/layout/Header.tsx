@@ -2,21 +2,25 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useChallengeState } from '@/context/ChallengeContext';
 
 interface HeaderProps {
-  onSettingsClick: () => void;
+  onSettingsClick?: () => void;
 }
 
 const Header = ({ onSettingsClick }: HeaderProps) => {
   const { challenge } = useChallengeState();
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   return (
     <header className="bg-[var(--color-background)] py-4 px-8 shadow-md">
       <nav className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center">
+        <Link href="/" className="flex items-center" aria-label="Grit Homepage">
           <Image
             src="/assets/logos/logo-trans.svg"
             alt="Grit Logo"
@@ -24,17 +28,26 @@ const Header = ({ onSettingsClick }: HeaderProps) => {
             height={75}
             priority
           />
-        </div>
-        {challenge && (
-          <div>
+        </Link>
+        <div className="flex items-center gap-6">
+          {isHomePage && (
+            <Link
+              href="/app"
+              className="bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-300 flex items-center gap-2">
+              <FontAwesomeIcon icon={faRocket} />
+              <span>Launch App</span>
+            </Link>
+          )}
+
+          {!isHomePage && challenge && (
             <button
               onClick={onSettingsClick}
               className="text-2xl text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer"
               aria-label="Open settings">
               <FontAwesomeIcon icon={faCog} />
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </nav>
     </header>
   );
