@@ -13,14 +13,15 @@ import {
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { version } from '../../../package.json';
 import FailModal from './FailModal';
-import Notification from './Notification';
+import type { NotificationProps } from './Notification';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  showNotification: (notification: Omit<NotificationProps, 'onClose'>) => void;
 }
 
-const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
+const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
 
@@ -28,7 +29,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [originalStartDate, setOriginalStartDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isFailModalOpen, setIsFailModalOpen] = useState(false);
-  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
 
   useEffect(() => {
     if (challenge?.startDate) {
@@ -40,7 +40,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       setStartDate(formattedDate);
       setOriginalStartDate(formattedDate);
     }
-  }, [challenge?.startDate]);
+  }, [challenge?.startDate, isOpen]); // Re-sync if modal is reopened
 
   const handleSave = async () => {
     if (!challenge || startDate === originalStartDate) return;
@@ -66,8 +66,12 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
-        setOriginalStartDate(startDate);
-        setShowSaveConfirmation(true);
+        showNotification({
+          type: 'success',
+          title: 'Settings Saved',
+          message: 'Your challenge start date has been updated.',
+        });
+        onClose(); // Close the modal on successful save
       }
     } catch (error) {
       console.error('Failed to update start date:', error);
@@ -98,15 +102,6 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   return (
     <>
-      {showSaveConfirmation && (
-        <Notification
-          type="success"
-          title="Settings Saved"
-          message="Your challenge start date has been updated."
-          onClose={() => setShowSaveConfirmation(false)}
-        />
-      )}
-
       <div
         className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
         onClick={onClose}>
@@ -159,7 +154,7 @@ const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             <button
               onClick={handleSave}
               disabled={isSaving || !hasChanges}
-              className="w-full sm:w-auto bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-300 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed">
+              className="w-full sm:w-auto bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed">
               {isSaving ? (
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
               ) : (

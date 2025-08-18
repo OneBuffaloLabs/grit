@@ -4,7 +4,8 @@ import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faInfoCircle, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-interface NotificationProps {
+// Export the interface so it can be used elsewhere
+export interface NotificationProps {
   type: 'success' | 'info';
   title: string;
   message: string;

@@ -13,6 +13,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SettingsModal from '@/components/ui/SettingsModal';
 import AnalyticsInitializer from '@/components/AnalyticsInitializer';
+import Notification from '@/components/ui/Notification'; // Import Notification
+import type { NotificationProps } from '@/components/ui/Notification'; // Import NotificationProps type
 
 /**
  * This component handles the main application logic, deciding whether to show
@@ -22,6 +24,7 @@ const AppContent = () => {
   const { challenge, isLoading } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
 
   // This effect runs once on component mount on the client-side
   useEffect(() => {
@@ -50,11 +53,23 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {notification && (
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <Header onSettingsClick={() => setIsSettingsOpen(true)} />
       <main className="flex-grow">{challenge ? <DailyDashboard /> : <Welcome />}</main>
       <Footer />
       {challenge && (
-        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          showNotification={setNotification}
+        />
       )}
       <AnalyticsInitializer />
     </div>
