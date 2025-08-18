@@ -44,7 +44,8 @@ export const startNewChallenge = async (
   if (!db) return null;
 
   const newChallenge: ChallengeDoc = {
-    _id: `challenge_${uuidv4()}`, // Use a UUID for a unique ID
+    _id: uuidv4(),
+    docType: 'challenge',
     startDate: new Date().toISOString(),
     status: 'active',
     type: type,
@@ -62,7 +63,7 @@ export const startNewChallenge = async (
 };
 
 /**
- * Fetches all challenges from the database (active, failed, completed).
+ * Fetches all challenges from the database by filtering by docType.
  * @returns An array of all challenge documents.
  */
 export const getAllChallenges = async (): Promise<ChallengeDoc[]> => {
@@ -70,12 +71,15 @@ export const getAllChallenges = async (): Promise<ChallengeDoc[]> => {
   if (!db) return [];
 
   try {
+    // Fetch all documents and filter them in the app
     const result = await db.allDocs({
       include_docs: true,
-      startkey: 'challenge_',
-      endkey: 'challenge_\ufff0',
     });
-    const challenges = result.rows.map((row) => row.doc).filter((doc) => !!doc) as ChallengeDoc[];
+
+    const challenges = result.rows
+      .map((row) => row.doc)
+      .filter((doc) => !!doc && doc.docType === 'challenge') as ChallengeDoc[];
+
     return challenges;
   } catch (err) {
     console.error('Error fetching all challenges:', err);

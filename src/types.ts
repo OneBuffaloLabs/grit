@@ -1,6 +1,7 @@
 export interface ChallengeDoc {
-  _id: string; // Will now be a UUID
+  _id: string;
   _rev?: string;
+  docType: 'challenge';
   startDate: string;
   status: 'active' | 'failed' | 'completed';
   type: '75 Hard' | '75 Soft';
