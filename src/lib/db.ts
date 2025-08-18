@@ -1,4 +1,5 @@
 import type { ChallengeDoc } from '@/types';
+import PouchDB from 'pouchdb';
 
 let dbInstance: PouchDB.Database<ChallengeDoc> | null = null;
 
@@ -11,8 +12,8 @@ const getDb = async () => {
     return dbInstance;
   }
   if (typeof window !== 'undefined') {
-    const PouchDB = (await import('pouchdb')).default;
-    dbInstance = new PouchDB<ChallengeDoc>('grit-challenge');
+    const PouchDBConstructor = (await import('pouchdb')).default;
+    dbInstance = new PouchDBConstructor<ChallengeDoc>('grit-challenge');
     return dbInstance;
   }
   return null;
@@ -37,10 +38,41 @@ export const startNewChallenge = async (): Promise<ChallengeDoc | null> => {
     return newChallenge;
   } catch (err) {
     if ((err as PouchDB.Core.Error).status === 409) {
-      return db.get('current_challenge');
+      return archiveAndStartNewChallenge();
     }
     console.error('Error starting new challenge:', err);
     throw err;
+  }
+};
+
+/**
+ * Archives the current challenge by renaming its ID, then starts a new one.
+ * This preserves the old challenge data for future features.
+ */
+export const archiveAndStartNewChallenge = async (): Promise<ChallengeDoc | null> => {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const currentChallenge = await db.get('current_challenge');
+
+    const { _id, _rev, ...challengeData } = currentChallenge;
+
+    const archivedChallenge: ChallengeDoc = {
+      ...challengeData,
+      _id: `challenge_${currentChallenge.startDate}`,
+      status: 'failed',
+    };
+
+    await db.put(archivedChallenge);
+    await db.remove(currentChallenge);
+    return await startNewChallenge();
+  } catch (error) {
+    if ((error as PouchDB.Core.Error).status === 404) {
+      return startNewChallenge();
+    }
+    console.error('Error archiving and starting new challenge:', error);
+    return null;
   }
 };
 
@@ -55,7 +87,7 @@ export const getCurrentChallenge = async (): Promise<ChallengeDoc | null> => {
     return await db.get('current_challenge');
   } catch (err) {
     if ((err as PouchDB.Core.Error).status === 404) {
-      return null; // No challenge started yet
+      return null;
     }
     console.error('Error fetching challenge:', err);
     throw err;
@@ -90,7 +122,6 @@ export const addPhotoAttachment = async (
 
   await db.putAttachment(doc._id, `day-${day}.jpg`, rev, photo, photo.type);
 
-  // Now, fetch the latest version of the doc to update its properties
   const latestDoc = await db.get(doc._id);
 
   if (!latestDoc.days[day]) {
@@ -126,6 +157,6 @@ export const getPhotoAttachment = async (day: number): Promise<string | null> =>
     const blob = (await db.getAttachment('current_challenge', `day-${day}.jpg`)) as Blob;
     return URL.createObjectURL(blob);
   } catch {
-    return null; // No attachment found
+    return null;
   }
 };

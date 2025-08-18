@@ -2,6 +2,7 @@ export interface ChallengeDoc {
   _id: string;
   _rev?: string;
   startDate: string;
+  status?: 'failed' | 'completed';
   days: {
     [day: number]: {
       completed: boolean;

@@ -8,8 +8,10 @@ import GritTimeline from '@/components/features/dashboard/GritTimeline';
 import PhotoGallery from '@/components/ui/PhotoGallery';
 import Journal from '@/components/features/dashboard/Journal';
 import ChallengeDetails from '@/components/features/dashboard/ChallengeDetails';
-import CompletionAlert from '@/components/ui/CompletionAlert';
+import Notification from '@/components/ui/Notification';
 import WeightTracker from '@/components/features/dashboard/WeightTracker';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
 
 const initialTaskState = {
   diet: false,
@@ -27,8 +29,8 @@ const DailyDashboard = () => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
   const [showCompletionAlert, setShowCompletionAlert] = useState(false);
+  const [dayCompletedToShowInAlert, setDayCompletedToShowInAlert] = useState<number | null>(null);
 
-  // --- Logic to determine which day to show ---
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
     const completedDays = Object.keys(challenge.days)
@@ -43,22 +45,23 @@ const DailyDashboard = () => {
     setSelectedDay(nextDayToShow);
   }, [nextDayToShow]);
 
-  // --- Logic to load tasks for the selected day ---
   useEffect(() => {
     if (challenge && challenge.days[selectedDay]) {
-      setTasks(challenge.days[selectedDay].tasks);
+      if (challenge.days[selectedDay].tasks) {
+        setTasks(challenge.days[selectedDay].tasks);
+      } else {
+        setTasks(initialTaskState);
+      }
     } else {
       setTasks(initialTaskState);
     }
   }, [challenge, selectedDay]);
 
-  // --- State variables for UI logic ---
   const isDayComplete = challenge?.days[selectedDay]?.completed || false;
   const isPreviousDayComplete =
     selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
   const allTasksCompleted = useMemo(() => Object.values(tasks).every(Boolean), [tasks]);
 
-  // --- Handlers for user actions ---
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
     if (!challenge || isDayComplete) return;
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
@@ -77,7 +80,7 @@ const DailyDashboard = () => {
       if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
     } catch (error) {
       console.error('Failed to update task:', error);
-      setTasks(tasks); // Revert on error
+      setTasks(tasks);
     }
   };
 
@@ -90,6 +93,7 @@ const DailyDashboard = () => {
       updatedChallenge.days[selectedDay] = { completed: true, photoAttached: false, tasks };
     }
     try {
+      setDayCompletedToShowInAlert(selectedDay);
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
@@ -97,13 +101,7 @@ const DailyDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to complete day:', error);
-    }
-  };
-
-  const handleGoToNextDay = () => {
-    setShowCompletionAlert(false);
-    if (selectedDay < 75) {
-      setSelectedDay(selectedDay + 1);
+      setDayCompletedToShowInAlert(null);
     }
   };
 
@@ -118,33 +116,31 @@ const DailyDashboard = () => {
 
   return (
     <section className="bg-[var(--color-surface)] py-12 px-4 sm:px-6 lg:px-8">
-      {showCompletionAlert && (
-        <CompletionAlert
-          day={selectedDay}
-          onClose={() => setShowCompletionAlert(false)}
-          onGoToNextDay={handleGoToNextDay}
+      {showCompletionAlert && dayCompletedToShowInAlert !== null && (
+        <Notification
+          type="success"
+          title={`Day ${dayCompletedToShowInAlert} Complete!`}
+          message="Great job, keep up the momentum."
+          onClose={() => {
+            setShowCompletionAlert(false);
+            setDayCompletedToShowInAlert(null);
+          }}
         />
       )}
-      {/* Container now uses max-w-7xl on large screens for a wider layout */}
       <div className="container mx-auto max-w-7xl">
         <header className="text-center mb-8">
           <div className="flex items-baseline justify-center">
-            <h1 className="text-7xl md:text-8xl font-bold font-orbitron text-[var(--color-primary)]">
+            <h1 className="text-5xl font-bold font-orbitron text-[var(--color-primary)]">
               Day {selectedDay}
             </h1>
-            <p className="text-3xl md:text-4xl text-[var(--color-text-muted)] font-orbitron ml-2">
-              / 75
-            </p>
+            <p className="text-3xl text-[var(--color-text-muted)] font-orbitron ml-2">/ 75</p>
           </div>
           <ChallengeDetails />
         </header>
 
-        {/* Universal Timeline */}
         <GritTimeline selectedDay={selectedDay} onDaySelect={setSelectedDay} />
 
-        {/* Responsive Grid Layout */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
-          {/* --- Left Column: Primary Actions --- */}
           <div className="flex flex-col gap-8">
             <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 space-y-6">
               {taskItems.map((task) => (
@@ -179,9 +175,13 @@ const DailyDashboard = () => {
               className="w-full bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-xl hover:bg-[var(--color-primary-hover)] transition-colors duration-300 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer">
               {isDayComplete ? 'Day Complete' : 'Complete Day'}
             </button>
+            <p className="text-center text-md text-[var(--color-text-muted)]">
+              Missed a task? You must start over. The &apos;Start Over&apos; button is in the
+              <FontAwesomeIcon icon={faCog} className="mx-1" />
+              settings.
+            </p>
           </div>
 
-          {/* --- Right Column: Secondary Modules --- */}
           <div className="space-y-8 mt-8 lg:mt-0">
             <WeightTracker currentDay={selectedDay} />
             <Journal currentDay={selectedDay} />
