@@ -9,9 +9,10 @@ import PhotoModal from '@/components/features/dashboard/PhotoModal';
 
 interface PhotoGalleryProps {
   currentDay: number;
+  isReadOnly?: boolean;
 }
 
-const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
+const PhotoGallery = ({ currentDay, isReadOnly = false }: PhotoGalleryProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const [photos, setPhotos] = useState<Map<number, string>>(new Map());
@@ -28,7 +29,8 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
       .filter((day) => challenge.days[day]?.photoAttached);
 
     for (const day of daysWithPhotos) {
-      const url = await getPhotoAttachment(day);
+      // Correctly pass both the challenge ID and the day number
+      const url = await getPhotoAttachment(challenge._id, day);
       if (url) {
         newPhotos.set(day, url);
       }
@@ -75,33 +77,38 @@ const PhotoGallery = ({ currentDay }: PhotoGalleryProps) => {
         />
       )}
 
-      <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 mt-8">
+      <div
+        className={`bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 mt-8 ${
+          isReadOnly ? 'opacity-60' : ''
+        }`}>
         <h2 className="text-3xl font-bold font-orbitron text-center mb-6">Progress Gallery</h2>
 
-        <div className="mb-8 text-center">
-          <label
-            htmlFor="photo-upload"
-            className={`inline-block text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 ${
-              isUploading
-                ? 'bg-gray-500 cursor-not-allowed'
-                : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] cursor-pointer'
-            }`}>
-            {isUploading ? (
-              <FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" />
-            ) : (
-              <FontAwesomeIcon icon={faUpload} className="mr-2" />
-            )}
-            {isUploading ? 'Uploading...' : `Upload Day ${currentDay} Photo`}
-          </label>
-          <input
-            id="photo-upload"
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoUpload}
-            disabled={isUploading}
-            className="hidden"
-          />
-        </div>
+        {!isReadOnly && (
+          <div className="mb-8 text-center">
+            <label
+              htmlFor="photo-upload"
+              className={`inline-block text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 ${
+                isUploading
+                  ? 'bg-gray-500 cursor-not-allowed'
+                  : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] cursor-pointer'
+              }`}>
+              {isUploading ? (
+                <FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" />
+              ) : (
+                <FontAwesomeIcon icon={faUpload} className="mr-2" />
+              )}
+              {isUploading ? 'Uploading...' : `Upload Day ${currentDay} Photo`}
+            </label>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              disabled={isUploading}
+              className="hidden"
+            />
+          </div>
+        )}
 
         {isFetching ? (
           <p className="text-center">Loading photos...</p>

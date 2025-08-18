@@ -9,9 +9,10 @@ import WeightChangeIndicator from '@/components/ui/WeightChangeIndicator';
 
 interface WeightTrackerProps {
   currentDay: number;
+  isReadOnly?: boolean;
 }
 
-const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
+const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const [weight, setWeight] = useState('');
@@ -107,15 +108,16 @@ const WeightTracker = ({ currentDay }: WeightTrackerProps) => {
             max={1000}
             value={weight}
             onChange={handleWeightChange}
-            placeholder="Enter weight..."
+            disabled={isReadOnly}
+            placeholder={isReadOnly ? 'Challenge not active' : 'Enter weight...'}
             className={`w-full p-2 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border ${
               error ? 'border-red-500' : 'border-gray-600'
-            } focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]`}
+            } focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] disabled:cursor-not-allowed`}
           />
         </div>
         <button
           onClick={handleSaveWeight}
-          disabled={isSaving || !hasChanged}
+          disabled={isSaving || !hasChanged || isReadOnly}
           className={`text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 ${
             isSaved
               ? 'bg-green-600'

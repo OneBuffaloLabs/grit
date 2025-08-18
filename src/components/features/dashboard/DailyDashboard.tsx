@@ -10,6 +10,7 @@ import Journal from '@/components/features/dashboard/Journal';
 import ChallengeDetails from '@/components/features/dashboard/ChallengeDetails';
 import Notification from '@/components/ui/Notification';
 import WeightTracker from '@/components/features/dashboard/WeightTracker';
+import ChallengeStatusBanner from '@/components/ui/ChallengeStatusBanner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 
@@ -25,6 +26,9 @@ const initialTaskState = {
 const DailyDashboard = () => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
+
+  // Determine if the view should be read-only
+  const isReadOnly = challenge?.status !== 'active';
 
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
@@ -63,7 +67,7 @@ const DailyDashboard = () => {
   const allTasksCompleted = useMemo(() => Object.values(tasks).every(Boolean), [tasks]);
 
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
-    if (!challenge || isDayComplete) return;
+    if (!challenge || isDayComplete || isReadOnly) return;
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
     setTasks(newTasks);
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
@@ -138,6 +142,9 @@ const DailyDashboard = () => {
           <ChallengeDetails />
         </header>
 
+        {/* Render the status banner if the challenge is not active */}
+        {isReadOnly && challenge && <ChallengeStatusBanner status={challenge.status} />}
+
         <GritTimeline selectedDay={selectedDay} onDaySelect={setSelectedDay} />
 
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
@@ -147,7 +154,7 @@ const DailyDashboard = () => {
                 <label
                   key={task.id}
                   className={`flex items-center text-lg p-4 bg-[var(--color-surface)] rounded-lg transition-all duration-300 ${
-                    isDayComplete || !isPreviousDayComplete
+                    isDayComplete || !isPreviousDayComplete || isReadOnly
                       ? 'cursor-not-allowed'
                       : 'cursor-pointer hover:bg-gray-700'
                   }`}>
@@ -155,7 +162,7 @@ const DailyDashboard = () => {
                     type="checkbox"
                     checked={tasks[task.id as keyof typeof tasks]}
                     onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
-                    disabled={isDayComplete || !isPreviousDayComplete}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
                     className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] bg-gray-700 focus:ring-[var(--color-primary)] focus:ring-offset-gray-800 disabled:cursor-not-allowed"
                   />
                   <span
@@ -171,7 +178,7 @@ const DailyDashboard = () => {
             </div>
             <button
               onClick={handleCompleteDay}
-              disabled={!allTasksCompleted || isDayComplete || !isPreviousDayComplete}
+              disabled={!allTasksCompleted || isDayComplete || !isPreviousDayComplete || isReadOnly}
               className="w-full bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-xl hover:bg-[var(--color-primary-hover)] transition-colors duration-300 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer">
               {isDayComplete ? 'Day Complete' : 'Complete Day'}
             </button>
@@ -183,9 +190,9 @@ const DailyDashboard = () => {
           </div>
 
           <div className="space-y-8 mt-8 lg:mt-0">
-            <WeightTracker currentDay={selectedDay} />
-            <Journal currentDay={selectedDay} />
-            <PhotoGallery currentDay={selectedDay} />
+            <WeightTracker currentDay={selectedDay} isReadOnly={isReadOnly} />
+            <Journal currentDay={selectedDay} isReadOnly={isReadOnly} />
+            <PhotoGallery currentDay={selectedDay} isReadOnly={isReadOnly} />
           </div>
         </div>
       </div>

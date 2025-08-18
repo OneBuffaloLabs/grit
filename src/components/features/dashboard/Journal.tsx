@@ -8,9 +8,10 @@ import { faSave, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 interface JournalProps {
   currentDay: number;
+  isReadOnly?: boolean;
 }
 
-const Journal = ({ currentDay }: JournalProps) => {
+const Journal = ({ currentDay, isReadOnly = false }: JournalProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const [journalText, setJournalText] = useState('');
@@ -73,13 +74,18 @@ const Journal = ({ currentDay }: JournalProps) => {
       <textarea
         value={journalText}
         onChange={(e) => setJournalText(e.target.value)}
-        placeholder="How did today go? What were your wins? What were your challenges?"
-        className="w-full h-40 p-4 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border border-gray-600 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors"
+        placeholder={
+          isReadOnly
+            ? 'Challenge not active'
+            : 'How did today go? What were your wins? What were your challenges?'
+        }
+        disabled={isReadOnly}
+        className="w-full h-40 p-4 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border border-gray-600 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-colors disabled:cursor-not-allowed"
       />
       <div className="mt-4 text-right">
         <button
           onClick={handleSaveJournal}
-          disabled={isSaving || !hasChanges} // Disable if saving or if there are no changes
+          disabled={isSaving || !hasChanges || isReadOnly} // Disable if saving or if there are no changes
           className={`w-full sm:w-auto text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 cursor-pointer ${
             isSaving
               ? 'bg-gray-500'
