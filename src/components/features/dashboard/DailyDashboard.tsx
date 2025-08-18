@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc } from '@/types';
@@ -12,7 +13,7 @@ import Notification from '@/components/ui/Notification';
 import WeightTracker from '@/components/features/dashboard/WeightTracker';
 import ChallengeStatusBanner from '@/components/ui/ChallengeStatusBanner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const initialTaskState = {
   diet: false,
@@ -26,10 +27,7 @@ const initialTaskState = {
 const DailyDashboard = () => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
-
-  // Determine if the view should be read-only
   const isReadOnly = challenge?.status !== 'active';
-
   const [selectedDay, setSelectedDay] = useState(1);
   const [tasks, setTasks] = useState(initialTaskState);
   const [showCompletionAlert, setShowCompletionAlert] = useState(false);
@@ -51,11 +49,7 @@ const DailyDashboard = () => {
 
   useEffect(() => {
     if (challenge && challenge.days[selectedDay]) {
-      if (challenge.days[selectedDay].tasks) {
-        setTasks(challenge.days[selectedDay].tasks);
-      } else {
-        setTasks(initialTaskState);
-      }
+      setTasks(challenge.days[selectedDay].tasks || initialTaskState);
     } else {
       setTasks(initialTaskState);
     }
@@ -142,8 +136,16 @@ const DailyDashboard = () => {
           <ChallengeDetails />
         </header>
 
-        {/* Render the status banner if the challenge is not active */}
         {isReadOnly && challenge && <ChallengeStatusBanner status={challenge.status} />}
+
+        <div className="mb-8">
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] transition-colors">
+            <FontAwesomeIcon icon={faArrowLeft} />
+            <span>Back to All Challenges</span>
+          </Link>
+        </div>
 
         <GritTimeline selectedDay={selectedDay} onDaySelect={setSelectedDay} />
 
@@ -155,7 +157,7 @@ const DailyDashboard = () => {
                   key={task.id}
                   className={`flex items-center text-lg p-4 bg-[var(--color-surface)] rounded-lg transition-all duration-300 ${
                     isDayComplete || !isPreviousDayComplete || isReadOnly
-                      ? 'cursor-not-allowed'
+                      ? 'cursor-not-allowed opacity-60'
                       : 'cursor-pointer hover:bg-gray-700'
                   }`}>
                   <input

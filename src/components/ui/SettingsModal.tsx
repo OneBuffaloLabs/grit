@@ -27,16 +27,15 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
   const dispatch = useChallengeDispatch();
   const router = useRouter();
 
-  // State for the modal (start date editing, fail confirmation)
+  const isReadOnly = challenge?.status !== 'active';
+
   const [startDate, setStartDate] = useState('');
   const [originalStartDate, setOriginalStartDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
-  // Effect to sync start date when modal opens
   React.useEffect(() => {
     if (challenge?.startDate) {
-      // Formatting to MM/DD/YYYY for the input
       const date = new Date(challenge.startDate);
       const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
         .getDate()
@@ -47,9 +46,8 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
     }
   }, [challenge?.startDate, isOpen]);
 
-  // Handler for saving changes (like start date)
   const handleSave = async () => {
-    if (!challenge || startDate === originalStartDate) return;
+    if (!challenge || startDate === originalStartDate || isReadOnly) return;
 
     const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(20)\d{2}$/;
     if (!dateRegex.test(startDate)) {
@@ -59,12 +57,6 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
 
     const [month, day, year] = startDate.split('/').map(Number);
     const newStartDate = new Date(year, month - 1, day);
-
-    const earliestDate = new Date('2025-01-01');
-    if (newStartDate < earliestDate) {
-      alert('Start date cannot be earlier than January 2025.');
-      return;
-    }
 
     setIsSaving(true);
     try {
@@ -77,7 +69,7 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
           title: 'Settings Saved',
           message: 'Your challenge start date has been updated.',
         });
-        onClose(); // Close the modal on successful save
+        onClose();
       }
     } catch (error) {
       console.error('Failed to update start date:', error);
@@ -88,14 +80,13 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
   };
 
   const handleFailConfirm = async () => {
-    if (!challenge) return;
+    if (!challenge || isReadOnly) return;
 
     dispatch({ type: 'START_LOADING' });
     try {
       const failedChallenge = { ...challenge, status: 'failed' as const };
       await updateChallenge(failedChallenge);
 
-      // Clear the context and navigate back to the challenge list
       dispatch({ type: 'SET_CHALLENGE', payload: null });
       router.push('/app');
     } catch (error) {
@@ -148,7 +139,7 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
             App Version: {version}
           </div>
 
-          <div>
+          <div className={isReadOnly ? 'opacity-50' : ''}>
             <label htmlFor="start-date" className="block text-sm font-medium mb-2">
               Challenge Start Date
             </label>
@@ -158,14 +149,15 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               placeholder="MM/DD/YYYY"
-              className="w-full p-2 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border border-gray-600 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+              disabled={isReadOnly}
+              className="w-full p-2 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border border-gray-600 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] disabled:cursor-not-allowed"
             />
           </div>
 
           <div className="mt-2 text-right">
             <button
               onClick={handleSave}
-              disabled={isSaving || !hasChanges}
+              disabled={isSaving || !hasChanges || isReadOnly}
               className="w-full sm:w-auto bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-300 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed">
               {isSaving ? (
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
@@ -179,11 +171,12 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
 
           <div className="border-t border-gray-700 my-2"></div>
 
-          <div>
+          <div className={isReadOnly ? 'opacity-50' : ''}>
             <h4 className="text-lg font-bold text-[var(--color-danger)] mb-2">Danger Zone</h4>
             <button
               onClick={() => setIsFailModalOpen(true)}
-              className="w-full bg-transparent border-2 border-[var(--color-danger)] text-[var(--color-danger)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-colors duration-300 cursor-pointer">
+              disabled={isReadOnly}
+              className="w-full bg-transparent border-2 border-[var(--color-danger)] text-[var(--color-danger)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed disabled:border-gray-600 disabled:text-gray-600 disabled:hover:bg-transparent">
               <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
               Start Over
             </button>
