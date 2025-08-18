@@ -3,28 +3,13 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { useChallengeDispatch } from '@/context/ChallengeContext';
-import { startNewChallenge } from '@/lib/db';
+import { faCheckCircle, faRocket } from '@fortawesome/free-solid-svg-icons';
 
 const Welcome = () => {
-  const dispatch = useChallengeDispatch();
   const router = useRouter();
 
-  const handleStartChallenge = async () => {
-    dispatch({ type: 'START_LOADING' });
-    try {
-      const newChallenge = await startNewChallenge();
-      dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
-
-      // Navigate to the main app page upon success
-      if (newChallenge) {
-        router.push('/app');
-      }
-    } catch (error) {
-      console.error('Failed to start challenge:', error);
-      dispatch({ type: 'STOP_LOADING' });
-    }
+  const handleLaunchApp = () => {
+    router.push('/app');
   };
 
   const rules = [
@@ -59,9 +44,10 @@ const Welcome = () => {
           </ul>
         </div>
         <button
-          onClick={handleStartChallenge}
-          className="w-full max-w-xs mx-auto bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-lg hover:bg-[var(--color-primary-hover)] transition-transform duration-300 transform hover:scale-105 cursor-pointer">
-          Start Challenge
+          onClick={handleLaunchApp}
+          className="w-full max-w-xs mx-auto bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-lg hover:bg-[var(--color-primary-hover)] transition-transform duration-300 transform hover:scale-105 cursor-pointer flex items-center justify-center gap-2">
+          <FontAwesomeIcon icon={faRocket} />
+          <span>Launch App</span>
         </button>
       </div>
     </section>
