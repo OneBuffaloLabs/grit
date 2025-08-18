@@ -12,7 +12,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
-  const totalDays = 75; // Assuming 75 for now
+  const totalDays = 75;
   const completedDays = Object.values(challenge.days).filter((day) => day.completed).length;
   const progressPercentage = (completedDays / totalDays) * 100;
 
@@ -136,6 +136,14 @@ function ChallengeListPage() {
     };
     fetchChallenges();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-2xl font-orbitron">Loading Challenges...</p>
+      </div>
+    );
+  }
 
   return (
     <>

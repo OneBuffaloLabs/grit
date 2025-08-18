@@ -4,6 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 let dbInstance: PouchDB.Database<ChallengeDoc> | null = null;
 
+// Define a properly typed initial state for tasks
+const initialTaskState: ChallengeDoc['days'][number]['tasks'] = {
+  diet: false,
+  workout1: false,
+  workout2: false,
+  water: false,
+  reading: false,
+  progressPhoto: false,
+};
+
 /**
  * Dynamically initializes the PouchDB database instance.
  * This ensures PouchDB is only ever loaded on the client-side.
@@ -132,7 +142,7 @@ export const addPhotoAttachment = async (
     latestDoc.days[day] = {
       completed: false,
       photoAttached: false,
-      tasks: {} as any,
+      tasks: { ...initialTaskState }, // Use the typed initial state
     };
   }
 
