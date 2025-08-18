@@ -154,7 +154,7 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
             <button
               onClick={handleSave}
               disabled={isSaving || !hasChanges}
-              className="w-full sm:w-auto bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed">
+              className="w-full sm:w-auto bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-300 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed">
               {isSaving ? (
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
               ) : (
@@ -171,7 +171,7 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
             <h4 className="text-lg font-bold text-[var(--color-danger)] mb-2">Danger Zone</h4>
             <button
               onClick={() => setIsFailModalOpen(true)}
-              className="w-full bg-[var(--color-danger)] text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300 cursor-pointer">
+              className="w-full bg-transparent border border-[var(--color-danger)] text-[var(--color-danger)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-colors duration-300 cursor-pointer">
               <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
               Start Over
             </button>
