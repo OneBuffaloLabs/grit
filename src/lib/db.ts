@@ -56,6 +56,7 @@ export const archiveAndStartNewChallenge = async (): Promise<ChallengeDoc | null
   try {
     const currentChallenge = await db.get('current_challenge');
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, _rev, ...challengeData } = currentChallenge;
 
     const archivedChallenge: ChallengeDoc = {
