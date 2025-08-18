@@ -1,10 +1,11 @@
 import type { ChallengeDoc } from '@/types';
 import PouchDB from 'pouchdb';
+import { v4 as uuidv4 } from 'uuid';
 
 let dbInstance: PouchDB.Database<ChallengeDoc> | null = null;
 
 /**
- * Dynamically imports PouchDB and initializes the database instance.
+ * Dynamically initializes the PouchDB database instance.
  * This ensures PouchDB is only ever loaded on the client-side.
  */
 const getDb = async () => {
@@ -12,7 +13,9 @@ const getDb = async () => {
     return dbInstance;
   }
   if (typeof window !== 'undefined') {
+    // Dynamically import PouchDB and uuid only on the client
     const PouchDBConstructor = (await import('pouchdb')).default;
+    await import('uuid');
     dbInstance = new PouchDBConstructor<ChallengeDoc>('grit-challenge');
     return dbInstance;
   }
@@ -20,15 +23,21 @@ const getDb = async () => {
 };
 
 /**
- * Starts a new 75 Hard challenge in the database.
+ * Starts a new challenge with a unique ID.
+ * @param type The type of challenge to start, e.g., '75 Hard'.
+ * @returns The newly created challenge document.
  */
-export const startNewChallenge = async (): Promise<ChallengeDoc | null> => {
+export const startNewChallenge = async (
+  type: '75 Hard' | '75 Soft'
+): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
 
   const newChallenge: ChallengeDoc = {
-    _id: 'current_challenge',
+    _id: `challenge_${uuidv4()}`, // Use a UUID for a unique ID
     startDate: new Date().toISOString(),
+    status: 'active',
+    type: type,
     days: {},
   };
 
@@ -37,66 +46,57 @@ export const startNewChallenge = async (): Promise<ChallengeDoc | null> => {
     newChallenge._rev = response.rev;
     return newChallenge;
   } catch (err) {
-    if ((err as PouchDB.Core.Error).status === 409) {
-      return archiveAndStartNewChallenge();
-    }
     console.error('Error starting new challenge:', err);
     throw err;
   }
 };
 
 /**
- * Archives the current challenge by renaming its ID, then starts a new one.
- * This preserves the old challenge data for future features.
+ * Fetches all challenges from the database (active, failed, completed).
+ * @returns An array of all challenge documents.
  */
-export const archiveAndStartNewChallenge = async (): Promise<ChallengeDoc | null> => {
+export const getAllChallenges = async (): Promise<ChallengeDoc[]> => {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) return [];
 
   try {
-    const currentChallenge = await db.get('current_challenge');
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _id, _rev, ...challengeData } = currentChallenge;
-
-    const archivedChallenge: ChallengeDoc = {
-      ...challengeData,
-      _id: `challenge_${currentChallenge.startDate}`,
-      status: 'failed',
-    };
-
-    await db.put(archivedChallenge);
-    await db.remove(currentChallenge);
-    return await startNewChallenge();
-  } catch (error) {
-    if ((error as PouchDB.Core.Error).status === 404) {
-      return startNewChallenge();
-    }
-    console.error('Error archiving and starting new challenge:', error);
-    return null;
+    const result = await db.allDocs({
+      include_docs: true,
+      startkey: 'challenge_',
+      endkey: 'challenge_\ufff0',
+    });
+    const challenges = result.rows.map((row) => row.doc).filter((doc) => !!doc) as ChallengeDoc[];
+    return challenges;
+  } catch (err) {
+    console.error('Error fetching all challenges:', err);
+    return [];
   }
 };
 
 /**
- * Fetches the current challenge from the database.
+ * Fetches a single challenge by its document ID.
+ * @param id The _id of the challenge to fetch.
+ * @returns The challenge document or null if not found.
  */
-export const getCurrentChallenge = async (): Promise<ChallengeDoc | null> => {
+export const getChallengeById = async (id: string): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
 
   try {
-    return await db.get('current_challenge');
+    return await db.get(id);
   } catch (err) {
     if ((err as PouchDB.Core.Error).status === 404) {
       return null;
     }
-    console.error('Error fetching challenge:', err);
+    console.error(`Error fetching challenge with id ${id}:`, err);
     throw err;
   }
 };
 
 /**
- * Updates the current challenge document in the database.
+ * Updates an existing challenge document in the database.
+ * @param challenge The challenge document with updated data.
+ * @returns The updated challenge document with a new _rev.
  */
 export const updateChallenge = async (challenge: ChallengeDoc): Promise<ChallengeDoc | null> => {
   const db = await getDb();
@@ -108,7 +108,11 @@ export const updateChallenge = async (challenge: ChallengeDoc): Promise<Challeng
 };
 
 /**
- * Adds a photo as an attachment and updates the document to reflect the upload.
+ * Adds a photo as an attachment to a specific challenge document.
+ * @param doc The challenge document.
+ * @param day The day number for the photo.
+ * @param photo The photo file to attach.
+ * @returns The updated challenge document.
  */
 export const addPhotoAttachment = async (
   doc: ChallengeDoc,
@@ -122,21 +126,13 @@ export const addPhotoAttachment = async (
   if (!rev) throw new Error('Document revision is missing');
 
   await db.putAttachment(doc._id, `day-${day}.jpg`, rev, photo, photo.type);
-
   const latestDoc = await db.get(doc._id);
 
   if (!latestDoc.days[day]) {
     latestDoc.days[day] = {
       completed: false,
       photoAttached: false,
-      tasks: {
-        diet: false,
-        workout1: false,
-        workout2: false,
-        water: false,
-        reading: false,
-        progressPhoto: false,
-      },
+      tasks: {} as any,
     };
   }
 
@@ -148,42 +144,22 @@ export const addPhotoAttachment = async (
 };
 
 /**
- * Retrieves a photo attachment for a specific day.
+ * Retrieves a photo attachment for a specific day from a specific challenge.
+ * @param challengeId The _id of the challenge.
+ * @param day The day number of the photo.
+ * @returns A local object URL for the image or null if not found.
  */
-export const getPhotoAttachment = async (day: number): Promise<string | null> => {
+export const getPhotoAttachment = async (
+  challengeId: string,
+  day: number
+): Promise<string | null> => {
   const db = await getDb();
   if (!db) return null;
 
   try {
-    const blob = (await db.getAttachment('current_challenge', `day-${day}.jpg`)) as Blob;
+    const blob = (await db.getAttachment(challengeId, `day-${day}.jpg`)) as Blob;
     return URL.createObjectURL(blob);
   } catch {
     return null;
-  }
-};
-
-/**
- * Fetches all archived challenges from the database.
- * Archived challenges are identified by an ID starting with `challenge_`.
- */
-export const getArchivedChallenges = async (): Promise<ChallengeDoc[]> => {
-  const db = await getDb();
-  if (!db) return [];
-
-  try {
-    const result = await db.allDocs({
-      include_docs: true,
-      startkey: 'challenge_',
-      endkey: 'challenge_\\ufff0',
-    });
-
-    // Filter out any potential undefined docs and cast the result.
-    // The documents from the DB will have _id and _rev, matching our ChallengeDoc type.
-    const challenges = result.rows.map((row) => row.doc).filter((doc) => !!doc) as ChallengeDoc[];
-
-    return challenges;
-  } catch (err) {
-    console.error('Error fetching archived challenges:', err);
-    return [];
   }
 };

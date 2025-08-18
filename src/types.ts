@@ -1,8 +1,9 @@
 export interface ChallengeDoc {
-  _id: string;
+  _id: string; // Will now be a UUID
   _rev?: string;
   startDate: string;
-  status?: 'failed' | 'completed';
+  status: 'active' | 'failed' | 'completed';
+  type: '75 Hard' | '75 Soft';
   days: {
     [day: number]: {
       completed: boolean;

@@ -3,7 +3,6 @@ import { ChallengeProvider } from '@/context/ChallengeContext';
 import Welcome from '@/components/features/welcome/Welcome';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import AnalyticsInitializer from '@/components/AnalyticsInitializer';
 
 /**
  * The main HomePage component that serves as the landing page for the application.
@@ -18,7 +17,6 @@ export default function HomePage() {
           <Welcome />
         </main>
         <Footer />
-        <AnalyticsInitializer />
       </div>
     </ChallengeProvider>
   );

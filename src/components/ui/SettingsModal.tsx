@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
-import { updateChallenge, archiveAndStartNewChallenge } from '@/lib/db';
+import { updateChallenge } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
-  faSave,
   faSpinner,
+  faSave,
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -24,14 +25,18 @@ interface SettingsModalProps {
 const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
+  const router = useRouter();
 
+  // State for the modal (start date editing, fail confirmation)
   const [startDate, setStartDate] = useState('');
   const [originalStartDate, setOriginalStartDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
-  useEffect(() => {
+  // Effect to sync start date when modal opens
+  React.useEffect(() => {
     if (challenge?.startDate) {
+      // Formatting to MM/DD/YYYY for the input
       const date = new Date(challenge.startDate);
       const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
         .getDate()
@@ -40,8 +45,9 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
       setStartDate(formattedDate);
       setOriginalStartDate(formattedDate);
     }
-  }, [challenge?.startDate, isOpen]); // Re-sync if modal is reopened
+  }, [challenge?.startDate, isOpen]);
 
+  // Handler for saving changes (like start date)
   const handleSave = async () => {
     if (!challenge || startDate === originalStartDate) return;
 
@@ -82,12 +88,18 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
   };
 
   const handleFailConfirm = async () => {
+    if (!challenge) return;
+
     dispatch({ type: 'START_LOADING' });
     try {
-      const newChallenge = await archiveAndStartNewChallenge();
-      dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
+      const failedChallenge = { ...challenge, status: 'failed' as const };
+      await updateChallenge(failedChallenge);
+
+      // Clear the context and navigate back to the challenge list
+      dispatch({ type: 'SET_CHALLENGE', payload: null });
+      router.push('/app');
     } catch (error) {
-      console.error('Failed to start new challenge after failing:', error);
+      console.error('Failed to update challenge status:', error);
       dispatch({ type: 'STOP_LOADING' });
     }
     setIsFailModalOpen(false);
@@ -171,13 +183,13 @@ const SettingsModal = ({ isOpen, onClose, showNotification }: SettingsModalProps
             <h4 className="text-lg font-bold text-[var(--color-danger)] mb-2">Danger Zone</h4>
             <button
               onClick={() => setIsFailModalOpen(true)}
-              className="w-full bg-transparent border border-[var(--color-danger)] text-[var(--color-danger)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-colors duration-300 cursor-pointer">
+              className="w-full bg-transparent border-2 border-[var(--color-danger)] text-[var(--color-danger)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-colors duration-300 cursor-pointer">
               <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
               Start Over
             </button>
             <p className="text-xs text-[var(--color-text-muted)] mt-2">
-              If you&apos;ve failed a day, you must start over. This will archive your current
-              progress and reset to Day 1.
+              If you&apos;ve failed a day, you must start over. This will mark your current
+              challenge as failed and return you to the challenge list.
             </p>
           </div>
         </div>
