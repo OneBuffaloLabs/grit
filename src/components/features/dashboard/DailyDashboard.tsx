@@ -105,8 +105,8 @@ const DailyDashboard = () => {
 
   const taskItems = [
     { id: 'diet', label: 'Follow a Diet' },
-    { id: 'workout1', label: '45-Minute Workout #1' },
-    { id: 'workout2', label: '45-Minute Workout #2 (outdoors)' },
+    { id: 'workout1', label: '45-Minute Workout' },
+    { id: 'workout2', label: '45-Minute Workout (outdoors)' },
     { id: 'water', label: 'Drink 1 Gallon of Water' },
     { id: 'reading', label: 'Read 10 Pages of Non-Fiction' },
     { id: 'progressPhoto', label: 'Take a Progress Picture' },
