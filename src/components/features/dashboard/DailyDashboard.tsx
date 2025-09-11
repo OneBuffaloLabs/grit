@@ -24,7 +24,11 @@ const initialTaskState = {
   progressPhoto: false,
 };
 
-const DailyDashboard = () => {
+interface DailyDashboardProps {
+  onFinishChallenge: () => void;
+}
+
+const DailyDashboard = ({ onFinishChallenge }: DailyDashboardProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const isReadOnly = challenge?.status !== 'active';
@@ -35,12 +39,15 @@ const DailyDashboard = () => {
 
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
+    if (challenge.status === 'completed') {
+      return challenge.duration;
+    }
     const completedDays = Object.keys(challenge.days)
       .map(Number)
       .filter((day) => challenge.days[day]?.completed);
     if (completedDays.length === 0) return 1;
     const highestCompletedDay = Math.max(...completedDays);
-    return Math.min(highestCompletedDay + 1, 75);
+    return Math.min(highestCompletedDay + 1, challenge.duration);
   }, [challenge]);
 
   useEffect(() => {
@@ -60,8 +67,13 @@ const DailyDashboard = () => {
     selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
   const allTasksCompleted = useMemo(() => Object.values(tasks).every(Boolean), [tasks]);
 
+  const isLastDay = useMemo(() => {
+    if (!challenge) return false;
+    return selectedDay === challenge.duration;
+  }, [challenge, selectedDay]);
+
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
-    if (!challenge || isDayComplete || isReadOnly) return;
+    if (!challenge || isDayComplete || isReadOnly || challenge.status === 'completed') return;
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
     setTasks(newTasks);
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
@@ -74,8 +86,8 @@ const DailyDashboard = () => {
     }
     updatedChallenge.days[selectedDay].tasks = newTasks;
     try {
-      const newRev = await updateChallenge(updatedChallenge);
-      if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+      const savedChallenge = await updateChallenge(updatedChallenge);
+      if (savedChallenge) dispatch({ type: 'SET_CHALLENGE', payload: savedChallenge });
     } catch (error) {
       console.error('Failed to update task:', error);
       setTasks(tasks);
@@ -83,7 +95,7 @@ const DailyDashboard = () => {
   };
 
   const handleCompleteDay = async () => {
-    if (!challenge) return;
+    if (!challenge || isLastDay) return;
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
     if (updatedChallenge.days[selectedDay]) {
       updatedChallenge.days[selectedDay].completed = true;
@@ -92,14 +104,32 @@ const DailyDashboard = () => {
     }
     try {
       setDayCompletedToShowInAlert(selectedDay);
-      const newRev = await updateChallenge(updatedChallenge);
-      if (newRev) {
-        dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+      const savedChallenge = await updateChallenge(updatedChallenge);
+      if (savedChallenge) {
+        dispatch({ type: 'SET_CHALLENGE', payload: savedChallenge });
         setShowCompletionAlert(true);
       }
     } catch (error) {
       console.error('Failed to complete day:', error);
       setDayCompletedToShowInAlert(null);
+    }
+  };
+
+  const handleFinishChallenge = async () => {
+    if (!challenge) return;
+    try {
+      const updatedChallenge: ChallengeDoc = {
+        ...challenge,
+        status: 'completed',
+        completionDate: new Date().toISOString(),
+      };
+      const savedChallenge = await updateChallenge(updatedChallenge);
+      if (savedChallenge) {
+        dispatch({ type: 'SET_CHALLENGE', payload: savedChallenge });
+        onFinishChallenge();
+      }
+    } catch (error) {
+      console.error('Failed to finish challenge:', error);
     }
   };
 
@@ -131,12 +161,12 @@ const DailyDashboard = () => {
             <h1 className="text-5xl font-bold font-orbitron text-[var(--color-primary)]">
               Day {selectedDay}
             </h1>
-            <p className="text-3xl text-[var(--color-text-muted)] font-orbitron ml-2">/ 75</p>
+            <p className="text-3xl text-[var(--color-text-muted)] font-orbitron ml-2">/ {challenge?.duration || 75}</p>
           </div>
           <ChallengeDetails />
         </header>
 
-        {isReadOnly && challenge && <ChallengeStatusBanner status={challenge.status} />}
+        {challenge && challenge.status !== 'active' && <ChallengeStatusBanner status={challenge.status} />}
 
         <div className="mb-8">
           <Link
@@ -156,7 +186,7 @@ const DailyDashboard = () => {
                 <label
                   key={task.id}
                   className={`flex items-center text-lg p-4 bg-[var(--color-surface)] rounded-lg transition-all duration-300 ${
-                    isDayComplete || !isPreviousDayComplete || isReadOnly
+                    isDayComplete || !isPreviousDayComplete || isReadOnly || challenge?.status === 'completed'
                       ? 'cursor-not-allowed opacity-60'
                       : 'cursor-pointer hover:bg-gray-700'
                   }`}>
@@ -164,7 +194,7 @@ const DailyDashboard = () => {
                     type="checkbox"
                     checked={tasks[task.id as keyof typeof tasks]}
                     onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
-                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly || challenge?.status === 'completed'}
                     className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] bg-gray-700 focus:ring-[var(--color-primary)] focus:ring-offset-gray-800 disabled:cursor-not-allowed"
                   />
                   <span
@@ -179,10 +209,16 @@ const DailyDashboard = () => {
               ))}
             </div>
             <button
-              onClick={handleCompleteDay}
-              disabled={!allTasksCompleted || isDayComplete || !isPreviousDayComplete || isReadOnly}
+              onClick={isLastDay ? handleFinishChallenge : handleCompleteDay}
+              disabled={
+                !allTasksCompleted ||
+                isDayComplete ||
+                !isPreviousDayComplete ||
+                isReadOnly ||
+                challenge?.status === 'completed'
+              }
               className="w-full bg-[var(--color-primary)] text-white font-bold py-4 px-6 rounded-lg text-xl hover:bg-[var(--color-primary-hover)] transition-colors duration-300 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer">
-              {isDayComplete ? 'Day Complete' : 'Complete Day'}
+              {isLastDay ? 'Finish Challenge' : `Complete Day ${selectedDay}`}
             </button>
             <p className="text-center text-md text-[var(--color-text-muted)]">
               Missed a task? You must start over. The &apos;Start Over&apos; button is in the
@@ -192,9 +228,9 @@ const DailyDashboard = () => {
           </div>
 
           <div className="space-y-8 mt-8 lg:mt-0">
-            <WeightTracker currentDay={selectedDay} isReadOnly={isReadOnly} />
-            <Journal currentDay={selectedDay} isReadOnly={isReadOnly} />
-            <PhotoGallery currentDay={selectedDay} isReadOnly={isReadOnly} />
+            <WeightTracker currentDay={selectedDay} isReadOnly={isReadOnly || challenge?.status === 'completed'} />
+            <Journal currentDay={selectedDay} isReadOnly={isReadOnly || challenge?.status === 'completed'} />
+            <PhotoGallery currentDay={selectedDay} isReadOnly={isReadOnly || challenge?.status === 'completed'} />
           </div>
         </div>
       </div>

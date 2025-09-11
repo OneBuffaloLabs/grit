@@ -14,6 +14,8 @@ import Footer from '@/components/layout/Footer';
 import SettingsModal from '@/components/ui/SettingsModal';
 import Notification from '@/components/ui/Notification';
 import type { NotificationProps } from '@/components/ui/Notification';
+import CompletionBanner from '@/components/ui/CompletionBanner';
+import CompletionModal from '@/components/ui/CompletionModal';
 
 const ChallengeDetailContent = () => {
   const searchParams = useSearchParams();
@@ -23,6 +25,7 @@ const ChallengeDetailContent = () => {
   const dispatch = useChallengeDispatch();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchChallenge = async () => {
@@ -42,6 +45,16 @@ const ChallengeDetailContent = () => {
 
     fetchChallenge();
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (challenge?.status === 'completed' && challenge.completionDate) {
+      const hasSeenCompletion = sessionStorage.getItem(`grit-completed-${challenge._id}`);
+      if (!hasSeenCompletion) {
+        setIsCompletionModalOpen(true);
+        sessionStorage.setItem(`grit-completed-${challenge._id}`, 'true');
+      }
+    }
+  }, [challenge]);
 
   if (isLoading) {
     return (
@@ -71,7 +84,13 @@ const ChallengeDetailContent = () => {
       )}
       <Header onSettingsClick={() => setIsSettingsOpen(true)} />
       <main className="flex-grow">
-        <DailyDashboard />
+        {challenge.status === 'completed' && challenge.completionDate && (
+          <CompletionBanner
+            completionDate={challenge.completionDate}
+            onOpenSummary={() => setIsCompletionModalOpen(true)}
+          />
+        )}
+        <DailyDashboard onFinishChallenge={() => setIsCompletionModalOpen(true)} />
       </main>
       <Footer />
       <SettingsModal
@@ -79,14 +98,18 @@ const ChallengeDetailContent = () => {
         onClose={() => setIsSettingsOpen(false)}
         showNotification={setNotification}
       />
+      <CompletionModal
+        isOpen={isCompletionModalOpen}
+        onClose={() => setIsCompletionModalOpen(false)}
+        challenge={challenge}
+      />
     </div>
   );
 };
 
-// Use Suspense to handle the client-side nature of search parameters
 export default function ChallengeDetailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><p className="text-2xl font-orbitron">Loading...</p></div>}>
       <ChallengeProvider>
         <ChallengeDetailContent />
       </ChallengeProvider>
