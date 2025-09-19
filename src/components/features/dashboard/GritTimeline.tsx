@@ -19,6 +19,9 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [showChevrons, setShowChevrons] = useState(false);
 
+  // Use the challenge's duration, with a fallback to 75
+  const challengeDuration = challenge?.duration || 75;
+
   // This effect scrolls the selected day into view when it changes
   useEffect(() => {
     if (selectedDayRef.current) {
@@ -89,8 +92,10 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
   };
 
   return (
-    <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-4 mb-8">
-      <h2 className="text-xl font-bold font-orbitron text-center mb-4">Your 75 Day Journey</h2>
+    <div className="bg-background rounded-lg shadow-lg p-4 mb-8">
+      <h2 className="text-xl font-bold font-orbitron text-center mb-4">
+        Your {challengeDuration} Day Journey
+      </h2>
       <div className="relative flex items-center">
         {showChevrons && (
           <button
@@ -108,17 +113,18 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}>
-          {Array.from({ length: 75 }, (_, i) => {
+          {Array.from({ length: challengeDuration }, (_, i) => {
             const dayNumber = i + 1;
-            const isCompleted = challenge?.days[dayNumber]?.completed || false;
+            // If challenge is completed, all days are complete. Otherwise, check the day's status.
+            const isCompleted =
+              challenge?.status === 'completed' || challenge?.days[dayNumber]?.completed || false;
             const isSelectable =
               dayNumber === 1 || isCompleted || challenge?.days[dayNumber - 1]?.completed || false;
 
-            let dayStyles = 'bg-[var(--color-surface)]';
-            if (isCompleted) dayStyles = 'bg-[var(--color-primary)]';
+            let dayStyles = 'bg-surface';
+            if (isCompleted) dayStyles = 'bg-primary';
             if (selectedDay === dayNumber)
-              dayStyles +=
-                ' ring-2 ring-offset-2 ring-offset-[var(--color-background)] ring-[var(--color-primary-hover)]';
+              dayStyles += ' ring-2 ring-offset-2 ring-offset-background ring-primary-hover';
             if (!isSelectable) dayStyles += ' opacity-50 !cursor-not-allowed';
 
             return (

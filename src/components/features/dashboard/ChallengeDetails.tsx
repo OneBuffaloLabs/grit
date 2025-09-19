@@ -12,7 +12,9 @@ const ChallengeDetails = () => {
 
   const startDate = new Date(challenge.startDate);
   const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 74);
+  // Use the challenge's duration to calculate the end date
+  // Subtract 1 because the start date is day 1
+  endDate.setDate(startDate.getDate() + (challenge.duration - 1));
 
   const formatDate = (date: Date) => {
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date

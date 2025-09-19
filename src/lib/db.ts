@@ -35,10 +35,12 @@ const getDb = async () => {
 /**
  * Starts a new challenge with a unique ID.
  * @param type The type of challenge to start, e.g., '75 Hard'.
+ * @param duration The duration of the challenge in days.
  * @returns The newly created challenge document.
  */
 export const startNewChallenge = async (
-  type: '75 Hard' | '75 Soft'
+  type: '75 Hard' | '75 Soft',
+  duration: number = 75
 ): Promise<ChallengeDoc | null> => {
   const db = await getDb();
   if (!db) return null;
@@ -49,6 +51,7 @@ export const startNewChallenge = async (
     startDate: new Date().toISOString(),
     status: 'active',
     type: type,
+    duration: duration,
     days: {},
   };
 

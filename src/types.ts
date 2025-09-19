@@ -5,6 +5,8 @@ export interface ChallengeDoc {
   startDate: string;
   status: 'active' | 'failed' | 'completed';
   type: '75 Hard' | '75 Soft';
+  duration: number;
+  completionDate?: string;
   days: {
     [day: number]: {
       completed: boolean;

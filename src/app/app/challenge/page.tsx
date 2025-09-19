@@ -14,6 +14,8 @@ import Footer from '@/components/layout/Footer';
 import SettingsModal from '@/components/ui/SettingsModal';
 import Notification from '@/components/ui/Notification';
 import type { NotificationProps } from '@/components/ui/Notification';
+import CompletionModal from '@/components/ui/CompletionModal';
+import ChallengeStatusBanner from '@/components/ui/ChallengeStatusBanner';
 
 const ChallengeDetailContent = () => {
   const searchParams = useSearchParams();
@@ -22,6 +24,7 @@ const ChallengeDetailContent = () => {
   const { challenge, isLoading } = useChallengeState();
   const dispatch = useChallengeDispatch();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
 
   useEffect(() => {
@@ -71,13 +74,28 @@ const ChallengeDetailContent = () => {
       )}
       <Header onSettingsClick={() => setIsSettingsOpen(true)} />
       <main className="flex-grow">
-        <DailyDashboard />
+        {challenge.status === 'completed' && (
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
+            <ChallengeStatusBanner status="completed" />
+            <button
+              onClick={() => setIsCompletionModalOpen(true)}
+              className="w-full bg-primary text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-primary-hover transition-colors cursor-pointer mt-4">
+              View Your Summary
+            </button>
+          </div>
+        )}
+        <DailyDashboard onFinishChallenge={() => setIsCompletionModalOpen(true)} />
       </main>
       <Footer />
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         showNotification={setNotification}
+      />
+      <CompletionModal
+        isOpen={isCompletionModalOpen}
+        onClose={() => setIsCompletionModalOpen(false)}
+        challenge={challenge}
       />
     </div>
   );
