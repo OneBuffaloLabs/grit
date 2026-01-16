@@ -112,7 +112,7 @@ const Welcome = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-5xl font-bold font-orbitron mb-6">Choose Your Hard</h1>
           <p className="text-lg text-[var(--color-text-muted)] mb-8">
-            Grit now supports three distinct paths. Whether you are building a foundation or testing
+            Grit supports three distinct paths. Whether you are building a foundation or testing
             your limits, there is a challenge for you.
           </p>
 
