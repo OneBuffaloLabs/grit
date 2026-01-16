@@ -1,49 +1,71 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
+import packageInfo from '../../../package.json';
 
+/**
+ * Global footer component displaying copyright, links, and the current app version.
+ */
 const Footer = () => {
   const startYear = 2025;
   const currentYear = new Date().getFullYear();
   const yearDisplay = startYear === currentYear ? startYear : `${startYear} - ${currentYear}`;
 
   return (
-    <footer className="bg-[var(--color-background)] text-[var(--color-text-muted)] py-6 px-8 mt-auto">
+    <footer className="bg-[var(--color-surface)] text-[var(--color-text-muted)] py-8 px-8 mt-auto border-t border-[var(--color-background)]">
       <div className="container mx-auto text-center text-sm">
         {/* Data Persistence Message */}
-        <div className="bg-[var(--color-surface)] p-4 rounded-lg mb-6 text-xs text-[var(--color-foreground)]">
-          <p className="flex items-center justify-center">
-            <FontAwesomeIcon icon={faInfoCircle} className="mr-2 text-[var(--color-primary)]" />
-            <span>
-              Your data is stored securely on this device. Clearing browser data will erase your
-              progress.
-            </span>
+        <div className="max-w-md mx-auto mb-8 text-xs bg-[var(--color-background)] p-4 rounded-lg border border-[var(--color-surface)]">
+          <p className="flex items-center justify-center gap-2 mb-1 font-semibold text-[var(--color-foreground)]">
+            <FontAwesomeIcon icon={faInfoCircle} className="text-[var(--color-primary)]" />
+            <span>Local Storage Only</span>
           </p>
-          <p className="mt-1">Multi-device sync coming soon!</p>
+          <p>
+            Your data is stored securely on this device. Clearing browser data will erase your
+            progress. Multi-device sync coming soon!
+          </p>
         </div>
 
-        <p className="mb-2">
-          &copy; {yearDisplay}{' '}
-          <a
-            href="https://onebuffalolabs.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-[var(--color-primary-hover)] transition-colors">
-            OneBuffaloLabs
-          </a>
-        </p>
-        <p className="mb-4">
-          <a
-            href="https://github.com/OneBuffaloLabs/grit/blob/main/LICENSE"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-[var(--color-primary-hover)] transition-colors">
-            License
-          </a>
-        </p>
-        <p className="italic text-xs">
-          This app is an independent project created by OneBuffaloLabs and is not affiliated with,
-          endorsed by, or sponsored by Andy Frisella or the official 75 HARD® program.
+        <div className="grid gap-2">
+          <p>
+            &copy; {yearDisplay}{' '}
+            <a
+              href="https://onebuffalolabs.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold hover:text-[var(--color-primary)] transition-colors">
+              OneBuffaloLabs
+            </a>
+          </p>
+
+          <div className="flex justify-center gap-4 text-xs">
+            <a
+              href="https://github.com/OneBuffaloLabs/grit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-[var(--color-primary)] transition-colors">
+              GitHub
+            </a>
+            <span>•</span>
+            <a
+              href="https://github.com/OneBuffaloLabs/grit/blob/main/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-[var(--color-primary)] transition-colors">
+              License
+            </a>
+            <span>•</span>
+            <span
+              className="flex items-center gap-1 text-[var(--color-text-muted)]"
+              title={`Current Version: ${packageInfo.version}`}>
+              <FontAwesomeIcon icon={faCodeBranch} className="w-3 h-3" />
+              <span>v{packageInfo.version}</span>
+            </span>
+          </div>
+        </div>
+
+        <p className="mt-8 text-[10px] uppercase tracking-wider opacity-50">
+          Not affiliated with the official 75 HARD® program.
         </p>
       </div>
     </footer>
