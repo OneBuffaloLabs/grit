@@ -6,7 +6,6 @@ import {
   faListCheck,
   faDatabase,
   faUserShield,
-  faWifi,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -41,8 +40,8 @@ const HowItWorks = () => {
         </h2>
 
         <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto mb-16">
-          Most apps sell your data. Grit doesn't even have a server to store it. It loads once and
-          works anywhere—perfect for those outdoor workouts in remote areas.
+          Most apps sell your data. Grit doesn&apos;t even have a server to store it. It loads once
+          and works anywhere—perfect for those outdoor workouts in remote areas.
         </p>
 
         <div className="relative grid md:grid-cols-3 gap-12">

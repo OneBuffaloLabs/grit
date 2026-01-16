@@ -55,16 +55,17 @@ const Methodology = () => {
               <strong>66 days</strong> to form a new habit automatically.
             </p>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
-              Grit pushes you to <strong>75 days</strong> to take you beyond just "habit formation"
-              and into "lifestyle permanence." By the time you finish, these tasks aren't
-              chores—they are just who you are.
+              Grit pushes you to <strong>75 days</strong> to take you beyond just &quot;habit
+              formation&quot; and into &quot;lifestyle permanence&quot; By the time you finish,
+              these tasks aren&apos;t chores—they are just who you are.
             </p>
           </div>
           {/* Visual abstract representation of a brain or growth could go here,
               but we'll use a clean typographic quote for now */}
           <div className="bg-[var(--color-background)] p-8 rounded-2xl border-l-4 border-[var(--color-primary)] shadow-lg">
             <blockquote className="text-xl italic text-[var(--color-text-muted)] mb-4">
-              "We are what we repeatedly do. Excellence, then, is not an act, but a habit."
+              &quot;We are what we repeatedly do. Excellence, then, is not an act, but a
+              habit.&quot;
             </blockquote>
             <cite className="block text-right font-bold text-[var(--color-foreground)]">
               — Will Durant
