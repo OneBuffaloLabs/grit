@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChallengeProvider } from '@/context/ChallengeContext';
 import Welcome from '@/components/features/welcome/Welcome';
+import Methodology from '@/components/features/welcome/Methodology';
 import HowItWorks from '@/components/features/welcome/HowItWorks';
 import OpenSource from '@/components/features/welcome/OpenSource';
 import Header from '@/components/layout/Header';
@@ -16,11 +17,14 @@ export default function HomePage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
-          {/* Hero and Rules Section */}
+          {/* Hero and Rules Section (The "What") */}
           <Welcome />
 
-          {/* Local-First Architecture Explainer */}
+          {/* Local-First Architecture Explainer (The "How") */}
           <HowItWorks />
+
+          {/* Psychology and Persona Guide (The "Why" and "Who") */}
+          <Methodology />
 
           {/* Open Source and Privacy Details */}
           <OpenSource />
