@@ -81,8 +81,7 @@ const NewChallengeModal = ({ onClose }: { onClose: () => void }) => {
   const handleCreateChallenge = async (type: '75 Hard') => {
     setIsCreating(true);
     try {
-      // For testing, creating a 3-day challenge
-      const newChallenge = await startNewChallenge(type, 3);
+      const newChallenge = await startNewChallenge(type, 75);
       if (newChallenge) {
         router.push(`/app/challenge/?id=${newChallenge._id}`);
       }
