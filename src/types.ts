@@ -30,6 +30,7 @@ export type ChallengeType = 'soft' | 'balanced' | 'hard';
 export interface ChallengeVariant {
   id: ChallengeType;
   title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   color: string;
   tagline: string;

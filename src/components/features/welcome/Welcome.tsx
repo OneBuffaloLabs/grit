@@ -182,7 +182,7 @@ const Welcome = () => {
                     Why this works
                   </h4>
                   <p className="text-sm italic text-[var(--color-text-muted)]">
-                    "{activeChallenge.whyItWorks}"
+                    &quot;{activeChallenge.whyItWorks}&quot;
                   </p>
                 </div>
               </div>

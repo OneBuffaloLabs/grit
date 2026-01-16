@@ -21,9 +21,9 @@ const OpenSource = () => {
               <h3 className="text-2xl font-bold font-orbitron">Privacy First</h3>
             </div>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
-              Grit is built on a "Local-First" architecture. We do not have servers, and we do not
-              sell your data. Everything you track exists solely on your device in an encrypted
-              PouchDB database.
+              Grit is built on a &quot;Local-First&quot; architecture. We do not have servers, and
+              we do not sell your data. Everything you track exists solely on your device in an
+              encrypted PouchDB database.
             </p>
           </div>
 
