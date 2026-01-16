@@ -24,3 +24,16 @@ export interface ChallengeDoc {
     };
   };
 }
+
+export type ChallengeType = 'soft' | 'balanced' | 'hard';
+
+export interface ChallengeVariant {
+  id: ChallengeType;
+  title: string;
+  icon: any;
+  color: string;
+  tagline: string;
+  description: string;
+  rules: string[];
+  whyItWorks: string;
+}
