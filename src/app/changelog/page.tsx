@@ -10,6 +10,7 @@ import {
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CHANGELOG_DATA, ChangeType } from '@/data/changelog';
+import packageInfo from '../../../package.json'; // <--- Import Package Info
 
 // Helper to map string types to Icons
 const getIconForType = (type: ChangeType) => {
@@ -35,6 +36,17 @@ const ChangelogPage = () => {
       <main className="flex-grow bg-[var(--color-background)] text-[var(--color-foreground)]">
         {/* Header Block */}
         <div className="py-16 px-4 text-center bg-[var(--color-surface)]">
+          {/* Dynamic Version Badge */}
+          <div className="inline-flex items-center gap-2 bg-[var(--color-background)] border border-[var(--color-text-muted)]/20 px-4 py-1.5 rounded-full mb-6 shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs font-mono text-[var(--color-text-muted)] uppercase tracking-wider">
+              Current Version:{' '}
+              <span className="text-[var(--color-foreground)] font-bold">
+                v{packageInfo.version}
+              </span>
+            </span>
+          </div>
+
           <h1 className="text-4xl md:text-5xl font-bold font-orbitron mb-4">Product Timeline</h1>
           <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
             Grit is constantly evolving. Here is a look at our journey, from day one to today.
@@ -107,6 +119,20 @@ const ChangelogPage = () => {
                         <p className="text-[var(--color-text-muted)] leading-relaxed text-sm">
                           {event.description}
                         </p>
+
+                        {/* Bullet Points */}
+                        {event.details && event.details.length > 0 && (
+                          <ul className="mt-4 space-y-2">
+                            {event.details.map((detail, i) => (
+                              <li
+                                key={i}
+                                className="flex items-start gap-2 text-sm text-[var(--color-text-muted)]">
+                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shrink-0 opacity-70" />
+                                <span className="leading-relaxed">{detail}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     </div>
                   </div>

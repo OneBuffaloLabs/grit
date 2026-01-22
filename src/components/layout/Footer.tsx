@@ -1,78 +1,140 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
+import { faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { faCodeBranch, faDatabase } from '@fortawesome/free-solid-svg-icons';
 import packageInfo from '../../../package.json';
 
-/**
- * Global footer component displaying copyright, links, and the current app version.
- */
 const Footer = () => {
-  const startYear = 2025;
-  const currentYear = new Date().getFullYear();
-  const yearDisplay = startYear === currentYear ? startYear : `${startYear} - ${currentYear}`;
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
 
   return (
-    <footer className="bg-[var(--color-surface)] text-[var(--color-text-muted)] py-8 px-8 mt-auto border-t border-[var(--color-background)]">
-      <div className="container mx-auto text-center text-sm">
-        {/* Data Persistence Message */}
-        <div className="max-w-md mx-auto mb-8 text-xs bg-[var(--color-background)] p-4 rounded-lg border border-[var(--color-surface)]">
-          <p className="flex items-center justify-center gap-2 mb-1 font-semibold text-[var(--color-foreground)]">
-            <FontAwesomeIcon icon={faInfoCircle} className="text-[var(--color-primary)]" />
-            <span>Local Storage Only</span>
-          </p>
+    <footer className="bg-[var(--color-surface)] border-t border-[var(--color-background)] py-12 px-4 sm:px-6 lg:px-8 mt-auto">
+      <div className="container mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Column 1: Brand */}
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-xl font-bold font-orbitron mb-4 text-[var(--color-foreground)]">
+              GRIT
+            </h3>
+            <p className="text-[var(--color-text-muted)] text-sm leading-relaxed max-w-xs mb-4">
+              A privacy-first, offline-capable tracker for 75 Hard, 75 Soft, and 75 Balanced. Built
+              to help you build mental toughness without sacrificing your data.
+            </p>
+            <div className="flex gap-4">
+              <a
+                href="https://github.com/OneBuffaloLabs/grit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                aria-label="GitHub">
+                <FontAwesomeIcon icon={faGithub} className="text-xl" />
+              </a>
+              <a
+                href="https://twitter.com/onebuffalolabs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                aria-label="Twitter">
+                <FontAwesomeIcon icon={faXTwitter} className="text-xl" />
+              </a>
+            </div>
+          </div>
+
+          {/* Column 2: Product */}
+          <div>
+            <h4 className="font-bold text-[var(--color-foreground)] mb-4">Product</h4>
+            <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
+              <li>
+                <Link
+                  href="/changelog"
+                  className="hover:text-[var(--color-primary)] transition-colors">
+                  Updates & Timeline
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/app/setup"
+                  className="hover:text-[var(--color-primary)] transition-colors">
+                  Start Challenge
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/OneBuffaloLabs/grit/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--color-primary)] transition-colors">
+                  Report a Bug
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Legal */}
+          <div>
+            <h4 className="font-bold text-[var(--color-foreground)] mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm text-[var(--color-text-muted)]">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="hover:text-[var(--color-primary)] transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-[var(--color-primary)] transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Disclaimer Section (NEW) */}
+        <div className="border-t border-[var(--color-background)] py-6 text-xs text-[var(--color-text-muted)] text-center opacity-60">
           <p>
-            Your data is stored securely on this device. Clearing browser data will erase your
-            progress. Multi-device sync coming soon!
+            Grit is an unofficial companion app and is not affiliated with, endorsed by, or
+            associated with 75 Hard, Andy Frisella, or the 75 Hard program. "75 Hard" is a
+            registered trademark of Andy Frisella.
           </p>
         </div>
 
-        <div className="grid gap-2">
-          <p>
-            &copy; {yearDisplay}{' '}
+        {/* Bottom Bar: Copyright & Stats */}
+        <div className="border-t border-[var(--color-background)] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[var(--color-text-muted)]">
+          <div>
+            &copy; {year}{' '}
             <a
               href="https://onebuffalolabs.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-bold hover:text-[var(--color-primary)] transition-colors">
-              OneBuffaloLabs
+              className="hover:text-[var(--color-primary)] transition-colors font-bold">
+              One Buffalo Labs
             </a>
-          </p>
+            . All rights reserved.
+          </div>
 
-          <div className="flex justify-center gap-4 text-xs">
-            <a
-              href="https://github.com/OneBuffaloLabs/grit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-[var(--color-primary)] transition-colors">
-              GitHub
-            </a>
-            <span>•</span>
-            <a
-              href="https://github.com/OneBuffaloLabs/grit/blob/main/LICENSE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-[var(--color-primary)] transition-colors">
-              License
-            </a>
-            <span>•</span>
-            <span
-              className="flex items-center gap-1 text-[var(--color-text-muted)]"
-              title={`Current Version: ${packageInfo.version}`}>
-              <Link
-                href="/changelog"
-                className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                title="View Changelog">
-                <FontAwesomeIcon icon={faCodeBranch} className="w-3 h-3" />
-                <span>v{packageInfo.version}</span>
-              </Link>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1" title="Data stored locally">
+              <FontAwesomeIcon icon={faDatabase} className="w-3 h-3" />
+              <span>Local-First</span>
             </span>
+            <span>•</span>
+            <Link
+              href="/changelog"
+              className="flex items-center gap-1 hover:text-[var(--color-foreground)] transition-colors"
+              title="View Changelog">
+              <FontAwesomeIcon icon={faCodeBranch} className="w-3 h-3" />
+              <span>v{packageInfo.version}</span>
+            </Link>
           </div>
         </div>
-
-        <p className="mt-8 text-[10px] uppercase tracking-wider opacity-50">
-          Not affiliated with the official 75 HARD® program.
-        </p>
       </div>
     </footer>
   );

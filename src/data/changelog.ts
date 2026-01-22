@@ -15,6 +15,7 @@ export interface ChangelogEntry {
   version: string;
   type: ChangeType;
   description: string;
+  details?: string[]; // NEW: Optional array for bullet points
 }
 
 export interface YearLog {
@@ -22,7 +23,6 @@ export interface YearLog {
   entries: ChangelogEntry[];
 }
 
-// Helper to map string types to Icons (used in the UI component)
 export const getIconForType = (type: ChangeType): IconDefinition => {
   switch (type) {
     case 'launch':
@@ -48,7 +48,13 @@ export const CHANGELOG_DATA: YearLog[] = [
         version: 'v1.5.0',
         type: 'update',
         description:
-          "We've completely reimagined the homepage to help you find your path with the 'Choose Your Hard' tiers. Plus, we launched this brand-new Product Timeline page so you can see exactly how Grit is evolving with every update!",
+          "We've completely reimagined the platform to support your journey, no matter which level of difficulty you choose. This update lays the groundwork for the future of Grit.",
+        details: [
+          "Introduced the 'Choose Your Hard' system on the homepage, outlining the upcoming 75 Soft and 75 Balanced tiers.",
+          'Launched this Product Timeline page to keep you in the loop on our development journey.',
+          'Added a comprehensive Privacy Policy page to detail exactly how our Local-First architecture protects you.',
+          'Redesigned the Footer for better navigation, transparency, and easier access to legal/support resources.',
+        ],
       },
     ],
   },
