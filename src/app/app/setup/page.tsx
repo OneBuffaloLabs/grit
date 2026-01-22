@@ -1,20 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faFire,
-  faLeaf,
-  faScaleBalanced,
-  faCogs,
-  faArrowRight,
-  faLock,
-  faUnlock,
-  faUserAstronaut,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCogs, faArrowRight, faLock, faUnlock } from '@fortawesome/free-solid-svg-icons';
 import { useChallengeController } from '@/context/ChallengeContext';
 import { ChallengeType, ChallengeRules } from '@/types';
 import { CHALLENGE_PRESETS } from '@/data/presets';
@@ -35,11 +26,12 @@ const SetupPage = () => {
   // Handle Card Selection
   const handleSelectType = (type: ChallengeType) => {
     setSelectedType(type);
-    setRules(JSON.parse(JSON.stringify(CHALLENGE_PRESETS[type]))); // Deep copy to prevent ref issues
+    setRules(JSON.parse(JSON.stringify(CHALLENGE_PRESETS[type]))); // Deep copy
     setIsCustom(type === 'custom');
   };
 
   // Handle Basic Rule Changes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRuleChange = (field: keyof ChallengeRules, value: any) => {
     if (!isCustom) return;
     setRules((prev) => ({ ...prev, [field]: value }));
@@ -51,27 +43,15 @@ const SetupPage = () => {
 
     setRules((prev) => {
       const newDurations = [...prev.workoutDurations];
-      // If increasing, add default 30m
-      while (newDurations.length < count) {
-        newDurations.push(30);
-      }
-      // If decreasing, trim array
-      while (newDurations.length > count) {
-        newDurations.pop();
-      }
-
-      return {
-        ...prev,
-        workouts: count,
-        workoutDurations: newDurations,
-      };
+      while (newDurations.length < count) newDurations.push(30);
+      while (newDurations.length > count) newDurations.pop();
+      return { ...prev, workouts: count, workoutDurations: newDurations };
     });
   };
 
   // Handle Individual Workout Duration Change
   const handleDurationChange = (index: number, minutes: number) => {
     if (!isCustom) return;
-
     setRules((prev) => {
       const newDurations = [...prev.workoutDurations];
       newDurations[index] = minutes;
@@ -81,7 +61,7 @@ const SetupPage = () => {
 
   const handleStart = async () => {
     await startChallenge(selectedType, rules);
-    router.push('/app/');
+    router.push('/app/dashboard');
   };
 
   return (
@@ -109,7 +89,7 @@ const SetupPage = () => {
                 : 'border-[var(--color-surface)] bg-[var(--color-surface)] hover:border-green-500/50'
             }`}>
             <FontAwesomeIcon
-              icon={faLeaf}
+              icon={THEME.soft.icon}
               className={`text-3xl ${selectedType === 'soft' ? THEME.soft.color : 'text-green-500'}`}
             />
             <h3 className="font-bold text-lg font-orbitron">75 Soft</h3>
@@ -128,7 +108,7 @@ const SetupPage = () => {
                 : 'border-[var(--color-surface)] bg-[var(--color-surface)] hover:border-orange-400/50'
             }`}>
             <FontAwesomeIcon
-              icon={faScaleBalanced}
+              icon={THEME.balanced.icon}
               className={`text-3xl ${selectedType === 'balanced' ? THEME.balanced.color : 'text-orange-400'}`}
             />
             <h3 className="font-bold text-lg font-orbitron">75 Balanced</h3>
@@ -147,7 +127,7 @@ const SetupPage = () => {
                 : 'border-[var(--color-surface)] bg-[var(--color-surface)] hover:border-red-500/50'
             }`}>
             <FontAwesomeIcon
-              icon={faFire}
+              icon={THEME.hard.icon}
               className={`text-3xl ${selectedType === 'hard' ? THEME.hard.color : 'text-red-500'}`}
             />
             <h3 className="font-bold text-lg font-orbitron">75 Hard</h3>
@@ -166,7 +146,7 @@ const SetupPage = () => {
                 : 'border-[var(--color-surface)] bg-[var(--color-surface)] hover:border-blue-500/50'
             }`}>
             <FontAwesomeIcon
-              icon={faUserAstronaut}
+              icon={THEME.custom.icon}
               className={`text-3xl ${selectedType === 'custom' ? THEME.custom.color : 'text-blue-500'}`}
             />
             <h3 className="font-bold text-lg font-orbitron">Custom</h3>
@@ -329,6 +309,7 @@ const SetupPage = () => {
                     className="flex items-center gap-3 cursor-pointer p-2 hover:bg-[var(--color-background)] rounded-lg transition-colors">
                     <input
                       type="checkbox"
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       checked={(rules as any)[toggle.id]}
                       onChange={(e) =>
                         handleRuleChange(toggle.id as keyof ChallengeRules, e.target.checked)

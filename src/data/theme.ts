@@ -1,3 +1,10 @@
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import {
+  faFire,
+  faLeaf,
+  faScaleBalanced,
+  faUserAstronaut,
+} from '@fortawesome/free-solid-svg-icons';
 import { ChallengeType } from '@/types';
 
 interface ThemeConfig {
@@ -8,7 +15,8 @@ interface ThemeConfig {
   button: string;
   shadow: string;
   badge: string;
-  toggle: string; // <--- NEW PROPERTY
+  toggle: string;
+  icon: IconDefinition;
 }
 
 export const THEME: Record<ChallengeType, ThemeConfig> = {
@@ -21,6 +29,7 @@ export const THEME: Record<ChallengeType, ThemeConfig> = {
     shadow: 'shadow-[0_0_20px_rgba(34,197,94,0.2)]',
     badge: 'bg-green-500/20 text-green-500',
     toggle: 'peer-checked:bg-green-500',
+    icon: faLeaf,
   },
   balanced: {
     color: 'text-orange-400',
@@ -31,6 +40,7 @@ export const THEME: Record<ChallengeType, ThemeConfig> = {
     shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.2)]',
     badge: 'bg-orange-400/20 text-orange-400',
     toggle: 'peer-checked:bg-orange-400',
+    icon: faScaleBalanced,
   },
   hard: {
     color: 'text-red-500',
@@ -41,6 +51,7 @@ export const THEME: Record<ChallengeType, ThemeConfig> = {
     shadow: 'shadow-[0_0_20px_rgba(239,68,68,0.2)]',
     badge: 'bg-red-500/20 text-red-500',
     toggle: 'peer-checked:bg-red-500',
+    icon: faFire,
   },
   custom: {
     color: 'text-blue-500',
@@ -51,5 +62,6 @@ export const THEME: Record<ChallengeType, ThemeConfig> = {
     shadow: 'shadow-[0_0_20px_rgba(59,130,246,0.2)]',
     badge: 'bg-blue-500/20 text-blue-500',
     toggle: 'peer-checked:bg-blue-500',
+    icon: faUserAstronaut,
   },
 };

@@ -3,60 +3,86 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCheckCircle,
-  faRocket,
-  faFire,
-  faBalanceScale,
-  faLeaf,
-  faInfoCircle,
-} from '@fortawesome/free-solid-svg-icons';
-import { CHALLENGE_DATA, CHALLENGE_ORDER } from '@/data/challenges';
+import { faCheckCircle, faRocket, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { CHALLENGE_DATA } from '@/data/challenges';
+import { THEME } from '@/data/theme';
 import { ChallengeType } from '@/types';
 
 /**
  * Renders the comparison table for a quick "At a Glance" view.
- * Uses a grid layout for responsiveness.
  */
 const ComparisonTable = () => {
   const rows = [
-    { label: 'Diet', soft: 'Cut 1 Vice', balanced: '1 Cheat/Week', hard: 'Strict. No cheats.' },
+    {
+      label: 'Diet',
+      soft: 'Cut 1 Vice',
+      balanced: '1 Cheat/Week',
+      hard: 'Strict. No cheats.',
+      custom: 'You Decide',
+    },
     {
       label: 'Workouts',
-      soft: '1x 45min movement',
+      soft: '1x 45min',
       balanced: '1x 45min + 15min',
       hard: '2x 45min (1 outdoor)',
+      custom: '1-3 Daily Sessions',
     },
-    { label: 'Water', soft: '2 Liters', balanced: '3 Liters', hard: '1 Gallon' },
+    {
+      label: 'Water',
+      soft: '64oz (2L)',
+      balanced: '100oz (3L)',
+      hard: '128oz (1 Gal)',
+      custom: 'Any Amount',
+    },
     {
       label: 'Reading',
-      soft: '10 pages or 20 mins of Audio/Podcast',
+      soft: '10 pages or Audio',
       balanced: '10 pages (Any)',
       hard: '10 pages (Non-Fiction)',
+      custom: 'Page Goal',
     },
-    { label: 'Photo', soft: 'Start & End', balanced: 'Weekly', hard: 'Daily' },
-    { label: 'Failure', soft: 'Keep Going', balanced: 'Penalty Day', hard: 'Restart at Day 1' },
+    {
+      label: 'Photo',
+      soft: 'Day 1 & 75',
+      balanced: 'Weekly',
+      hard: 'Daily',
+      custom: 'Toggle On/Off',
+    },
+    {
+      label: 'Failure',
+      soft: 'Keep Going',
+      balanced: 'Penalty Day',
+      hard: 'Restart at Day 1',
+      custom: 'Your Rules',
+    },
   ];
 
   return (
     <div className="overflow-x-auto w-full mb-12">
-      {/* table-fixed ensures columns obey the widths we set below */}
-      <table className="w-full text-left border-collapse min-w-[600px] table-fixed">
+      <table className="w-full text-left border-collapse min-w-[800px] table-fixed">
         <thead>
           <tr className="border-b border-[var(--color-surface)]">
-            {/* Setting explicit widths to make them uniform */}
-            <th className="w-[15%] p-4 bg-[var(--color-background)] text-[var(--color-text-muted)] font-normal text-xs uppercase tracking-wider"></th>
-            <th className="w-[28.33%] p-4 bg-[var(--color-background)] text-green-500 font-bold">
-              <FontAwesomeIcon icon={faLeaf} className="mr-2" />
+            <th className="w-[12%] p-4 bg-[var(--color-background)] text-[var(--color-text-muted)] font-normal text-xs uppercase tracking-wider"></th>
+
+            <th
+              className={`w-[22%] p-4 bg-[var(--color-background)] font-bold ${THEME.soft.color}`}>
+              <FontAwesomeIcon icon={THEME.soft.icon} className="mr-2" />
               75 Soft
             </th>
-            <th className="w-[28.33%] p-4 bg-[var(--color-background)] text-orange-400 font-bold">
-              <FontAwesomeIcon icon={faBalanceScale} className="mr-2" />
+            <th
+              className={`w-[22%] p-4 bg-[var(--color-background)] font-bold ${THEME.balanced.color}`}>
+              <FontAwesomeIcon icon={THEME.balanced.icon} className="mr-2" />
               75 Balanced
             </th>
-            <th className="w-[28.33%] p-4 bg-[var(--color-background)] text-red-500 font-bold">
-              <FontAwesomeIcon icon={faFire} className="mr-2" />
+            <th
+              className={`w-[22%] p-4 bg-[var(--color-background)] font-bold ${THEME.hard.color}`}>
+              <FontAwesomeIcon icon={THEME.hard.icon} className="mr-2" />
               75 Hard
+            </th>
+            <th
+              className={`w-[22%] p-4 bg-[var(--color-background)] font-bold ${THEME.custom.color}`}>
+              <FontAwesomeIcon icon={THEME.custom.icon} className="mr-2" />
+              Custom
             </th>
           </tr>
         </thead>
@@ -72,7 +98,6 @@ const ComparisonTable = () => {
                 title={row.label}>
                 {row.label}
               </td>
-              {/* whitespace-normal ensures the text wraps within the fixed-width column */}
               <td className="p-4 text-[var(--color-text-muted)] whitespace-normal break-words text-sm">
                 {row.soft}
               </td>
@@ -81,6 +106,9 @@ const ComparisonTable = () => {
               </td>
               <td className="p-4 text-[var(--color-text-muted)] whitespace-normal break-words text-sm">
                 {row.hard}
+              </td>
+              <td className="p-4 text-[var(--color-text-muted)] whitespace-normal break-words text-sm italic">
+                {row.custom}
               </td>
             </tr>
           ))}
@@ -92,18 +120,62 @@ const ComparisonTable = () => {
 
 /**
  * The enhanced Welcome component.
- * Displays the three challenge tiers, a comparison table, and detailed breakdowns.
  */
 const Welcome = () => {
   const router = useRouter();
-  // Default to 'balanced' as the middle ground, or 'soft' if you prefer lower friction.
   const [activeTab, setActiveTab] = useState<ChallengeType>('soft');
 
   const handleLaunchApp = () => {
     router.push('/app');
   };
 
-  const activeChallenge = CHALLENGE_DATA[activeTab];
+  // Helper to get display data
+  const getDisplayData = (type: ChallengeType) => {
+    // 1. Handle Custom Case
+    if (type === 'custom') {
+      return {
+        id: 'custom',
+        title: 'Custom Challenge',
+        tagline: 'Your Rules. Your Pace.',
+        description:
+          'You know exactly what you need. Build a protocol that fits your specific goals, whether that means 3 workouts a day or just drinking more water.',
+        whyItWorks:
+          'Ownership creates adherence. When you build the plan, you are more likely to stick to it.',
+        rules: [
+          'Set your own workout frequency (1-3/day)',
+          'Define your water intake goal',
+          'Toggle reading, photos, and diet rules',
+          'Choose your own failure conditions',
+        ],
+        theme: THEME.custom,
+      };
+    }
+
+    // 2. Handle Standard Cases
+    const data = CHALLENGE_DATA[type];
+
+    // Safety fallback
+    if (!data) {
+      return {
+        id: 'hard',
+        title: '75 Hard',
+        tagline: 'The Iron Standard',
+        description: 'The original mental toughness program.',
+        whyItWorks: 'Total elimination of excuses.',
+        rules: [],
+        theme: THEME.hard,
+      };
+    }
+
+    return {
+      ...data,
+      theme: THEME[type],
+    };
+  };
+
+  const activeData = getDisplayData(activeTab);
+
+  const TABS: ChallengeType[] = ['soft', 'balanced', 'hard', 'custom'];
 
   return (
     <section className="bg-[var(--color-surface)] text-[var(--color-foreground)] py-16 px-4 sm:px-6 lg:px-8">
@@ -112,26 +184,43 @@ const Welcome = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-5xl font-bold font-orbitron mb-6">Choose Your Hard</h1>
           <p className="text-lg text-[var(--color-text-muted)] mb-8">
-            Grit supports three distinct paths. Whether you are building a foundation or testing
-            your limits, there is a challenge for you.
+            Grit supports distinct paths. Whether you are building a foundation, testing your
+            limits, or forging your own way, there is a challenge for you.
           </p>
 
-          {/* Progression Logic: Soft -> Balanced -> Hard */}
-          <div className="grid md:grid-cols-3 gap-4 text-sm text-[var(--color-text-muted)] bg-[var(--color-background)] p-6 rounded-xl border border-[var(--color-surface)]/50">
+          {/* Quick Pillars */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-[var(--color-text-muted)] bg-[var(--color-background)] p-6 rounded-xl border border-[var(--color-surface)]/50">
             <div className="flex flex-col items-center">
-              <FontAwesomeIcon icon={faLeaf} className="text-green-500 text-2xl mb-2" />
-              <strong className="text-[var(--color-foreground)]">75 Soft</strong>
-              <span>Builds the Habit</span>
+              <FontAwesomeIcon
+                icon={THEME.soft.icon}
+                className={`${THEME.soft.color} text-2xl mb-2`}
+              />
+              <strong className="text-[var(--color-foreground)]">Soft</strong>
+              <span className="text-xs">Builds Habit</span>
             </div>
-            <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-[var(--color-surface)] pt-4 md:pt-0">
-              <FontAwesomeIcon icon={faBalanceScale} className="text-orange-400 text-2xl mb-2" />
-              <strong className="text-[var(--color-foreground)]">75 Balanced</strong>
-              <span>Builds Consistency</span>
+            <div className="flex flex-col items-center border-l border-[var(--color-surface)]">
+              <FontAwesomeIcon
+                icon={THEME.balanced.icon}
+                className={`${THEME.balanced.color} text-2xl mb-2`}
+              />
+              <strong className="text-[var(--color-foreground)]">Balanced</strong>
+              <span className="text-xs">Builds Consistency</span>
             </div>
-            <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-[var(--color-surface)] pt-4 md:pt-0">
-              <FontAwesomeIcon icon={faFire} className="text-red-500 text-2xl mb-2" />
-              <strong className="text-[var(--color-foreground)]">75 Hard</strong>
-              <span>Builds Mental Toughness</span>
+            <div className="flex flex-col items-center border-l border-[var(--color-surface)]">
+              <FontAwesomeIcon
+                icon={THEME.hard.icon}
+                className={`${THEME.hard.color} text-2xl mb-2`}
+              />
+              <strong className="text-[var(--color-foreground)]">Hard</strong>
+              <span className="text-xs">Mental Toughness</span>
+            </div>
+            <div className="flex flex-col items-center border-l border-[var(--color-surface)]">
+              <FontAwesomeIcon
+                icon={THEME.custom.icon}
+                className={`${THEME.custom.color} text-2xl mb-2`}
+              />
+              <strong className="text-[var(--color-foreground)]">Custom</strong>
+              <span className="text-xs">Total Control</span>
             </div>
           </div>
         </div>
@@ -141,22 +230,26 @@ const Welcome = () => {
         <ComparisonTable />
 
         {/* Detailed Breakdowns (Tabs) */}
-        <div className="bg-[var(--color-background)] rounded-2xl shadow-xl overflow-hidden mb-12">
+        <div className="bg-[var(--color-background)] rounded-2xl shadow-xl overflow-hidden mb-12 border border-[var(--color-surface)]">
           {/* Tab Navigation */}
-          <div className="flex border-b border-[var(--color-surface)]">
-            {CHALLENGE_ORDER.map((key) => {
-              const variant = CHALLENGE_DATA[key];
+          <div className="flex flex-wrap border-b border-[var(--color-surface)]">
+            {TABS.map((key) => {
+              const theme = THEME[key];
+              const isActive = activeTab === key;
+              const title =
+                key === 'custom' ? 'Custom' : `75 ${key.charAt(0).toUpperCase() + key.slice(1)}`;
+
               return (
                 <button
-                  key={variant.id}
-                  onClick={() => setActiveTab(variant.id as ChallengeType)}
-                  className={`flex-1 py-4 text-center font-bold transition-colors duration-200 flex items-center justify-center gap-2 ${
-                    activeTab === variant.id
-                      ? `${variant.color} bg-[var(--color-surface)] border-b-2 border-current`
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex-1 py-4 min-w-[100px] text-center font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
+                    isActive
+                      ? `${theme.color} bg-[var(--color-surface)] border-b-2 border-current shadow-[inset_0_-2px_0_0_currentColor]`
                       : 'text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-surface)]/50 cursor-pointer'
                   }`}>
-                  <FontAwesomeIcon icon={variant.icon} />
-                  <span className="hidden sm:inline">{variant.title}</span>
+                  <FontAwesomeIcon icon={theme.icon} />
+                  <span className="hidden sm:inline">{title}</span>
                 </button>
               );
             })}
@@ -166,14 +259,14 @@ const Welcome = () => {
           <div className="p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-12">
               <div>
-                <h3 className={`text-3xl font-bold font-orbitron mb-2 ${activeChallenge.color}`}>
-                  {activeChallenge.title}
+                <h3 className={`text-3xl font-bold font-orbitron mb-2 ${activeData.theme.color}`}>
+                  {activeData.title}
                 </h3>
                 <p className="text-xl font-medium mb-4 text-[var(--color-foreground)]">
-                  {activeChallenge.tagline}
+                  {activeData.tagline}
                 </p>
                 <p className="text-[var(--color-text-muted)] leading-relaxed mb-6">
-                  {activeChallenge.description}
+                  {activeData.description}
                 </p>
 
                 <div className="bg-[var(--color-surface)] p-6 rounded-lg border border-[var(--color-surface)]/50">
@@ -182,7 +275,7 @@ const Welcome = () => {
                     Why this works
                   </h4>
                   <p className="text-sm italic text-[var(--color-text-muted)]">
-                    &quot;{activeChallenge.whyItWorks}&quot;
+                    &quot;{activeData.whyItWorks}&quot;
                   </p>
                 </div>
               </div>
@@ -192,11 +285,11 @@ const Welcome = () => {
                   The Rules
                 </h4>
                 <ul className="space-y-4">
-                  {activeChallenge.rules.map((rule, index) => (
+                  {activeData.rules.map((rule, index) => (
                     <li key={index} className="flex items-start">
                       <FontAwesomeIcon
                         icon={faCheckCircle}
-                        className={`mt-1 mr-4 flex-shrink-0 ${activeChallenge.color}`}
+                        className={`mt-1 mr-4 flex-shrink-0 ${activeData.theme.color}`}
                       />
                       <span className="text-[var(--color-text-muted)]">{rule}</span>
                     </li>

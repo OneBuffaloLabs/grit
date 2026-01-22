@@ -1,3 +1,5 @@
+import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+
 export type ChallengeType = 'hard' | 'soft' | 'balanced' | 'custom';
 
 export interface ChallengeRules {
@@ -43,8 +45,10 @@ export interface ChallengeDoc {
 export interface ChallengeVariant {
   id: ChallengeType;
   title: string;
-  icon: any;
+  icon: IconDefinition;
   color: string;
   tagline: string;
   description: string;
+  rules: string[];
+  whyItWorks: string;
 }
