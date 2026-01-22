@@ -6,7 +6,6 @@ import {
   faTrophy,
   faCodeBranch,
   faBug,
-  faCalendar,
 } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -58,7 +57,7 @@ const ChangelogPage = () => {
             </div>
 
             {/* LOOP THROUGH YEARS */}
-            {CHANGELOG_DATA.map((yearGroup, yearIdx) => (
+            {CHANGELOG_DATA.map((yearGroup) => (
               <div key={yearGroup.year}>
                 {/* YEAR MARKER (Sticky Header effect purely visual) */}
                 <div className="relative flex items-center justify-center mb-12 z-10">

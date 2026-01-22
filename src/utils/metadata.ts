@@ -15,22 +15,26 @@ interface PageMetadata {
 const BASE_URL = 'https://grit.onebuffalolabs.com';
 const SITE_NAME = 'Grit';
 const TWITTER_CREATOR = '@onebuffalolabs';
-const GOOGLE_ADSENSE_ACCOUNT = ''; // Leave blank if not using AdSense
-const DEFAULT_TITLE = 'Grit: The Privacy-First 75 Hard Challenge Tracker';
+const GOOGLE_ADSENSE_ACCOUNT = '';
+const DEFAULT_TITLE = 'Grit: The Privacy-First Discipline Tracker';
 const DEFAULT_DESCRIPTION =
-  'Track your progress on the 75 Hard challenge with Grit, a simple, private, and offline-first PWA. No sign-up required. Your data stays on your device.';
+  'The ultimate privacy-first tracker for 75 Hard, 75 Soft, and 75 Balanced. Grit is an offline-ready PWA that keeps your transformation data 100% on your device. No accounts, no cloud, no compromises.';
 const DEFAULT_OG_IMAGE = ``;
 const DEFAULT_KEYWORDS = [
   '75 Hard',
+  '75 Soft',
+  '75 Balanced',
   '75 Hard Tracker',
-  'Challenge Tracker',
+  '75 Soft Tracker',
+  '75 Balanced Tracker',
+  'Discipline Tracker',
   'Mental Toughness',
-  'Andy Frisella',
-  'Grit App',
-  'Discipline App',
+  'Habit Tracker',
+  'Privacy First App',
   'PouchDB',
   'Offline First',
   'PWA',
+  'One Buffalo Labs',
 ];
 
 /**
@@ -70,13 +74,10 @@ export function generateMetadata({
     manifest: '/manifest.json',
     icons: {
       icon: [
-        // SVG icon for modern browsers
         { url: '/icon.svg', type: 'image/svg+xml' },
         { url: '/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
-        // PNG icon as a fallback
         { url: '/icon.png', type: 'image/png' },
       ],
-      // Apple touch icon for iOS devices
       apple: '/apple-icon.png',
     },
     appleWebApp: {
@@ -94,7 +95,7 @@ export function generateMetadata({
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${title || 'Grit Challenge Tracker'}`,
+          alt: `${title || 'Grit Discipline Tracker'}`,
           type: 'image/png',
         },
       ],

@@ -5,7 +5,6 @@ import {
   faPaintRoller,
   faBug,
   faCodeBranch,
-  faHistory,
 } from '@fortawesome/free-solid-svg-icons';
 
 export type ChangeType = 'launch' | 'feature' | 'update' | 'fix';
