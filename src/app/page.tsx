@@ -1,5 +1,4 @@
 import React from 'react';
-import { ChallengeProvider } from '@/context/ChallengeContext';
 import Welcome from '@/components/features/welcome/Welcome';
 import Methodology from '@/components/features/welcome/Methodology';
 import HowItWorks from '@/components/features/welcome/HowItWorks';
@@ -13,24 +12,22 @@ import Footer from '@/components/layout/Footer';
  */
 export default function HomePage() {
   return (
-    <ChallengeProvider>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          {/* Hero and Rules Section (The "What") */}
-          <Welcome />
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        {/* Hero and Rules Section (The "What") */}
+        <Welcome />
 
-          {/* Local-First Architecture Explainer (The "How") */}
-          <HowItWorks />
+        {/* Local-First Architecture Explainer (The "How") */}
+        <HowItWorks />
 
-          {/* Psychology and Persona Guide (The "Why" and "Who") */}
-          <Methodology />
+        {/* Psychology and Persona Guide (The "Why" and "Who") */}
+        <Methodology />
 
-          {/* Open Source and Privacy Details */}
-          <OpenSource />
-        </main>
-        <Footer />
-      </div>
-    </ChallengeProvider>
+        {/* Open Source and Privacy Details */}
+        <OpenSource />
+      </main>
+      <Footer />
+    </div>
   );
 }

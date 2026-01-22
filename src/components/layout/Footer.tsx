@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 import packageInfo from '../../../package.json';
@@ -58,8 +59,13 @@ const Footer = () => {
             <span
               className="flex items-center gap-1 text-[var(--color-text-muted)]"
               title={`Current Version: ${packageInfo.version}`}>
-              <FontAwesomeIcon icon={faCodeBranch} className="w-3 h-3" />
-              <span>v{packageInfo.version}</span>
+              <Link
+                href="/changelog"
+                className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                title="View Changelog">
+                <FontAwesomeIcon icon={faCodeBranch} className="w-3 h-3" />
+                <span>v{packageInfo.version}</span>
+              </Link>
             </span>
           </div>
         </div>

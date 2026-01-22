@@ -2,11 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import {
-  ChallengeProvider,
-  useChallengeState,
-  useChallengeDispatch,
-} from '@/context/ChallengeContext';
+import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
 import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
 import Header from '@/components/layout/Header';
@@ -105,9 +101,7 @@ const ChallengeDetailContent = () => {
 export default function ChallengeDetailPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <ChallengeProvider>
-        <ChallengeDetailContent />
-      </ChallengeProvider>
+      <ChallengeDetailContent />
     </Suspense>
   );
 }

@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faLock, faCheck, faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { getAllChallenges, startNewChallenge } from '@/lib/db';
 import { ChallengeDoc } from '@/types';
-import { ChallengeProvider } from '@/context/ChallengeContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -185,14 +184,12 @@ function ChallengeListPage() {
 
 export default function AppPage() {
   return (
-    <ChallengeProvider>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <ChallengeListPage />
-        </main>
-        <Footer />
-      </div>
-    </ChallengeProvider>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        <ChallengeListPage />
+      </main>
+      <Footer />
+    </div>
   );
 }
