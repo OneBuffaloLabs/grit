@@ -36,9 +36,10 @@ const TermsPage = () => {
               <h2 className="text-2xl font-bold font-orbitron">1. Agreement to Terms</h2>
             </div>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
-              By accessing or using the Grit application ("the App"), provided by One Buffalo Labs
-              ("we," "us," or "our"), you agree to be bound by these Terms of Service. If you do not
-              agree to these terms, do not use the App.
+              By accessing or using the Grit application (&quot;the App&quot;), provided by One
+              Buffalo Labs (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), you agree to be
+              bound by these Terms of Service. If you do not agree to these terms, do not use the
+              App.
             </p>
           </section>
 
@@ -54,8 +55,8 @@ const TermsPage = () => {
               </p>
               <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
                 Grit is a tracking utility, not a medical provider. The challenges tracked by this
-                app (such as 75 Hard) involve rigorous physical activity and dietary changes. You
-                expressly agree that your use of the App is at your sole risk.
+                app (such as &quot;75 Hard&quot;) involve rigorous physical activity and dietary
+                changes. You expressly agree that your use of the App is at your sole risk.
               </p>
               <p className="text-sm text-[var(--color-text-muted)] leading-relaxed mt-2">
                 We are not responsible for any injuries, health problems, or death that may result
@@ -77,7 +78,7 @@ const TermsPage = () => {
             </p>
             <ul className="list-disc pl-6 space-y-2 text-[var(--color-text-muted)]">
               <li>
-                <strong>"75 Hard"</strong> is a registered trademark of{' '}
+                <strong>&quot;75 Hard&quot;</strong> is a registered trademark of{' '}
                 <strong>Andy Frisella</strong>.
               </li>
               <li>
@@ -95,15 +96,15 @@ const TermsPage = () => {
               <h2 className="text-2xl font-bold font-orbitron">4. User Data & Liability</h2>
             </div>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
-              Grit operates on a "Local-First" architecture. Your data is stored exclusively in your
-              browser's local storage (IndexedDB).
+              Grit operates on a &quot;Local-First&quot; architecture. Your data is stored
+              exclusively in your browser&apos;s local storage (IndexedDB).
             </p>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
               <strong>We do not have a backup of your data.</strong> You are solely responsible for:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-[var(--color-text-muted)]">
               <li>Ensuring your device is secure.</li>
-              <li>Not clearing your browser's site data/cache for this domain.</li>
+              <li>Not clearing your browser&apos;s site data/cache for this domain.</li>
               <li>Exporting any data you wish to keep (if export features are available).</li>
             </ul>
             <p className="text-[var(--color-text-muted)] leading-relaxed mt-2">

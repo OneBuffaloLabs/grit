@@ -31,9 +31,9 @@ const PrivacyPage = () => {
             </div>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
               At One Buffalo Labs, we believe your personal growth data belongs to you, and only
-              you. **Grit is a "Local-First" application.** This means that unlike traditional apps,
-              we do not require you to create an account, and we do not store your challenge logs,
-              journal entries, or photos on our proprietary servers.
+              you. &quot;Grit&quot; is a Local-First application. This means that unlike traditional
+              apps, we do not require you to create an account, and we do not store your challenge
+              logs, journal entries, or photos on our proprietary servers.
             </p>
             <p className="text-[var(--color-text-muted)] leading-relaxed">
               The application logic is delivered to your device via{' '}
@@ -59,7 +59,7 @@ const PrivacyPage = () => {
               </li>
               <li>
                 <strong>Photos:</strong> If you use the progress photo feature, images are stored in
-                your device's local storage. They are not uploaded to any cloud bucket.
+                your device&apos;s local storage. They are not uploaded to any cloud bucket.
               </li>
             </ul>
             <div className="bg-[var(--color-surface)]/50 p-4 rounded-lg border-l-4 border-[var(--color-primary)] text-sm text-[var(--color-text-muted)] mt-4">
@@ -105,10 +105,9 @@ const PrivacyPage = () => {
                 via the App Settings.
               </li>
               <li>
-                <strong>Clear Browser Data:</strong> Clearing your browser's cache/site data for{' '}
-                <code>grit.onebuffalolabs.com</code>
-                will permanently erase all history from your device. Once deleted, this data cannot
-                be recovered by us.
+                <strong>Clear Browser Data:</strong> Clearing your browser&apos;s cache/site data
+                for <code>grit.onebuffalolabs.com</code> will permanently erase all history from
+                your device. Once deleted, this data cannot be recovered by us.
               </li>
             </ul>
           </section>

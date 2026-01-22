@@ -50,7 +50,7 @@ export const CHANGELOG_DATA: YearLog[] = [
         description:
           "We've completely reimagined the platform to support your journey, no matter which level of difficulty you choose. This update lays the groundwork for the future of Grit.",
         details: [
-          "Introduced the 'Choose Your Hard' system on the homepage, outlining the upcoming 75 Soft and 75 Balanced tiers.",
+          'Overhauled the Challenge Setup experience, allowing you to choose between 75 Hard, 75 Soft, 75 Balanced, or a fully Custom protocol.',
           'Launched this Product Timeline page to keep you in the loop on our development journey.',
           'Added comprehensive pages for Privacy Policy and Terms of Service to detail exactly how our Local-First architecture protects you.',
           'Redesigned the Footer for better navigation, transparency, and easier access to legal/support resources.',

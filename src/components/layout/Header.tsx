@@ -60,7 +60,7 @@ const Header = ({ onSettingsClick }: HeaderProps) => {
           {/* 2. LAUNCH APP (Updated: Shows on Home AND Changelog) */}
           {!isInApp && (
             <Link
-              href={challenge ? '/app' : '/app/setup'}
+              href={challenge ? '/app' : '/app/'}
               className="bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
               <FontAwesomeIcon icon={challenge ? faArrowRight : faRocket} />
               <span>{challenge ? 'Dashboard' : 'Launch App'}</span>

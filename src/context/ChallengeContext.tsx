@@ -1,7 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, ReactNode, Dispatch } from 'react';
-import { ChallengeDoc } from '@/types';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+  Dispatch,
+} from 'react';
+import { ChallengeDoc, ChallengeType, ChallengeRules } from '@/types';
+import { getActiveChallenge, createChallenge } from '@/lib/db';
 
 type State = {
   challenge: ChallengeDoc | null;
@@ -37,6 +45,22 @@ const challengeReducer = (state: State, action: Action): State => {
 export const ChallengeProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(challengeReducer, initialState);
 
+  // Load active challenge on mount
+  useEffect(() => {
+    const loadChallenge = async () => {
+      dispatch({ type: 'START_LOADING' });
+      try {
+        const activeDoc = await getActiveChallenge();
+        dispatch({ type: 'SET_CHALLENGE', payload: activeDoc });
+      } catch (error) {
+        console.error('Failed to load challenge:', error);
+        dispatch({ type: 'STOP_LOADING' }); // Stop loading even on error
+      }
+    };
+
+    loadChallenge();
+  }, []);
+
   return (
     <ChallengeStateContext.Provider value={state}>
       <ChallengeDispatchContext.Provider value={dispatch}>
@@ -60,4 +84,30 @@ export const useChallengeDispatch = () => {
     throw new Error('useChallengeDispatch must be used within a ChallengeProvider');
   }
   return context;
+};
+
+// --- Controller Hook ---
+export const useChallengeController = () => {
+  const dispatch = useChallengeDispatch();
+
+  const startChallenge = async (type: ChallengeType, rules: ChallengeRules) => {
+    try {
+      const newChallenge = await createChallenge(type, rules);
+      if (newChallenge) {
+        dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
+      }
+    } catch (err) {
+      console.error('Error starting challenge:', err);
+    }
+  };
+
+  const resetChallenge = async () => {
+    // Implementation for reset if needed
+    dispatch({ type: 'SET_CHALLENGE', payload: null });
+  };
+
+  return {
+    startChallenge,
+    resetChallenge,
+  };
 };

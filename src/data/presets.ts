@@ -1,0 +1,48 @@
+import { ChallengeType, ChallengeRules } from '@/types';
+
+export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
+  soft: {
+    workouts: 1,
+    workoutDuration: 45,
+    workoutDurations: [45],
+    outdoorWorkout: false,
+    water: 64,
+    reading: 10,
+    noCheatMeals: false,
+    noAlcohol: false,
+    progressPhoto: false,
+  },
+  balanced: {
+    workouts: 2,
+    workoutDuration: 30,
+    workoutDurations: [45, 15],
+    outdoorWorkout: false,
+    water: 100,
+    reading: 10,
+    noCheatMeals: false,
+    noAlcohol: false,
+    progressPhoto: false,
+  },
+  hard: {
+    workouts: 2,
+    workoutDuration: 45,
+    workoutDurations: [45, 45],
+    outdoorWorkout: true,
+    water: 128,
+    reading: 10,
+    noCheatMeals: true,
+    noAlcohol: true,
+    progressPhoto: true,
+  },
+  custom: {
+    workouts: 1,
+    workoutDuration: 30,
+    workoutDurations: [30, 30, 30],
+    outdoorWorkout: false,
+    water: 64,
+    reading: 10,
+    noCheatMeals: false,
+    noAlcohol: false,
+    progressPhoto: false,
+  },
+};

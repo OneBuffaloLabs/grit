@@ -48,13 +48,18 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
           </button>
         </header>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <p className="text-lg text-foreground">
             Congratulations on completing the {challenge.type} challenge!
           </p>
           <p className="text-sm text-text-muted">
             From {new Date(startDate).toLocaleDateString()} to{' '}
             {completionDate ? new Date(completionDate).toLocaleDateString() : ''}
+          </p>
+
+          <p className="text-md font-medium text-foreground pt-2">
+            You showed up and executed for{' '}
+            <span className="text-primary font-bold">{completedDays} days</span>. That is true grit.
           </p>
         </div>
 

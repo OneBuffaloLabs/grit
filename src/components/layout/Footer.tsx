@@ -59,9 +59,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/app/setup"
-                  className="hover:text-[var(--color-primary)] transition-colors">
+                <Link href="/app/" className="hover:text-[var(--color-primary)] transition-colors">
                   Start Challenge
                 </Link>
               </li>
@@ -101,7 +99,7 @@ const Footer = () => {
         <div className="border-t border-[var(--color-background)] py-6 text-xs text-[var(--color-text-muted)] text-center opacity-60">
           <p>
             Grit is an unofficial companion app and is not affiliated with, endorsed by, or
-            associated with 75 Hard, Andy Frisella, or the 75 Hard program. "75 Hard" is a
+            associated with 75 Hard, Andy Frisella, or the 75 Hard program. &quot;75 Hard&quot; is a
             registered trademark of Andy Frisella.
           </p>
         </div>

@@ -1,12 +1,27 @@
+export type ChallengeType = 'hard' | 'soft' | 'balanced' | 'custom';
+
+export interface ChallengeRules {
+  workouts: number;
+  workoutDuration: number;
+  workoutDurations: number[];
+  outdoorWorkout: boolean;
+  water: number;
+  reading: number;
+  noCheatMeals: boolean;
+  noAlcohol: boolean;
+  progressPhoto: boolean;
+}
+
 export interface ChallengeDoc {
   _id: string;
   _rev?: string;
   docType: 'challenge';
   startDate: string;
   status: 'active' | 'failed' | 'completed';
-  type: '75 Hard' | '75 Soft';
+  type: ChallengeType;
   duration: number;
   completionDate?: string;
+  rules: ChallengeRules;
   days: {
     [day: number]: {
       completed: boolean;
@@ -25,16 +40,11 @@ export interface ChallengeDoc {
   };
 }
 
-export type ChallengeType = 'soft' | 'balanced' | 'hard';
-
 export interface ChallengeVariant {
   id: ChallengeType;
   title: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   color: string;
   tagline: string;
   description: string;
-  rules: string[];
-  whyItWorks: string;
 }
