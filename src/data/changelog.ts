@@ -52,7 +52,7 @@ export const CHANGELOG_DATA: YearLog[] = [
         details: [
           "Introduced the 'Choose Your Hard' system on the homepage, outlining the upcoming 75 Soft and 75 Balanced tiers.",
           'Launched this Product Timeline page to keep you in the loop on our development journey.',
-          'Added a comprehensive Privacy Policy page to detail exactly how our Local-First architecture protects you.',
+          'Added comprehensive pages for Privacy Policy and Terms of Service to detail exactly how our Local-First architecture protects you.',
           'Redesigned the Footer for better navigation, transparency, and easier access to legal/support resources.',
         ],
       },
