@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faXTwitter } from '@fortawesome/free-brands-svg-icons';
+import { faGithub, faXTwitter, faBluesky, faFacebookF } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faDatabase } from '@fortawesome/free-solid-svg-icons';
 import packageInfo from '../../../package.json';
 
@@ -43,6 +43,22 @@ const Footer = () => {
                 className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
                 aria-label="Twitter">
                 <FontAwesomeIcon icon={faXTwitter} className="text-xl" />
+              </a>
+              <a
+                href="https://bsky.app/profile/onebuffalolabs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                aria-label="Bluesky">
+                <FontAwesomeIcon icon={faBluesky} className="text-xl" />
+              </a>
+              <a
+                href="https://www.facebook.com/onebuffalolabs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+                aria-label="Facebook">
+                <FontAwesomeIcon icon={faFacebookF} className="text-xl" />
               </a>
             </div>
           </div>
