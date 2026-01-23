@@ -174,3 +174,33 @@ export const getPhotoAttachment = async (
     return null;
   }
 };
+
+/**
+ * DANGER: Deletes all challenges from the database.
+ * Used for the "Reset App" functionality.
+ */
+export const deleteAllChallenges = async (): Promise<void> => {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    const result = await db.allDocs({ include_docs: true });
+
+    // Filter out rows that might be undefined
+    // Map to an object that includes { _deleted: true }
+    const deletedDocs = result.rows
+      .filter((row) => row.doc)
+      .map((row) => ({
+        ...row.doc!,
+        _deleted: true,
+      }));
+
+    if (deletedDocs.length > 0) {
+      // Use PouchDB's specific type instead of 'any'
+      await db.bulkDocs(deletedDocs as PouchDB.Core.PutDocument<ChallengeDoc>[]);
+    }
+  } catch (err) {
+    console.error('Error deleting all challenges:', err);
+    throw err;
+  }
+};

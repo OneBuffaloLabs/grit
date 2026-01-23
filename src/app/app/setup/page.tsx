@@ -61,7 +61,7 @@ const SetupPage = () => {
 
   const handleStart = async () => {
     await startChallenge(selectedType, rules);
-    router.push('/app/dashboard');
+    router.push('/app/');
   };
 
   return (

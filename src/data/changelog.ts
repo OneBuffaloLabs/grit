@@ -15,7 +15,7 @@ export interface ChangelogEntry {
   version: string;
   type: ChangeType;
   description: string;
-  details?: string[]; // NEW: Optional array for bullet points
+  details?: string[];
 }
 
 export interface YearLog {
@@ -42,6 +42,20 @@ export const CHANGELOG_DATA: YearLog[] = [
   {
     year: '2026',
     entries: [
+      {
+        date: 'Jan 23',
+        title: 'Unified Dashboard & Global Control',
+        version: 'v1.6.0',
+        type: 'feature',
+        description:
+          "We've cleaned up the experience by unifying your challenge history and giving you total control over your local data.",
+        details: [
+          'Redesigned the Dashboard to show all active, failed, and completed challenges in one place with dynamic thematic styling.',
+          'Added a "Danger Zone" to Global Settings, allowing you to completely reset the app and delete all local data.',
+          'Simplified navigation by removing the redundant History page in favor of a single, powerful journey view.',
+          'Fixed a UI bug where card borders were not correctly reflecting the challenge tier color.',
+        ],
+      },
       {
         date: 'Jan 16',
         title: 'A New Foundation',

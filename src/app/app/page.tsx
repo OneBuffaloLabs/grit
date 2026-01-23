@@ -6,14 +6,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { getAllChallenges } from '@/lib/db';
 import { ChallengeDoc } from '@/types';
+import { THEME } from '@/data/theme';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
-  const { duration } = challenge;
+  const { duration, type } = challenge;
+  const theme = THEME[type] || THEME.hard;
   const completedDays = Object.values(challenge.days).filter((day) => day.completed).length;
 
-  // Set progress to 100% if the challenge is completed
   const progressPercentage =
     challenge.status === 'completed' ? 100 : (completedDays / duration) * 100;
 
@@ -21,7 +22,9 @@ const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
     switch (challenge.status) {
       case 'active':
         return {
-          icon: <div className="w-3 h-3 bg-blue-500 rounded-full" title="Active"></div>,
+          icon: (
+            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" title="Active"></div>
+          ),
           text: `Day ${completedDays + 1} of ${duration}`,
         };
       case 'completed':
@@ -43,30 +46,35 @@ const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
 
   return (
     <Link href={`/app/challenge/?id=${challenge._id}`} className="block h-full">
-      <div className="bg-secondary rounded-lg shadow-lg p-6 h-full flex flex-col justify-between transform transition-transform hover:scale-105">
+      {/* FIXED: Removed .replace() so Tailwind detects the class */}
+      <div
+        className={`bg-secondary rounded-lg shadow-lg p-6 h-full flex flex-col justify-between transform transition-all hover:scale-105 border-t-4 ${theme.border}`}>
         <div>
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-2xl font-bold font-orbitron text-foreground capitalize">
-              {challenge.type.replace('-', ' ')}
-            </h3>
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={theme.icon} className={`text-xl ${theme.color}`} />
+              <h3 className="text-2xl font-bold font-orbitron text-foreground capitalize">
+                {type.replace('-', ' ')}
+              </h3>
+            </div>
             {icon}
           </div>
           <div className="w-full bg-neutral-700 rounded-full h-4 mb-2">
             <div
-              className="bg-primary h-4 rounded-full"
+              className={`${theme.button.split(' ')[0]} h-4 rounded-full transition-all duration-500`}
               style={{ width: `${progressPercentage}%` }}
               role="progressbar"
               aria-valuenow={completedDays}
               aria-valuemin={0}
-              aria-valuemax={duration}
-              aria-label={`${challenge.type} progress`}></div>
+              aria-valuemax={duration}></div>
           </div>
           <p className="text-sm text-neutral-400 mb-2">{text}</p>
           <p className="text-sm text-text-muted">
             Started: {new Date(challenge.startDate).toLocaleDateString()}
           </p>
         </div>
-        <button className="mt-4 bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded-lg transition-colors w-full cursor-pointer">
+        <button
+          className={`mt-4 ${theme.button} text-white font-bold py-2 px-4 rounded-lg transition-colors w-full cursor-pointer`}>
           View Challenge
         </button>
       </div>
@@ -82,9 +90,12 @@ function ChallengeListPage() {
     const fetchChallenges = async () => {
       setIsLoading(true);
       const allChallenges = await getAllChallenges();
-      allChallenges.sort(
-        (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-      );
+      // Sort: Active first, then by date descending
+      allChallenges.sort((a, b) => {
+        if (a.status === 'active' && b.status !== 'active') return -1;
+        if (a.status !== 'active' && b.status === 'active') return 1;
+        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+      });
       setChallenges(allChallenges);
       setIsLoading(false);
     };
@@ -94,7 +105,7 @@ function ChallengeListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-2xl font-orbitron">Loading Challenges...</p>
+        <p className="text-2xl font-orbitron animate-pulse">Loading Challenges...</p>
       </div>
     );
   }
@@ -103,14 +114,13 @@ function ChallengeListPage() {
     <section className="bg-secondary text-foreground py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="container mx-auto max-w-7xl">
         <header className="text-center mb-12">
-          <h2 className="text-5xl font-bold font-orbitron mb-4">Your Challenges</h2>
+          <h2 className="text-5xl font-bold font-orbitron mb-4">Your Journey</h2>
           <p className="text-lg text-text-muted">
-            Start a new challenge or review your past progress.
+            Track your active progress or look back at your grit.
           </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Start New Challenge Button - Now Links to Setup Page */}
           <Link
             href="/app/setup"
             className="border-2 cursor-pointer border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-800 hover:border-gray-500 transition-colors p-6 min-h-[220px] group">
