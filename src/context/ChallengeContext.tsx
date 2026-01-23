@@ -90,9 +90,14 @@ export const useChallengeDispatch = () => {
 export const useChallengeController = () => {
   const dispatch = useChallengeDispatch();
 
-  const startChallenge = async (type: ChallengeType, rules: ChallengeRules) => {
+  const startChallenge = async (
+    name: string,
+    type: ChallengeType,
+    rules: ChallengeRules,
+    duration: number
+  ) => {
     try {
-      const newChallenge = await createChallenge(type, rules);
+      const newChallenge = await createChallenge(name, type, rules, duration);
       if (newChallenge) {
         dispatch({ type: 'SET_CHALLENGE', payload: newChallenge });
       }

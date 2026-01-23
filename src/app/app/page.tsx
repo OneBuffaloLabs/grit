@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faCheck, faTimes, faRunning } from '@fortawesome/free-solid-svg-icons';
 import { getAllChallenges } from '@/lib/db';
 import { ChallengeDoc } from '@/types';
 import { THEME } from '@/data/theme';
@@ -11,54 +11,94 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
-  const { duration, type } = challenge;
+  const { duration, type, name } = challenge;
+  // Fallback to 'hard' theme if type isn't found
   const theme = THEME[type] || THEME.hard;
   const completedDays = Object.values(challenge.days).filter((day) => day.completed).length;
 
   const progressPercentage =
     challenge.status === 'completed' ? 100 : (completedDays / duration) * 100;
 
+  // Updated Status Logic
   const getStatusInfo = () => {
     switch (challenge.status) {
       case 'active':
         return {
+          label: 'Active',
+          // Added size="lg" as requested
           icon: (
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" title="Active"></div>
+            <FontAwesomeIcon icon={faRunning} size="lg" className={theme.color} title="Active" />
           ),
-          text: `Day ${completedDays + 1} of ${duration}`,
+          details: `Day ${completedDays + 1} of ${duration}`,
+          statusColor: theme.color,
         };
       case 'completed':
         return {
-          icon: <FontAwesomeIcon icon={faCheck} className="text-green-500" title="Completed" />,
-          text: challenge.completionDate
-            ? `Completed on ${new Date(challenge.completionDate).toLocaleDateString()}`
-            : 'Challenge Completed',
+          label: 'Completed',
+          // Added size="lg"
+          icon: (
+            <FontAwesomeIcon icon={faCheck} size="lg" className={theme.color} title="Completed" />
+          ),
+          details: challenge.completionDate
+            ? new Date(challenge.completionDate).toLocaleDateString()
+            : 'Mission Accomplished',
+          statusColor: theme.color,
         };
       case 'failed':
         return {
-          icon: <FontAwesomeIcon icon={faTimes} className="text-red-500" title="Failed" />,
-          text: `Failed after ${completedDays} days`,
+          label: 'Failed',
+          // Added size="lg"
+          icon: <FontAwesomeIcon icon={faTimes} size="lg" className={theme.color} title="Failed" />,
+          details: `Failed after ${completedDays} days`,
+          statusColor: theme.color,
+        };
+      default:
+        return {
+          label: 'Unknown',
+          icon: null,
+          details: '',
+          statusColor: 'text-gray-500',
         };
     }
   };
 
-  const { icon, text } = getStatusInfo();
+  // Dynamic Button Text Logic
+  const getButtonText = () => {
+    switch (challenge.status) {
+      case 'completed':
+        return 'View Journey';
+      case 'failed':
+        return 'View Attempt';
+      default:
+        return 'Track Progress';
+    }
+  };
+
+  const { label, icon, details, statusColor } = getStatusInfo();
 
   return (
     <Link href={`/app/challenge/?id=${challenge._id}`} className="block h-full">
-      {/* FIXED: Removed .replace() so Tailwind detects the class */}
       <div
         className={`bg-secondary rounded-lg shadow-lg p-6 h-full flex flex-col justify-between transform transition-all hover:scale-105 border-t-4 ${theme.border}`}>
         <div>
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
               <FontAwesomeIcon icon={theme.icon} className={`text-xl ${theme.color}`} />
-              <h3 className="text-2xl font-bold font-orbitron text-foreground capitalize">
-                {type.replace('-', ' ')}
-              </h3>
+              <div>
+                {/* Use the Custom Name if available, fallback to Type */}
+                <h3 className="text-xl font-bold font-orbitron text-foreground capitalize">
+                  {name || type.replace('-', ' ')}
+                </h3>
+                {/* Status Badge */}
+                <div
+                  className={`text-xs font-bold uppercase tracking-wider flex items-center gap-2 mt-1 ${statusColor}`}>
+                  {icon}
+                  <span>{label}</span>
+                </div>
+              </div>
             </div>
-            {icon}
           </div>
+
           <div className="w-full bg-neutral-700 rounded-full h-4 mb-2">
             <div
               className={`${theme.button.split(' ')[0]} h-4 rounded-full transition-all duration-500`}
@@ -68,14 +108,14 @@ const ChallengeCard = ({ challenge }: { challenge: ChallengeDoc }) => {
               aria-valuemin={0}
               aria-valuemax={duration}></div>
           </div>
-          <p className="text-sm text-neutral-400 mb-2">{text}</p>
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-neutral-400 mb-2">{details}</p>
+          <p className="text-xs text-text-muted">
             Started: {new Date(challenge.startDate).toLocaleDateString()}
           </p>
         </div>
         <button
           className={`mt-4 ${theme.button} text-white font-bold py-2 px-4 rounded-lg transition-colors w-full cursor-pointer`}>
-          View Challenge
+          {getButtonText()}
         </button>
       </div>
     </Link>

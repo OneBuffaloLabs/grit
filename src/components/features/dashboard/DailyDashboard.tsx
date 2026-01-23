@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
-import type { ChallengeDoc } from '@/types';
+import type { ChallengeDoc, ChallengeRules } from '@/types';
 import GritTimeline from '@/components/features/dashboard/GritTimeline';
 import PhotoGallery from '@/components/ui/PhotoGallery';
 import Journal from '@/components/features/dashboard/Journal';
@@ -127,14 +127,79 @@ const DailyDashboard = ({ onFinishChallenge }: DailyDashboardProps) => {
     }
   };
 
-  const taskItems = [
-    { id: 'diet', label: 'Follow a Diet' },
-    { id: 'workout1', label: '45-Minute Workout' },
-    { id: 'workout2', label: '45-Minute Workout (outdoors)' },
-    { id: 'water', label: 'Drink 1 Gallon of Water' },
-    { id: 'reading', label: 'Read 10 Pages of Non-Fiction' },
-    { id: 'progressPhoto', label: 'Take a Progress Picture' },
-  ];
+  // Helper to generate dynamic task labels
+  const getTaskLabel = (id: string, rules?: ChallengeRules) => {
+    if (!rules) return '';
+    switch (id) {
+      case 'diet':
+        if (rules.dietRule === 'strict') return 'Diet: Strict (No Cheats)';
+        if (rules.dietRule === 'one_cheat_week') return 'Diet: Stick to plan';
+        if (rules.dietRule === 'cut_vice') return 'Diet: Avoid your Vice';
+        return 'Follow Diet';
+      case 'workout1':
+        return `${rules.workoutDurations[0] || 45}-Minute Workout`;
+      case 'workout2':
+        return rules.workouts > 1
+          ? `${rules.workoutDurations[1] || 45}-Minute Workout ${rules.outdoorWorkout ? '(Outdoors)' : ''}`
+          : 'Secondary Workout';
+      case 'water':
+        return `Drink ${rules.water}oz of Water`;
+      case 'reading':
+        if (rules.readingType === 'book_or_audio') {
+          return `Read ${rules.reading} pages or Listen ${rules.reading * 2} mins`;
+        }
+        const typeLabel = rules.readingType === 'any_book' ? 'Any Book' : 'Non-Fiction';
+        return `Read ${rules.reading} Pages (${typeLabel})`;
+      case 'progressPhoto':
+        if (rules.photoRule === 'first_last') {
+          return 'Photo (Only if Day 1 or Last Day)';
+        }
+        return rules.photoRule === 'daily'
+          ? 'Take Daily Progress Photo'
+          : rules.photoRule === 'weekly'
+            ? 'Weekly Photo (If due today)'
+            : 'Progress Photo';
+      default:
+        return '';
+    }
+  };
+
+  // Filter tasks based on rules (e.g., if workouts < 2, don't show workout2)
+  const taskItems = useMemo(() => {
+    if (!challenge) return [];
+    const items = [
+      { id: 'diet', label: getTaskLabel('diet', challenge.rules) },
+      { id: 'workout1', label: getTaskLabel('workout1', challenge.rules) },
+      { id: 'water', label: getTaskLabel('water', challenge.rules) },
+      { id: 'reading', label: getTaskLabel('reading', challenge.rules) },
+    ];
+
+    if (challenge.rules.workouts >= 2) {
+      items.splice(2, 0, {
+        id: 'workout2',
+        label: getTaskLabel('workout2', challenge.rules),
+      });
+    }
+
+    if (challenge.rules.photoRule !== 'none') {
+      // Logic for first/last day photo visibility
+      const isFirstDay = selectedDay === 1;
+      const isLastDay = selectedDay === challenge.duration;
+      const showPhotoTask =
+        challenge.rules.photoRule === 'daily' ||
+        challenge.rules.photoRule === 'weekly' || // We show it, user decides if it's "due" (simplification)
+        (challenge.rules.photoRule === 'first_last' && (isFirstDay || isLastDay));
+
+      if (showPhotoTask) {
+        items.push({
+          id: 'progressPhoto',
+          label: getTaskLabel('progressPhoto', challenge.rules),
+        });
+      }
+    }
+
+    return items;
+  }, [challenge, selectedDay]);
 
   return (
     <section className="bg-surface py-12 px-4 sm:px-6 lg:px-8">
@@ -155,6 +220,7 @@ const DailyDashboard = ({ onFinishChallenge }: DailyDashboardProps) => {
             <h1 className="text-5xl font-bold font-orbitron text-primary">Day {selectedDay}</h1>
             <p className="text-3xl text-text-muted font-orbitron ml-2">/ {challenge?.duration}</p>
           </div>
+          <p className="text-xl text-primary mt-2 font-bold">{challenge?.name}</p>
           <ChallengeDetails />
         </header>
 

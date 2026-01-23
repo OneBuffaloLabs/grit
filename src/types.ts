@@ -2,6 +2,11 @@ import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 export type ChallengeType = 'hard' | 'soft' | 'balanced' | 'custom';
 
+export type ReadingRuleType = 'non_fiction' | 'any_book' | 'book_or_audio';
+export type DietRuleType = 'strict' | 'one_cheat_week' | 'cut_vice';
+export type AlcoholRuleType = 'none' | 'one_cheat_week' | 'no_limit';
+export type PhotoRuleType = 'daily' | 'weekly' | 'first_last' | 'none';
+
 export interface ChallengeRules {
   workouts: number;
   workoutDuration: number;
@@ -9,15 +14,17 @@ export interface ChallengeRules {
   outdoorWorkout: boolean;
   water: number;
   reading: number;
-  noCheatMeals: boolean;
-  noAlcohol: boolean;
-  progressPhoto: boolean;
+  readingType: ReadingRuleType;
+  dietRule: DietRuleType;
+  alcoholRule: AlcoholRuleType;
+  photoRule: PhotoRuleType;
 }
 
 export interface ChallengeDoc {
   _id: string;
   _rev?: string;
   docType: 'challenge';
+  name: string;
   startDate: string;
   status: 'active' | 'failed' | 'completed';
   type: ChallengeType;

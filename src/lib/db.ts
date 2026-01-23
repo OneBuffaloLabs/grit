@@ -35,6 +35,7 @@ const getDb = async () => {
  * Replaces the old "startNewChallenge".
  */
 export const createChallenge = async (
+  name: string,
   type: ChallengeType,
   rules: ChallengeRules,
   duration: number = 75
@@ -45,11 +46,12 @@ export const createChallenge = async (
   const newChallenge: ChallengeDoc = {
     _id: uuidv4(),
     docType: 'challenge',
+    name,
     startDate: new Date().toISOString(),
     status: 'active',
     type,
     duration,
-    rules, // Saves the specific rules
+    rules,
     days: {},
   };
 
