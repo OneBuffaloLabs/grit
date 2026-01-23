@@ -1,27 +1,25 @@
 'use client';
 
 import React, { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import SettingsModal from '@/components/ui/SettingsModal';
-import Notification from '@/components/ui/Notification';
-import type { NotificationProps } from '@/components/ui/Notification';
 import CompletionModal from '@/components/ui/CompletionModal';
 import ChallengeStatusBanner from '@/components/ui/ChallengeStatusBanner';
 
 const ChallengeDetailContent = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get('id');
 
   const { challenge, isLoading } = useChallengeState();
   const dispatch = useChallengeDispatch();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
-  const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
 
   useEffect(() => {
     const fetchChallenge = async () => {
@@ -44,31 +42,49 @@ const ChallengeDetailContent = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-2xl font-orbitron">Loading Challenge...</p>
+      <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <p className="text-2xl font-orbitron animate-pulse">Loading Challenge...</p>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (!challenge) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-2xl font-orbitron">Challenge not found or ID is missing.</p>
+      <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
+        <Header />
+        <main className="flex-grow flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-[var(--color-surface)] p-8 rounded-2xl shadow-xl max-w-md w-full border border-[var(--color-background)]">
+            <FontAwesomeIcon
+              icon={faExclamationCircle}
+              className="text-4xl text-[var(--color-text-muted)] mb-4"
+            />
+            <h2 className="text-2xl font-bold font-orbitron mb-2">Challenge Not Found</h2>
+            <p className="text-[var(--color-text-muted)] mb-6">
+              We couldn't locate the challenge you are looking for. It may have been deleted or the
+              ID is incorrect.
+            </p>
+            <button
+              onClick={() => router.push('/app/')}
+              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold py-3 px-6 cursor-pointer rounded-lg transition-colors w-full flex items-center justify-center gap-2">
+              <FontAwesomeIcon icon={faHome} />
+              Return to Dashboard
+            </button>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {notification && (
-        <Notification
-          type={notification.type}
-          title={notification.title}
-          message={notification.message}
-          onClose={() => setNotification(null)}
-        />
-      )}
-      <Header onSettingsClick={() => setIsSettingsOpen(true)} />
+    <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
+      {/* Header now manages Settings internally */}
+      <Header />
+
       <main className="flex-grow">
         {challenge.status === 'completed' && (
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
@@ -80,14 +96,12 @@ const ChallengeDetailContent = () => {
             </button>
           </div>
         )}
+
         <DailyDashboard onFinishChallenge={() => setIsCompletionModalOpen(true)} />
       </main>
+
       <Footer />
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        showNotification={setNotification}
-      />
+
       <CompletionModal
         isOpen={isCompletionModalOpen}
         onClose={() => setIsCompletionModalOpen(false)}
