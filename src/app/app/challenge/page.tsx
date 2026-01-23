@@ -64,8 +64,8 @@ const ChallengeDetailContent = () => {
             />
             <h2 className="text-2xl font-bold font-orbitron mb-2">Challenge Not Found</h2>
             <p className="text-[var(--color-text-muted)] mb-6">
-              We couldn't locate the challenge you are looking for. It may have been deleted or the
-              ID is incorrect.
+              We couldn&apos;t locate the challenge you are looking for. It may have been deleted or
+              the ID is incorrect.
             </p>
             <button
               onClick={() => router.push('/app/')}

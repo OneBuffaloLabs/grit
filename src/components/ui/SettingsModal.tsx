@@ -13,7 +13,7 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { version } from '../../../package.json';
+import packageJson from '../../../package.json';
 import FailModal from './FailModal';
 import type { NotificationProps } from './Notification';
 import { ChallengeDoc } from '@/types';
@@ -22,7 +22,7 @@ interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   showNotification: (notification: Omit<NotificationProps, 'onClose'>) => void;
-  challengeOverride?: ChallengeDoc | null; // Typed correctly
+  challengeOverride?: ChallengeDoc | null;
 }
 
 const SettingsModal = ({
@@ -51,15 +51,11 @@ const SettingsModal = ({
       const urlId = searchParams.get('id');
 
       if (urlId) {
-        // Priority 1: If ID is in URL, fetch that specific challenge
         const doc = await getChallengeById(urlId);
         setActiveChallenge(doc);
       } else if (challengeOverride !== undefined) {
-        // Priority 2: Explicit override passed from parent (even if null)
-        // Check for undefined to allow null to act as "No Challenge"
         setActiveChallenge(challengeOverride);
       } else {
-        // Priority 3: Fallback to global context (active challenge)
         setActiveChallenge(contextChallenge);
       }
     };
@@ -69,7 +65,7 @@ const SettingsModal = ({
     }
   }, [isOpen, searchParams, challengeOverride, contextChallenge]);
 
-  // 2. Initialize Form Data when activeChallenge loads
+  // 2. Initialize Form Data
   useEffect(() => {
     if (activeChallenge?.startDate) {
       const date = new Date(activeChallenge.startDate);
@@ -103,11 +99,9 @@ const SettingsModal = ({
       const updatedChallenge = { ...activeChallenge, startDate: newStartDate.toISOString() };
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
-        // If we updated the context challenge, update global state
         if (contextChallenge?._id === activeChallenge._id) {
           dispatch({ type: 'SET_CHALLENGE', payload: newRev });
         } else {
-          // Otherwise just update local state to reflect changes
           setActiveChallenge(newRev);
         }
 
@@ -180,7 +174,6 @@ const SettingsModal = ({
         <div
           className="relative bg-[var(--color-secondary)] p-6 rounded-lg max-w-sm w-full flex flex-col gap-4"
           onClick={(e) => e.stopPropagation()}>
-          {/* Header */}
           <header className="flex justify-between items-center">
             <h3 className="text-2xl font-bold font-orbitron">
               {hasChallenge ? 'Settings' : 'Global Settings'}
@@ -193,7 +186,6 @@ const SettingsModal = ({
             </button>
           </header>
 
-          {/* GitHub Link */}
           <a
             href="https://github.com/OneBuffaloLabs/grit"
             target="_blank"
@@ -209,10 +201,9 @@ const SettingsModal = ({
           </a>
 
           <div className="text-center text-sm text-[var(--color-text-muted)]">
-            App Version: {version}
+            App Version: {packageJson.version}
           </div>
 
-          {/* CHALLENGE SPECIFIC SETTINGS */}
           {hasChallenge && (
             <>
               <div className={isReadOnly ? 'opacity-50' : ''}>

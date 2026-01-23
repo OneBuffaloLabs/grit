@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react'; // Added Suspense
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -83,13 +83,14 @@ const Header = () => {
         </nav>
       </header>
 
-      {/* Embedded Modal - Context Aware */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        challengeOverride={settingsChallengeContext} // FIXED PROP NAME
-        showNotification={showNotification} // ADDED MISSING PROP
-      />
+      <Suspense fallback={null}>
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          challengeOverride={settingsChallengeContext}
+          showNotification={showNotification}
+        />
+      </Suspense>
 
       {/* Notification Toast */}
       {notification && (
