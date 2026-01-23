@@ -25,9 +25,9 @@ const HabitsSection = ({
   onRuleChange,
   preventNonNumericInput,
 }: HabitsSectionProps) => {
-  // Calculations
-  const waterLiters = Math.round(rules.water * 0.0295735);
-  const waterGallons = Math.round(rules.water / 128);
+  // Calculations: Updated to allow up to 2 decimals (removing trailing zeros via Number())
+  const waterLiters = Number((rules.water * 0.0295735).toFixed(2));
+  const waterGallons = Number((rules.water / 128).toFixed(2));
 
   return (
     <div className="space-y-6">

@@ -44,6 +44,22 @@ export const CHANGELOG_DATA: YearLog[] = [
     entries: [
       {
         date: 'Jan 23',
+        title: 'Your Rules, Your Journey',
+        version: 'v1.7.0',
+        type: 'update',
+        description:
+          "We've reimagined the setup process to give you more flexibility. Whether you're following a classic program or building your own, Grit now adapts to how you want to grow.",
+        details: [
+          'Streamlined the setup experience by breaking it into simple, bite-sized steps: General Goals, Physical Training, and Daily Habits.',
+          'Introduced easy-to-use "Segmented Toggles" for reading, diet, and habits, making it faster to lock in your daily protocol.',
+          'Added smarter rules for 75 Soft, including the "10 pages or 20 minutes of audio" hybrid rule and the ability to set photos for just the first and last days.',
+          'Improved input safety to ensure your goals are always whole numbers—no more accidental decimals or typos in your targets.',
+          'Made the water tracker dynamic: it now automatically shows you how your Ounces convert to Liters and Gallons while you type.',
+          'Enhanced the Daily Dashboard to speak your language, showing task labels that match your specific choices and program level.',
+        ],
+      },
+      {
+        date: 'Jan 20',
         title: 'Unified Dashboard & Global Control',
         version: 'v1.6.0',
         type: 'feature',
