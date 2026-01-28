@@ -11,6 +11,7 @@ const Footer = () => {
   const [year, setYear] = useState<number>(new Date().getFullYear());
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setYear(new Date().getFullYear());
   }, []);
 

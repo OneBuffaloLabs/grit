@@ -144,13 +144,14 @@ const DailyDashboard = ({ onFinishChallenge }: DailyDashboardProps) => {
           : 'Secondary Workout';
       case 'water':
         return `Drink ${rules.water}oz of Water`;
-      case 'reading':
+      case 'reading': {
         if (rules.readingType === 'book_or_audio') {
           return `Read ${rules.reading} pages or Listen ${rules.reading * 2} mins`;
         }
         const typeLabel = rules.readingType === 'any_book' ? 'Any Book' : 'Non-Fiction';
         return `Read ${rules.reading} Pages (${typeLabel})`;
-      case 'progressPhoto':
+      }
+      case 'progressPhoto': {
         if (rules.photoRule === 'first_last') {
           return 'Photo (Only if Day 1 or Last Day)';
         }
@@ -159,6 +160,7 @@ const DailyDashboard = ({ onFinishChallenge }: DailyDashboardProps) => {
           : rules.photoRule === 'weekly'
             ? 'Weekly Photo (If due today)'
             : 'Progress Photo';
+      }
       default:
         return '';
     }
