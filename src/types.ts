@@ -23,6 +23,17 @@ export interface ChallengeRules {
   useDailyJournal: boolean;
 }
 
+export interface DailyMeasurements {
+  neck?: number;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  thighs?: number;
+  calves?: number;
+  biceps?: number;
+  forearms?: number;
+}
+
 export interface ChallengeDoc {
   _id: string;
   _rev?: string;
@@ -40,6 +51,7 @@ export interface ChallengeDoc {
       photoAttached: boolean;
       journal?: string;
       weight?: number;
+      measurements?: DailyMeasurements;
       tasks: {
         diet: boolean;
         workout1: boolean;

@@ -43,6 +43,21 @@ export const CHANGELOG_DATA: YearLog[] = [
     year: '2026',
     entries: [
       {
+        date: 'Feb 04',
+        title: 'Grit 2.0: The Customization Update',
+        version: 'v2.0.0',
+        type: 'feature',
+        description:
+          "This major release puts you in the driver's seat. We've completely overhauled the Challenge Dashboard and introduced deep customization options, allowing you to toggle specific tracking features to match your exact goals.",
+        details: [
+          'Redesigned the Challenge Dashboard with a dynamic layout that adapts to your enabled features (Sidebar vs. Focused View).',
+          'Added modular tracking toggles: You can now enable or disable Weight Tracking, Body Measurements, and the Daily Journal for any challenge type.',
+          'Introduced comprehensive Body Measurement tracking for key metrics like chest, waist, hips, biceps, and more.',
+          'Unlocked Challenge Naming for all presets, plus auto-appended dates (e.g., "75 Hard - 02/26") to keep your history organized.',
+          'Refined the setup wizard to clearly indicate which rules are locked presets and which tracking options remain flexible.',
+        ],
+      },
+      {
         date: 'Jan 23',
         title: 'Your Rules, Your Journey',
         version: 'v1.7.0',
