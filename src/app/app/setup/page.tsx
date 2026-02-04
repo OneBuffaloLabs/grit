@@ -63,11 +63,13 @@ const SetupPage = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRuleChange = (field: keyof ChallengeRules, value: any) => {
+    // Whitelist fields that can be edited even on Presets (Soft, Hard, etc.)
     const alwaysEditableFields: (keyof ChallengeRules)[] = [
       'trackWeight',
       'trackMeasurements',
       'useDailyJournal',
       'outdoorWorkout',
+      'vice',
     ];
 
     if (!isCustom && !alwaysEditableFields.includes(field)) return;

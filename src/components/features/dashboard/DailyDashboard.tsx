@@ -59,14 +59,14 @@ const DailyDashboard = ({
       case 'diet':
         if (rules.dietRule === 'strict') return 'Diet: Strict (No Cheats)';
         if (rules.dietRule === 'one_cheat_week') return 'Diet: Stick to plan';
-        if (rules.dietRule === 'cut_vice') return 'Diet: Avoid your Vice';
+        if (rules.dietRule === 'cut_vice') {
+          // Use the custom vice if available
+          return rules.vice ? `Diet: No ${rules.vice}` : 'Diet: Avoid your Vice';
+        }
         return 'Follow Diet';
       case 'workout1':
         return `${rules.workoutDurations[0] || 45}-Minute Workout`;
       case 'workout2':
-        // If there are 2 workouts, usually one is outdoors.
-        // If there are 3, it depends on user preference, but we label generically or note outdoors.
-        // For simplicity, we attach (Outdoors) to the second one if the rule exists, as per typical 75 Hard.
         return rules.workouts >= 2
           ? `${rules.workoutDurations[1] || 45}-Minute Workout ${rules.outdoorWorkout ? '(Outdoors)' : ''}`
           : 'Secondary Workout';

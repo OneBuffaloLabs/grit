@@ -30,7 +30,7 @@ export const SegmentedControl = <T extends string>({
         <button
           key={opt.id}
           onClick={() => onChange(opt.id)}
-          className={`flex-1 py-1 text-xs font-bold rounded transition-all ${
+          className={`cursor-pointer flex-1 py-1 text-xs font-bold rounded transition-all ${
             value === opt.id
               ? `${theme.badge} shadow-sm`
               : 'text-[var(--color-text-muted)] hover:text-white'

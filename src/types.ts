@@ -16,6 +16,7 @@ export interface ChallengeRules {
   reading: number;
   readingType: ReadingRuleType;
   dietRule: DietRuleType;
+  vice?: string;
   alcoholRule: AlcoholRuleType;
   photoRule: PhotoRuleType;
   trackWeight: boolean;

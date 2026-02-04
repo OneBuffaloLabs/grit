@@ -49,6 +49,14 @@ const PHOTO_LABELS: Record<PhotoRuleType, string> = {
 export const ProtocolRulebook = ({ rules }: ProtocolRulebookProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Helper to check for custom vice and format display
+  const getDietDisplay = () => {
+    if (rules.dietRule === 'cut_vice' && rules.vice) {
+      return `No ${rules.vice}`; // Displays "No Soda", "No Candy", etc.
+    }
+    return DIET_LABELS[rules.dietRule] || rules.dietRule;
+  };
+
   return (
     <div className="mt-2 border border-gray-700 rounded-lg w-full">
       <button
@@ -118,8 +126,8 @@ export const ProtocolRulebook = ({ rules }: ProtocolRulebookProps) => {
               </div>
 
               <span>Diet Rule</span>
-              <span className="text-right font-bold text-[var(--color-foreground)]">
-                {DIET_LABELS[rules.dietRule] || rules.dietRule}
+              <span className="text-right font-bold text-[var(--color-foreground)] capitalize">
+                {getDietDisplay()}
               </span>
 
               <span>Alcohol</span>

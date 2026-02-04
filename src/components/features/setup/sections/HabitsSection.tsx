@@ -7,12 +7,14 @@ import {
   PhotoRuleType,
 } from '@/types';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBan } from '@fortawesome/free-solid-svg-icons';
 
 interface HabitsSectionProps {
   rules: ChallengeRules;
   isCustom: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  theme: any; // Theme config
+  theme: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRuleChange: (field: keyof ChallengeRules, value: any) => void;
   preventNonNumericInput: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -25,7 +27,6 @@ const HabitsSection = ({
   onRuleChange,
   preventNonNumericInput,
 }: HabitsSectionProps) => {
-  // Calculations: Updated to allow up to 2 decimals (removing trailing zeros via Number())
   const waterLiters = Number((rules.water * 0.0295735).toFixed(2));
   const waterGallons = Number((rules.water / 128).toFixed(2));
 
@@ -94,19 +95,47 @@ const HabitsSection = ({
         </p>
       </div>
 
-      {/* Diet */}
-      <div className={!isCustom ? 'opacity-70 pointer-events-none' : ''}>
+      {/* Diet - STRUCTURE UPDATED for Vice Interaction */}
+      <div>
         <label className="block text-sm font-bold mb-2">Diet</label>
-        <SegmentedControl<DietRuleType>
-          options={[
-            { id: 'cut_vice', label: 'Cut 1 Vice' },
-            { id: 'one_cheat_week', label: '1 Cheat/Wk' },
-            { id: 'strict', label: 'Strict' },
-          ]}
-          value={rules.dietRule}
-          onChange={(val) => onRuleChange('dietRule', val)}
-          theme={theme}
-        />
+
+        {/* Only the Selector is disabled on non-custom */}
+        <div className={!isCustom ? 'opacity-70 pointer-events-none' : ''}>
+          <SegmentedControl<DietRuleType>
+            options={[
+              { id: 'cut_vice', label: 'Cut 1 Vice' },
+              { id: 'one_cheat_week', label: '1 Cheat/Wk' },
+              { id: 'strict', label: 'Strict' },
+            ]}
+            value={rules.dietRule}
+            onChange={(val) => onRuleChange('dietRule', val)}
+            theme={theme}
+          />
+        </div>
+
+        {/* Vice Input - Conditionally Rendered & Always Interactive if visible */}
+        {rules.dietRule === 'cut_vice' && (
+          <div className="mt-3 animate-fadeIn">
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase mb-1 block">
+              Name your Vice
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">
+                <FontAwesomeIcon icon={faBan} />
+              </span>
+              <input
+                type="text"
+                placeholder="e.g. Soda, Candy, Social Media"
+                value={rules.vice || ''}
+                onChange={(e) => onRuleChange('vice', e.target.value)}
+                className={`w-full pl-9 pr-3 py-2 bg-[var(--color-background)] border border-[var(--color-surface)] rounded focus:border-current outline-none text-sm ${theme.color} ${theme.border.replace('border-', 'focus:border-')}`}
+              />
+            </div>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1 ml-1">
+              Be specific. This will appear on your daily checklist.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Alcohol */}
