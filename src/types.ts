@@ -56,6 +56,7 @@ export interface ChallengeDoc {
         diet: boolean;
         workout1: boolean;
         workout2: boolean;
+        workout3?: boolean;
         water: boolean;
         reading: boolean;
         progressPhoto: boolean;

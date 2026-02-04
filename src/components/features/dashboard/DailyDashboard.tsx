@@ -4,7 +4,6 @@ import React, { useState, useMemo } from 'react';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc, ChallengeRules } from '@/types';
-import GritTimeline from '@/components/features/dashboard/GritTimeline';
 import Notification from '@/components/ui/Notification';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
@@ -13,6 +12,7 @@ const initialTaskState = {
   diet: false,
   workout1: false,
   workout2: false,
+  workout3: false, // Added initial state for workout3
   water: false,
   reading: false,
   progressPhoto: false,
@@ -28,6 +28,7 @@ interface DailyDashboardProps {
 const DailyDashboard = ({
   onFinishChallenge,
   selectedDay,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onDaySelect,
   isReadOnly = false,
 }: DailyDashboardProps) => {
@@ -40,23 +41,120 @@ const DailyDashboard = ({
   // Derive tasks directly from props/context
   const tasks = useMemo(() => {
     if (challenge && challenge.days[selectedDay]) {
-      return challenge.days[selectedDay].tasks || initialTaskState;
+      return { ...initialTaskState, ...challenge.days[selectedDay].tasks };
     }
     return initialTaskState;
   }, [challenge, selectedDay]);
 
   const isDayComplete = challenge?.days[selectedDay]?.completed || false;
-  // Day 1 is always unlocked. Otherwise check if prev day is complete.
   const isPreviousDayComplete =
     selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
-
-  const allTasksCompleted = useMemo(() => Object.values(tasks).every(Boolean), [tasks]);
   const isLastDay = selectedDay === challenge?.duration;
+
+  // --- Helpers ---
+
+  const getTaskLabel = (id: string, rules?: ChallengeRules) => {
+    if (!rules) return '';
+    switch (id) {
+      case 'diet':
+        if (rules.dietRule === 'strict') return 'Diet: Strict (No Cheats)';
+        if (rules.dietRule === 'one_cheat_week') return 'Diet: Stick to plan';
+        if (rules.dietRule === 'cut_vice') return 'Diet: Avoid your Vice';
+        return 'Follow Diet';
+      case 'workout1':
+        return `${rules.workoutDurations[0] || 45}-Minute Workout`;
+      case 'workout2':
+        // If there are 2 workouts, usually one is outdoors.
+        // If there are 3, it depends on user preference, but we label generically or note outdoors.
+        // For simplicity, we attach (Outdoors) to the second one if the rule exists, as per typical 75 Hard.
+        return rules.workouts >= 2
+          ? `${rules.workoutDurations[1] || 45}-Minute Workout ${rules.outdoorWorkout ? '(Outdoors)' : ''}`
+          : 'Secondary Workout';
+      case 'workout3':
+        return `${rules.workoutDurations[2] || 30}-Minute Workout`;
+      case 'water':
+        return `Drink ${rules.water}oz of Water`;
+      case 'reading': {
+        if (rules.readingType === 'book_or_audio') {
+          return `Read ${rules.reading} pages or Listen ${rules.reading * 2} mins`;
+        }
+        const typeLabel = rules.readingType === 'any_book' ? 'Any Book' : 'Non-Fiction';
+        return `Read ${rules.reading} Pages (${typeLabel})`;
+      }
+      case 'progressPhoto':
+        return 'Take Progress Photo';
+      default:
+        return '';
+    }
+  };
+
+  // --- Visible Tasks Calculation ---
+  const taskItems = useMemo(() => {
+    if (!challenge) return [];
+    const items = [
+      { id: 'diet', label: getTaskLabel('diet', challenge.rules) },
+      { id: 'workout1', label: getTaskLabel('workout1', challenge.rules) },
+      { id: 'water', label: getTaskLabel('water', challenge.rules) },
+      { id: 'reading', label: getTaskLabel('reading', challenge.rules) },
+    ];
+
+    // Add Workout 2
+    if (challenge.rules.workouts >= 2) {
+      items.splice(2, 0, {
+        id: 'workout2',
+        label: getTaskLabel('workout2', challenge.rules),
+      });
+    }
+
+    // Add Workout 3
+    if (challenge.rules.workouts >= 3) {
+      items.splice(3, 0, {
+        id: 'workout3',
+        label: getTaskLabel('workout3', challenge.rules),
+      });
+    }
+
+    if (challenge.rules.photoRule !== 'none') {
+      let showPhotoTask = false;
+      const isFirstDay = selectedDay === 1;
+      const isLastDay = selectedDay === challenge.duration;
+
+      switch (challenge.rules.photoRule) {
+        case 'daily':
+          showPhotoTask = true;
+          break;
+        case 'first_last':
+          showPhotoTask = isFirstDay || isLastDay;
+          break;
+        case 'weekly':
+          showPhotoTask = (selectedDay - 1) % 7 === 0;
+          break;
+        default:
+          showPhotoTask = false;
+      }
+
+      if (showPhotoTask) {
+        items.push({
+          id: 'progressPhoto',
+          label: getTaskLabel('progressPhoto', challenge.rules),
+        });
+      }
+    }
+
+    return items;
+  }, [challenge, selectedDay]);
+
+  // --- Validation Logic ---
+  const allTasksCompleted = useMemo(() => {
+    if (!taskItems || taskItems.length === 0) return false;
+    return taskItems.every((item) => tasks[item.id as keyof typeof tasks]);
+  }, [tasks, taskItems]);
+
+  // --- Handlers ---
 
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
     if (!challenge || isDayComplete || isReadOnly) return;
 
-    // Calculate new state based on derived values
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
 
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
@@ -71,11 +169,9 @@ const DailyDashboard = ({
 
     try {
       const newRev = await updateChallenge(updatedChallenge);
-      // Dispatching here updates the context, which triggers a re-render with new derived tasks
       if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
     } catch (error) {
       console.error('Failed to update task:', error);
-      // No local state to rollback, source of truth remains unchanged on error
     }
   };
 
@@ -120,80 +216,6 @@ const DailyDashboard = ({
     }
   };
 
-  // Helper to generate dynamic task labels
-  const getTaskLabel = (id: string, rules?: ChallengeRules) => {
-    if (!rules) return '';
-    switch (id) {
-      case 'diet':
-        if (rules.dietRule === 'strict') return 'Diet: Strict (No Cheats)';
-        if (rules.dietRule === 'one_cheat_week') return 'Diet: Stick to plan';
-        if (rules.dietRule === 'cut_vice') return 'Diet: Avoid your Vice';
-        return 'Follow Diet';
-      case 'workout1':
-        return `${rules.workoutDurations[0] || 45}-Minute Workout`;
-      case 'workout2':
-        return rules.workouts > 1
-          ? `${rules.workoutDurations[1] || 45}-Minute Workout ${rules.outdoorWorkout ? '(Outdoors)' : ''}`
-          : 'Secondary Workout';
-      case 'water':
-        return `Drink ${rules.water}oz of Water`;
-      case 'reading': {
-        if (rules.readingType === 'book_or_audio') {
-          return `Read ${rules.reading} pages or Listen ${rules.reading * 2} mins`;
-        }
-        const typeLabel = rules.readingType === 'any_book' ? 'Any Book' : 'Non-Fiction';
-        return `Read ${rules.reading} Pages (${typeLabel})`;
-      }
-      case 'progressPhoto': {
-        if (rules.photoRule === 'first_last') {
-          return 'Photo (Only if Day 1 or Last Day)';
-        }
-        return rules.photoRule === 'daily'
-          ? 'Take Daily Progress Photo'
-          : rules.photoRule === 'weekly'
-            ? 'Weekly Photo (If due today)'
-            : 'Progress Photo';
-      }
-      default:
-        return '';
-    }
-  };
-
-  const taskItems = useMemo(() => {
-    if (!challenge) return [];
-    const items = [
-      { id: 'diet', label: getTaskLabel('diet', challenge.rules) },
-      { id: 'workout1', label: getTaskLabel('workout1', challenge.rules) },
-      { id: 'water', label: getTaskLabel('water', challenge.rules) },
-      { id: 'reading', label: getTaskLabel('reading', challenge.rules) },
-    ];
-
-    if (challenge.rules.workouts >= 2) {
-      items.splice(2, 0, {
-        id: 'workout2',
-        label: getTaskLabel('workout2', challenge.rules),
-      });
-    }
-
-    if (challenge.rules.photoRule !== 'none') {
-      const isFirstDay = selectedDay === 1;
-      const isLastDay = selectedDay === challenge.duration;
-      const showPhotoTask =
-        challenge.rules.photoRule === 'daily' ||
-        challenge.rules.photoRule === 'weekly' ||
-        (challenge.rules.photoRule === 'first_last' && (isFirstDay || isLastDay));
-
-      if (showPhotoTask) {
-        items.push({
-          id: 'progressPhoto',
-          label: getTaskLabel('progressPhoto', challenge.rules),
-        });
-      }
-    }
-
-    return items;
-  }, [challenge, selectedDay]);
-
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl shadow-lg border border-[var(--color-surface-border)] overflow-hidden">
       {showCompletionAlert && dayCompletedToShowInAlert !== null && (
@@ -207,11 +229,6 @@ const DailyDashboard = ({
           }}
         />
       )}
-
-      {/* Timeline Section */}
-      <div className="p-4 border-b border-[var(--color-background)] bg-[var(--color-background)]/30">
-        <GritTimeline selectedDay={selectedDay} onDaySelect={onDaySelect} />
-      </div>
 
       <div className="p-6 sm:p-8">
         <h2 className="text-2xl font-bold font-orbitron mb-6 flex items-center gap-2">

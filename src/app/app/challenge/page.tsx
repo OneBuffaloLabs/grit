@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link'; // Added Link
+import Link from 'next/link';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,16 +11,15 @@ import {
   faExclamationCircle,
   faCalendarAlt,
   faTrophy,
-  faArrowLeft, // Added faArrowLeft
+  faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
-// Feature Components
 import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
 import WeightTracker from '@/components/features/dashboard/WeightTracker';
 import Journal from '@/components/features/dashboard/Journal';
 import PhotoGallery from '@/components/ui/PhotoGallery';
+import GritTimeline from '@/components/features/dashboard/GritTimeline';
 
-// Layout & UI
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CompletionModal from '@/components/ui/CompletionModal';
@@ -36,25 +35,46 @@ const ChallengeDetailContent = () => {
 
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [isFetchingId, setIsFetchingId] = useState(false); // Local loading state for ID fetch
 
   // --- Data Fetching ---
   useEffect(() => {
+    let isMounted = true;
+
     const fetchChallenge = async () => {
       if (!id) {
         dispatch({ type: 'SET_CHALLENGE', payload: null });
         return;
       }
-      dispatch({ type: 'START_LOADING' });
+
+      // If we already have the correct challenge loaded, don't re-fetch
+      if (challenge && challenge._id === id) {
+        return;
+      }
+
+      setIsFetchingId(true);
+      // dispatch({ type: 'START_LOADING' }); // Don't trigger global loading if we can help it, prevents flash
+
       try {
         const fetchedChallenge = await getChallengeById(id);
-        dispatch({ type: 'SET_CHALLENGE', payload: fetchedChallenge });
+        if (isMounted) {
+          dispatch({ type: 'SET_CHALLENGE', payload: fetchedChallenge });
+        }
       } catch (error) {
         console.error('Failed to fetch challenge data:', error);
-        dispatch({ type: 'STOP_LOADING' });
+      } finally {
+        if (isMounted) setIsFetchingId(false);
       }
     };
+
     fetchChallenge();
-  }, [id, dispatch]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, challenge, dispatch]);
+  // Dependency on 'challenge' ensures that if Context overwrites us with 'Active' challenge,
+  // we re-fire and fetch the correct ID again.
 
   // --- Calculate Active Day ---
   const nextDayToShow = useMemo(() => {
@@ -69,13 +89,16 @@ const ChallengeDetailContent = () => {
     return Math.min(highestCompletedDay + 1, challenge.duration);
   }, [challenge]);
 
-  // Set initial selected day when challenge loads
   useEffect(() => {
     setSelectedDay(nextDayToShow);
   }, [nextDayToShow]);
 
   // --- Loading / Error States ---
-  if (isLoading) {
+  // We show loading if global is loading OR if we are specifically fetching the ID
+  // AND we don't currently have the *correct* challenge displayed.
+  const isWrongChallenge = challenge && id && challenge._id !== id;
+
+  if (isLoading || isFetchingId || isWrongChallenge) {
     return (
       <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
         <Header />
@@ -127,10 +150,8 @@ const ChallengeDetailContent = () => {
       <Header />
 
       <main className="flex-grow pb-12">
-        {/* Header Banner */}
         <div className="bg-[var(--color-surface)] border-b border-[var(--color-background)] mb-8">
           <div className="container mx-auto px-4 py-8 max-w-7xl">
-            {/* Back Navigation - Added Here */}
             <div className="mb-6">
               <Link
                 href="/app"
@@ -168,14 +189,16 @@ const ChallengeDetailContent = () => {
                 </div>
               )}
             </div>
+
+            <div className="mt-8 pt-6 border-t border-[var(--color-background)]">
+              <GritTimeline selectedDay={selectedDay} onDaySelect={setSelectedDay} />
+            </div>
           </div>
         </div>
 
-        {/* Content Grid */}
         <div className="container mx-auto px-4 max-w-7xl">
           <div
             className={`grid grid-cols-1 ${hasSidebarFeatures ? 'lg:grid-cols-3' : 'lg:grid-cols-1 lg:max-w-4xl lg:mx-auto'} gap-8`}>
-            {/* Primary Column */}
             <div className="lg:col-span-2 space-y-8">
               <DailyDashboard
                 selectedDay={selectedDay}
@@ -191,7 +214,6 @@ const ChallengeDetailContent = () => {
               </div>
             </div>
 
-            {/* Sidebar Column */}
             {hasSidebarFeatures && (
               <div className="space-y-6">
                 {(showWeight || showMeasurements) && (
@@ -202,7 +224,6 @@ const ChallengeDetailContent = () => {
 
                 {showJournal && (
                   <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-surface-border)] shadow-sm">
-                    {/* Journal header is internal */}
                     <Journal currentDay={selectedDay} isReadOnly={isReadOnly} />
                   </div>
                 )}
