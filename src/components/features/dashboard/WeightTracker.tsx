@@ -73,14 +73,18 @@ const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) =
 
     // Load Measurements
     const mData = dayData?.measurements || {};
-    const newMState: any = {};
-    const newOriginalMState: any = {};
 
-    MEASUREMENT_KEYS.forEach((key) => {
-      const val = mData[key] != null ? String(mData[key]) : '';
-      newMState[key] = val;
-      newOriginalMState[key] = val;
-    });
+    // Use reduce to create a properly typed object instead of 'any'
+    const newMState = MEASUREMENT_KEYS.reduce(
+      (acc, key) => {
+        acc[key] = mData[key] != null ? String(mData[key]) : '';
+        return acc;
+      },
+      {} as Record<keyof DailyMeasurements, string>
+    );
+
+    // Create a copy for original state tracking
+    const newOriginalMState = { ...newMState };
 
     setMeasurements(newMState);
     setOriginalMeasurements(newOriginalMState);

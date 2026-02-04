@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
 import type { ChallengeDoc, ChallengeRules } from '@/types';
@@ -34,17 +34,15 @@ const DailyDashboard = ({
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
 
-  const [tasks, setTasks] = useState(initialTaskState);
   const [showCompletionAlert, setShowCompletionAlert] = useState(false);
   const [dayCompletedToShowInAlert, setDayCompletedToShowInAlert] = useState<number | null>(null);
 
-  // Sync tasks when day changes
-  useEffect(() => {
+  // Derive tasks directly from props/context
+  const tasks = useMemo(() => {
     if (challenge && challenge.days[selectedDay]) {
-      setTasks(challenge.days[selectedDay].tasks || initialTaskState);
-    } else {
-      setTasks(initialTaskState);
+      return challenge.days[selectedDay].tasks || initialTaskState;
     }
+    return initialTaskState;
   }, [challenge, selectedDay]);
 
   const isDayComplete = challenge?.days[selectedDay]?.completed || false;
@@ -57,8 +55,9 @@ const DailyDashboard = ({
 
   const handleTaskChange = async (taskName: keyof typeof tasks) => {
     if (!challenge || isDayComplete || isReadOnly) return;
+
+    // Calculate new state based on derived values
     const newTasks = { ...tasks, [taskName]: !tasks[taskName] };
-    setTasks(newTasks);
 
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
     if (!updatedChallenge.days[selectedDay]) {
@@ -72,10 +71,11 @@ const DailyDashboard = ({
 
     try {
       const newRev = await updateChallenge(updatedChallenge);
+      // Dispatching here updates the context, which triggers a re-render with new derived tasks
       if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
     } catch (error) {
       console.error('Failed to update task:', error);
-      setTasks(tasks);
+      // No local state to rollback, source of truth remains unchanged on error
     }
   };
 
