@@ -18,6 +18,8 @@ export interface ChallengeRules {
   dietRule: DietRuleType;
   alcoholRule: AlcoholRuleType;
   photoRule: PhotoRuleType;
+  trackWeight: boolean;
+  trackMeasurements: boolean;
 }
 
 export interface ChallengeDoc {

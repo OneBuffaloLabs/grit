@@ -25,9 +25,7 @@ const GeneralSection = ({
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className={`w-full bg-[var(--color-background)] border border-[var(--color-surface)] rounded-lg p-3 font-bold focus:outline-none focus:border-[var(--color-primary)] ${
-            !isCustom ? 'opacity-70 pointer-events-none' : ''
-          }`}
+          className={`w-full bg-[var(--color-background)] border border-[var(--color-surface)] rounded-lg p-3 font-bold focus:outline-none focus:border-[var(--color-primary)]`}
         />
       </div>
       <div>

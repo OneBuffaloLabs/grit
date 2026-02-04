@@ -3,7 +3,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCogs, faArrowRight, faLock, faUnlock } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCogs,
+  faArrowRight,
+  faLock,
+  faUnlock,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -21,11 +27,18 @@ const SetupPage = () => {
   const router = useRouter();
   const { startChallenge } = useChallengeController();
 
+  // Helper for date suffix
+  const getDateSuffix = () => {
+    const now = new Date();
+    return now.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' });
+  };
+
   // State
   const [selectedType, setSelectedType] = useState<ChallengeType>('hard');
   const [rules, setRules] = useState<ChallengeRules>(CHALLENGE_PRESETS.hard);
   const [isCustom, setIsCustom] = useState(false);
-  const [challengeName, setChallengeName] = useState('75 Hard');
+  // Initialize with date suffix
+  const [challengeName, setChallengeName] = useState(`75 Hard - ${getDateSuffix()}`);
   const [duration, setDuration] = useState(75);
 
   const currentTheme = THEME[selectedType];
@@ -37,11 +50,13 @@ const SetupPage = () => {
     setRules(JSON.parse(JSON.stringify(CHALLENGE_PRESETS[type]))); // Deep copy
     setIsCustom(type === 'custom');
 
-    // Default Names
-    if (type === 'hard') setChallengeName('75 Hard');
-    if (type === 'soft') setChallengeName('75 Soft');
-    if (type === 'balanced') setChallengeName('75 Balanced');
-    if (type === 'custom') setChallengeName('My Custom Challenge');
+    const suffix = getDateSuffix();
+
+    // Default Names with Date
+    if (type === 'hard') setChallengeName(`75 Hard - ${suffix}`);
+    if (type === 'soft') setChallengeName(`75 Soft - ${suffix}`);
+    if (type === 'balanced') setChallengeName(`75 Balanced - ${suffix}`);
+    if (type === 'custom') setChallengeName(`My Custom Challenge - ${suffix}`);
   };
 
   const preventNonNumericInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -52,7 +67,14 @@ const SetupPage = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRuleChange = (field: keyof ChallengeRules, value: any) => {
-    if (!isCustom) return;
+    // Allow editing specific fields even if not custom
+    const alwaysEditableFields: (keyof ChallengeRules)[] = [
+      'trackWeight',
+      'trackMeasurements',
+      'outdoorWorkout',
+    ];
+
+    if (!isCustom && !alwaysEditableFields.includes(field)) return;
 
     // Handle numeric fields that come in as strings from inputs
     if (['water', 'reading'].includes(field)) {
@@ -116,12 +138,22 @@ const SetupPage = () => {
           className={`bg-[var(--color-surface)] rounded-2xl border transition-colors duration-300 ${isCustom ? currentTheme.border : 'border-[var(--color-background)]'} overflow-hidden`}>
           {/* Container Header */}
           <div className="bg-[var(--color-background)]/50 p-4 px-8 border-b border-[var(--color-background)] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <FontAwesomeIcon icon={faCogs} className={`text-xl ${currentTheme.color}`} />
-              <h2 className="text-xl font-bold font-orbitron">
-                {selectedType === 'custom' ? 'Configure Rules' : 'Challenge Rules'}
-              </h2>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faCogs} className={`text-xl ${currentTheme.color}`} />
+                <h2 className="text-xl font-bold font-orbitron">
+                  {selectedType === 'custom' ? 'Configure Rules' : 'Challenge Rules'}
+                </h2>
+              </div>
+              {/* Added Note here */}
+              {!isCustom && (
+                <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5 mt-1">
+                  <FontAwesomeIcon icon={faInfoCircle} className="w-3 h-3" />
+                  <span>Tracking, metrics, and name can be customized for any challenge type.</span>
+                </p>
+              )}
             </div>
+
             <div
               className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-2 self-start md:self-auto ${isCustom ? currentTheme.badge : 'bg-[var(--color-background)] text-[var(--color-text-muted)]'}`}>
               <FontAwesomeIcon icon={isCustom ? faUnlock : faLock} />
@@ -147,7 +179,7 @@ const SetupPage = () => {
               theme={currentTheme}
               onWorkoutCountChange={handleWorkoutCountChange}
               onDurationChange={handleDurationChange}
-              onOutdoorToggle={(checked) => handleRuleChange('outdoorWorkout', checked)}
+              onRuleChange={handleRuleChange}
               preventNonNumericInput={preventNonNumericInput}
             />
 

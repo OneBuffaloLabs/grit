@@ -12,6 +12,8 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     dietRule: 'cut_vice',
     alcoholRule: 'no_limit',
     photoRule: 'first_last', // Default to First & Last
+    trackWeight: true,
+    trackMeasurements: false,
   },
   balanced: {
     workouts: 2,
@@ -24,6 +26,8 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     dietRule: 'one_cheat_week',
     alcoholRule: 'one_cheat_week',
     photoRule: 'weekly',
+    trackWeight: true,
+    trackMeasurements: true,
   },
   hard: {
     workouts: 2,
@@ -36,6 +40,8 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     dietRule: 'strict',
     alcoholRule: 'none',
     photoRule: 'daily',
+    trackWeight: true,
+    trackMeasurements: true,
   },
   custom: {
     workouts: 1,
@@ -48,5 +54,7 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     dietRule: 'one_cheat_week',
     alcoholRule: 'one_cheat_week',
     photoRule: 'none',
+    trackWeight: true,
+    trackMeasurements: true,
   },
 };

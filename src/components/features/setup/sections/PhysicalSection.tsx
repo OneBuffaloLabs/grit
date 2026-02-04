@@ -8,7 +8,8 @@ interface PhysicalSectionProps {
   theme: any; // Theme config object
   onWorkoutCountChange: (count: number) => void;
   onDurationChange: (index: number, minutes: number) => void;
-  onOutdoorToggle: (checked: boolean) => void;
+  // Replaced specific toggle with generic handler
+  onRuleChange: (field: keyof ChallengeRules, value: any) => void;
   preventNonNumericInput: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
@@ -18,7 +19,7 @@ const PhysicalSection = ({
   theme,
   onWorkoutCountChange,
   onDurationChange,
-  onOutdoorToggle,
+  onRuleChange,
   preventNonNumericInput,
 }: PhysicalSectionProps) => {
   return (
@@ -56,11 +57,7 @@ const PhysicalSection = ({
           <div
             key={index}
             className={`bg-[var(--color-background)] p-3 rounded-lg border border-[var(--color-surface)] text-sm flex justify-between items-center ${!isCustom ? 'opacity-70 pointer-events-none' : ''}`}>
-            <span>
-              Workout {index + 1}
-              {/* If Balanced, imply Workout 2 is simpler */}
-              {/* Note: logic for label could be passed down, but this is fine for now */}
-            </span>
+            <span>Workout {index + 1}</span>
             <div className="flex items-center gap-2">
               {isCustom ? (
                 <input
@@ -93,13 +90,52 @@ const PhysicalSection = ({
           <input
             type="checkbox"
             checked={rules.outdoorWorkout}
-            onChange={(e) => onOutdoorToggle(e.target.checked)}
+            onChange={(e) => onRuleChange('outdoorWorkout', e.target.checked)}
             className="sr-only peer"
           />
           <div
             className={`w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${theme.toggle}`}></div>
         </div>
       </label>
+
+      {/* Metrics Section - Always Editable */}
+      <div className="pt-4 border-t border-[var(--color-background)] mt-6">
+        <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+          Tracking & Metrics
+        </h4>
+
+        <div className="space-y-2">
+          {/* Weight Tracking */}
+          <label className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors">
+            <span className="text-sm font-bold">Track Weight</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={rules.trackWeight}
+                onChange={(e) => onRuleChange('trackWeight', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div
+                className={`w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${theme.toggle}`}></div>
+            </div>
+          </label>
+
+          {/* Measurements Tracking */}
+          <label className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors">
+            <span className="text-sm font-bold">Track Measurements</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={rules.trackMeasurements}
+                onChange={(e) => onRuleChange('trackMeasurements', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div
+                className={`w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${theme.toggle}`}></div>
+            </div>
+          </label>
+        </div>
+      </div>
     </div>
   );
 };
