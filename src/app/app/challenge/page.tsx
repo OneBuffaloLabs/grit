@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link'; // Added Link
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +11,7 @@ import {
   faExclamationCircle,
   faCalendarAlt,
   faTrophy,
+  faArrowLeft, // Added faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 
 // Feature Components
@@ -55,7 +57,6 @@ const ChallengeDetailContent = () => {
   }, [id, dispatch]);
 
   // --- Calculate Active Day ---
-  // Logic lifted from DailyDashboard
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
     const completedDays = Object.keys(challenge.days)
@@ -129,6 +130,16 @@ const ChallengeDetailContent = () => {
         {/* Header Banner */}
         <div className="bg-[var(--color-surface)] border-b border-[var(--color-background)] mb-8">
           <div className="container mx-auto px-4 py-8 max-w-7xl">
+            {/* Back Navigation - Added Here */}
+            <div className="mb-6">
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors font-bold text-sm">
+                <FontAwesomeIcon icon={faArrowLeft} />
+                <span>Back to Dashboard</span>
+              </Link>
+            </div>
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold font-orbitron text-[var(--color-text)] mb-2">
@@ -150,7 +161,7 @@ const ChallengeDetailContent = () => {
                   {challenge.status === 'completed' && (
                     <button
                       onClick={() => setIsCompletionModalOpen(true)}
-                      className="w-full mt-2 text-sm bg-[var(--color-primary)] text-white font-bold py-2 px-4 rounded">
+                      className="w-full mt-2 text-sm bg-[var(--color-primary)] text-white font-bold py-2 px-4 rounded hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer">
                       View Summary
                     </button>
                   )}
@@ -172,8 +183,7 @@ const ChallengeDetailContent = () => {
                 onFinishChallenge={() => setIsCompletionModalOpen(true)}
                 isReadOnly={isReadOnly}
               />
-              {/* Photo Gallery moved to main column as it is visual/large */}
-              <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-background)] shadow-sm">
+              <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-surface-border)] shadow-sm">
                 <h3 className="text-lg font-bold font-orbitron mb-4 border-b border-[var(--color-background)] pb-2">
                   Photo Gallery
                 </h3>
@@ -185,19 +195,14 @@ const ChallengeDetailContent = () => {
             {hasSidebarFeatures && (
               <div className="space-y-6">
                 {(showWeight || showMeasurements) && (
-                  <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-background)] shadow-sm">
-                    <h3 className="text-lg font-bold font-orbitron mb-4 border-b border-[var(--color-background)] pb-2">
-                      Body Metrics
-                    </h3>
+                  <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-surface-border)] shadow-sm">
                     <WeightTracker currentDay={selectedDay} isReadOnly={isReadOnly} />
                   </div>
                 )}
 
                 {showJournal && (
-                  <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-background)] shadow-sm">
-                    <h3 className="text-lg font-bold font-orbitron mb-4 border-b border-[var(--color-background)] pb-2">
-                      Daily Journal
-                    </h3>
+                  <div className="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-surface-border)] shadow-sm">
+                    {/* Journal header is internal */}
                     <Journal currentDay={selectedDay} isReadOnly={isReadOnly} />
                   </div>
                 )}

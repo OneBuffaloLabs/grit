@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCogs,
@@ -9,6 +10,7 @@ import {
   faLock,
   faUnlock,
   faInfoCircle,
+  faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
 import Header from '@/components/layout/Header';
@@ -114,6 +116,15 @@ const SetupPage = () => {
       <Header />
 
       <main className="flex-grow container mx-auto px-4 py-8 max-w-5xl">
+        <div className="mb-6">
+          <Link
+            href="/app"
+            className="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors font-bold text-sm">
+            <FontAwesomeIcon icon={faArrowLeft} />
+            <span>Back to Dashboard</span>
+          </Link>
+        </div>
+
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold font-orbitron mb-4">Choose Your Path</h1>
           <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
