@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react'; // Added Suspense
+import React, { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -19,12 +19,14 @@ const Header = () => {
   // Route Helpers
   const isHomePage = pathname === '/';
   const isInApp = pathname?.startsWith('/app');
-  // Check if we are on the dashboard list vs details
-  const isDashboardList = pathname === '/app' || pathname === '/app/';
 
-  // Pass the challenge to settings ONLY if we are NOT on the main list page
-  // This ensures the "Global Settings" (Delete All) show up on the list page
-  const settingsChallengeContext = isDashboardList ? null : challenge;
+  // Logic to determine if we should show specific challenge settings
+  const isDashboardList = pathname === '/app' || pathname === '/app/';
+  const isSetupPage = pathname === '/app/setup' || pathname === '/app/setup/';
+
+  // Pass the challenge to settings ONLY if we are actually viewing a specific challenge.
+  // If we are on the Dashboard List OR the Setup Page, we want "Global Settings" (no specific challenge context).
+  const settingsChallengeContext = isDashboardList || isSetupPage ? null : challenge;
 
   const showNotification = (notif: Omit<NotificationProps, 'onClose'>) => {
     setNotification(notif);
