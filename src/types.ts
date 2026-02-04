@@ -20,6 +20,7 @@ export interface ChallengeRules {
   photoRule: PhotoRuleType;
   trackWeight: boolean;
   trackMeasurements: boolean;
+  useDailyJournal: boolean;
 }
 
 export interface ChallengeDoc {

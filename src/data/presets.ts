@@ -8,12 +8,13 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     outdoorWorkout: false,
     water: 64,
     reading: 10,
-    readingType: 'book_or_audio', // 10 pages or 20 mins audio
+    readingType: 'book_or_audio',
     dietRule: 'cut_vice',
     alcoholRule: 'no_limit',
-    photoRule: 'first_last', // Default to First & Last
+    photoRule: 'first_last',
     trackWeight: true,
     trackMeasurements: false,
+    useDailyJournal: true,
   },
   balanced: {
     workouts: 2,
@@ -22,12 +23,13 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     outdoorWorkout: false,
     water: 100,
     reading: 10,
-    readingType: 'any_book', // Fiction, comics, etc.
+    readingType: 'any_book',
     dietRule: 'one_cheat_week',
     alcoholRule: 'one_cheat_week',
     photoRule: 'weekly',
     trackWeight: true,
     trackMeasurements: true,
+    useDailyJournal: true,
   },
   hard: {
     workouts: 2,
@@ -36,12 +38,13 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     outdoorWorkout: true,
     water: 128,
     reading: 10,
-    readingType: 'non_fiction', // Strict
+    readingType: 'non_fiction',
     dietRule: 'strict',
     alcoholRule: 'none',
     photoRule: 'daily',
     trackWeight: true,
     trackMeasurements: true,
+    useDailyJournal: true,
   },
   custom: {
     workouts: 1,
@@ -56,5 +59,6 @@ export const CHALLENGE_PRESETS: Record<ChallengeType, ChallengeRules> = {
     photoRule: 'none',
     trackWeight: true,
     trackMeasurements: true,
+    useDailyJournal: true,
   },
 };

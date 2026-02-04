@@ -27,32 +27,26 @@ const SetupPage = () => {
   const router = useRouter();
   const { startChallenge } = useChallengeController();
 
-  // Helper for date suffix
   const getDateSuffix = () => {
     const now = new Date();
     return now.toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' });
   };
 
-  // State
   const [selectedType, setSelectedType] = useState<ChallengeType>('hard');
   const [rules, setRules] = useState<ChallengeRules>(CHALLENGE_PRESETS.hard);
   const [isCustom, setIsCustom] = useState(false);
-  // Initialize with date suffix
   const [challengeName, setChallengeName] = useState(`75 Hard - ${getDateSuffix()}`);
   const [duration, setDuration] = useState(75);
 
   const currentTheme = THEME[selectedType];
 
-  // --- Handlers ---
-
   const handleSelectType = (type: ChallengeType) => {
     setSelectedType(type);
-    setRules(JSON.parse(JSON.stringify(CHALLENGE_PRESETS[type]))); // Deep copy
+    setRules(JSON.parse(JSON.stringify(CHALLENGE_PRESETS[type])));
     setIsCustom(type === 'custom');
 
     const suffix = getDateSuffix();
 
-    // Default Names with Date
     if (type === 'hard') setChallengeName(`75 Hard - ${suffix}`);
     if (type === 'soft') setChallengeName(`75 Soft - ${suffix}`);
     if (type === 'balanced') setChallengeName(`75 Balanced - ${suffix}`);
@@ -67,16 +61,15 @@ const SetupPage = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRuleChange = (field: keyof ChallengeRules, value: any) => {
-    // Allow editing specific fields even if not custom
     const alwaysEditableFields: (keyof ChallengeRules)[] = [
       'trackWeight',
       'trackMeasurements',
+      'useDailyJournal',
       'outdoorWorkout',
     ];
 
     if (!isCustom && !alwaysEditableFields.includes(field)) return;
 
-    // Handle numeric fields that come in as strings from inputs
     if (['water', 'reading'].includes(field)) {
       const intValue = parseInt(value);
       setRules((prev) => ({ ...prev, [field]: isNaN(intValue) ? 0 : Math.abs(intValue) }));
@@ -130,13 +123,10 @@ const SetupPage = () => {
           </p>
         </header>
 
-        {/* 1. Selection Grid Component */}
         <ChallengeTypeGrid selectedType={selectedType} onSelect={handleSelectType} />
 
-        {/* 2. Rules Configuration Container */}
         <div
           className={`bg-[var(--color-surface)] rounded-2xl border transition-colors duration-300 ${isCustom ? currentTheme.border : 'border-[var(--color-background)]'} overflow-hidden`}>
-          {/* Container Header */}
           <div className="bg-[var(--color-background)]/50 p-4 px-8 border-b border-[var(--color-background)] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-3">
@@ -145,7 +135,6 @@ const SetupPage = () => {
                   {selectedType === 'custom' ? 'Configure Rules' : 'Challenge Rules'}
                 </h2>
               </div>
-              {/* Added Note here */}
               {!isCustom && (
                 <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5 mt-1">
                   <FontAwesomeIcon icon={faInfoCircle} className="w-3 h-3" />
@@ -162,7 +151,6 @@ const SetupPage = () => {
           </div>
 
           <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-            {/* General Settings (Name/Duration) */}
             <GeneralSection
               name={challengeName}
               setName={setChallengeName}
@@ -172,7 +160,6 @@ const SetupPage = () => {
               themeAccent={currentTheme.accent}
             />
 
-            {/* Left Column: Physical */}
             <PhysicalSection
               rules={rules}
               isCustom={isCustom}
@@ -183,7 +170,6 @@ const SetupPage = () => {
               preventNonNumericInput={preventNonNumericInput}
             />
 
-            {/* Right Column: Habits */}
             <HabitsSection
               rules={rules}
               isCustom={isCustom}
@@ -194,7 +180,6 @@ const SetupPage = () => {
           </div>
         </div>
 
-        {/* 3. Action Button */}
         <div className="mt-12 text-center pb-12">
           <button
             onClick={handleStart}

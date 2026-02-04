@@ -5,10 +5,10 @@ interface PhysicalSectionProps {
   rules: ChallengeRules;
   isCustom: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  theme: any; // Theme config object
+  theme: any;
   onWorkoutCountChange: (count: number) => void;
   onDurationChange: (index: number, minutes: number) => void;
-  // Replaced specific toggle with generic handler
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRuleChange: (field: keyof ChallengeRules, value: any) => void;
   preventNonNumericInput: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
@@ -28,7 +28,6 @@ const PhysicalSection = ({
         Physical Training
       </h3>
 
-      {/* Number of Workouts Slider */}
       <div className={!isCustom ? 'opacity-70 pointer-events-none' : ''}>
         <label className="block text-sm font-bold mb-1">Workouts per Day</label>
         <div className="flex items-center gap-4">
@@ -47,7 +46,6 @@ const PhysicalSection = ({
         </div>
       </div>
 
-      {/* Workout Duration Details Loop */}
       <div className="space-y-3">
         <label className={`block text-sm font-bold ${!isCustom ? 'opacity-70' : ''}`}>
           Target Duration
@@ -82,7 +80,6 @@ const PhysicalSection = ({
         ))}
       </div>
 
-      {/* Outdoor Toggle */}
       <label
         className={`flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors ${!isCustom ? 'opacity-70 pointer-events-none' : ''}`}>
         <span className="text-sm font-bold">Outdoor Requirement</span>
@@ -98,14 +95,12 @@ const PhysicalSection = ({
         </div>
       </label>
 
-      {/* Metrics Section - Always Editable */}
       <div className="pt-4 border-t border-[var(--color-background)] mt-6">
         <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
           Tracking & Metrics
         </h4>
 
         <div className="space-y-2">
-          {/* Weight Tracking */}
           <label className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors">
             <span className="text-sm font-bold">Track Weight</span>
             <div className="relative">
@@ -120,7 +115,6 @@ const PhysicalSection = ({
             </div>
           </label>
 
-          {/* Measurements Tracking */}
           <label className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors">
             <span className="text-sm font-bold">Track Measurements</span>
             <div className="relative">
@@ -128,6 +122,20 @@ const PhysicalSection = ({
                 type="checkbox"
                 checked={rules.trackMeasurements}
                 onChange={(e) => onRuleChange('trackMeasurements', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div
+                className={`w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${theme.toggle}`}></div>
+            </div>
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-[var(--color-background)] transition-colors">
+            <span className="text-sm font-bold">Daily Journal</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={rules.useDailyJournal}
+                onChange={(e) => onRuleChange('useDailyJournal', e.target.checked)}
                 className="sr-only peer"
               />
               <div
