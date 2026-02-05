@@ -64,7 +64,9 @@ const DailyDashboard = ({
         }
         return 'Follow Diet';
       case 'workout1':
-        return `${rules.workoutDurations[0] || 45}-Minute Workout`;
+        return `${rules.workoutDurations[0] || 45}-Minute Workout${
+          rules.workouts === 1 && rules.outdoorWorkout ? ' (Outdoors)' : ''
+        }`;
       case 'workout2':
         return rules.workouts >= 2
           ? `${rules.workoutDurations[1] || 45}-Minute Workout ${rules.outdoorWorkout ? '(Outdoors)' : ''}`
@@ -175,11 +177,43 @@ const DailyDashboard = ({
   const handleCompleteDay = async () => {
     if (!challenge) return;
     const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+
+    // 1. Mark current day complete
     if (updatedChallenge.days[selectedDay]) {
       updatedChallenge.days[selectedDay].completed = true;
     } else {
       updatedChallenge.days[selectedDay] = { completed: true, photoAttached: false, tasks };
     }
+
+    // 2. Data Carry Over Logic (Metrics)
+    // Check if next day exists within duration
+    const nextDay = selectedDay + 1;
+    if (nextDay <= updatedChallenge.duration) {
+      // Ensure next day object exists
+      if (!updatedChallenge.days[nextDay]) {
+        updatedChallenge.days[nextDay] = {
+          completed: false,
+          photoAttached: false,
+          tasks: initialTaskState,
+        };
+      }
+
+      const currentData = updatedChallenge.days[selectedDay];
+      const nextDayData = updatedChallenge.days[nextDay];
+
+      // Carry Weight (if next day is empty)
+      if (currentData.weight !== undefined && nextDayData.weight === undefined) {
+        nextDayData.weight = currentData.weight;
+      }
+
+      // Carry Measurements (if next day is empty)
+      if (currentData.measurements && Object.keys(currentData.measurements).length > 0) {
+        if (!nextDayData.measurements || Object.keys(nextDayData.measurements).length === 0) {
+          nextDayData.measurements = { ...currentData.measurements };
+        }
+      }
+    }
+
     try {
       setDayCompletedToShowInAlert(selectedDay);
       const newRev = await updateChallenge(updatedChallenge);
@@ -228,7 +262,7 @@ const DailyDashboard = ({
         <Notification
           type="success"
           title={`Day ${dayCompletedToShowInAlert} Complete!`}
-          message="Great job, keep up the momentum."
+          message="Great job. Metrics copied to tomorrow."
           onClose={() => {
             setShowCompletionAlert(false);
             setDayCompletedToShowInAlert(null);
