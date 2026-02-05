@@ -13,14 +13,27 @@ import {
   faPenFancy,
   faUtensils,
   faRulerCombined,
+  faArrowRight,
+  faCloudSun,
 } from '@fortawesome/free-solid-svg-icons';
-import { ChallengeDoc } from '@/types';
+import { ChallengeDoc, DailyMeasurements } from '@/types';
 
 interface CompletionModalProps {
   isOpen: boolean;
   onClose: () => void;
   challenge: ChallengeDoc | null;
 }
+
+const MEASUREMENT_KEYS: (keyof DailyMeasurements)[] = [
+  'neck',
+  'chest',
+  'waist',
+  'hips',
+  'thighs',
+  'calves',
+  'biceps',
+  'forearms',
+];
 
 const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) => {
   // --- Derived Stats Calculation ---
@@ -33,7 +46,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     // Count fully completed days for the "Perfect Days" stat
     const perfectDaysCount = dayValues.filter((d) => d.completed).length;
 
-    // --- Task-Based Calculators (Give credit for partial days) ---
+    // --- Task-Based Calculators ---
 
     // 1. Reading Pages
     const totalPages = dayValues.reduce((acc, day) => {
@@ -46,14 +59,28 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     }, 0);
     const totalGallons = (totalOz / 128).toFixed(1);
 
-    // 3. Workouts
-    const totalWorkouts = dayValues.reduce((acc, day) => {
-      let dailyCount = 0;
-      if (day.tasks.workout1) dailyCount++;
-      if (day.tasks.workout2) dailyCount++;
-      if (day.tasks.workout3) dailyCount++;
-      return acc + dailyCount;
-    }, 0);
+    // 3. Workouts (Total & Outdoor)
+    let totalWorkouts = 0;
+    let outdoorSessions = 0;
+
+    dayValues.forEach((day) => {
+      // Count Total
+      if (day.tasks.workout1) totalWorkouts++;
+      if (day.tasks.workout2) totalWorkouts++;
+      if (day.tasks.workout3) totalWorkouts++;
+
+      // Count Outdoor Specifics
+      if (rules.outdoorWorkout) {
+        // If single workout & outdoor rule = Workout 1 is outdoor
+        if (rules.workouts === 1 && day.tasks.workout1) {
+          outdoorSessions++;
+        }
+        // If multiple workouts = Workout 2 is usually the designated outdoor one
+        else if (rules.workouts >= 2 && day.tasks.workout2) {
+          outdoorSessions++;
+        }
+      }
+    });
 
     // 4. Diet Consistency
     const dietDays = dayValues.filter((d) => d.tasks.diet).length;
@@ -77,14 +104,41 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
       }
     }
 
-    // 6. Other Logs
+    // 6. Measurement Deltas
+    const measurementChanges: { key: string; diff: string; start: number; end: number }[] = [];
+    if (rules.trackMeasurements) {
+      const sortedDayKeys = Object.keys(days)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      MEASUREMENT_KEYS.forEach((key) => {
+        const startDay = sortedDayKeys.find((d) => days[d].measurements?.[key]);
+        const endDay = [...sortedDayKeys].reverse().find((d) => days[d].measurements?.[key]);
+
+        if (startDay && endDay && startDay !== endDay) {
+          const startVal = days[startDay].measurements![key];
+          const endVal = days[endDay].measurements![key];
+
+          if (startVal !== undefined && endVal !== undefined) {
+            const diff = endVal - startVal;
+            measurementChanges.push({
+              key,
+              diff: `${diff > 0 ? '+' : ''}${diff.toFixed(1)}"`,
+              start: startVal,
+              end: endVal,
+            });
+          }
+        }
+      });
+    }
+
     const measurementLogs = dayValues.filter(
       (d) => d.measurements && Object.keys(d.measurements).length > 0
     ).length;
 
     const journalEntries = dayValues.filter((d) => d.journal && d.journal.length > 0).length;
 
-    // 7. Photos: Calculate required photos based on the rule, not actual uploads.
+    // 7. Photos
     let calculatedTotalPhotos = 0;
     switch (rules.photoRule) {
       case 'daily':
@@ -102,18 +156,18 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
         break;
     }
 
-    // --- Date Calculation ---
-    // Calculate expected end date based on start date + duration
     const startObj = new Date(startDate);
     const endObj = new Date(startObj);
-    endObj.setDate(startObj.getDate() + duration - 1); // -1 to be inclusive of the last day
+    endObj.setDate(startObj.getDate() + duration - 1);
 
     return {
       weightChangeLabel,
       measurementLogs,
+      measurementChanges,
       totalGallons,
       totalPages,
       totalWorkouts,
+      outdoorSessions, // New Stat
       dietDays,
       journalEntries,
       totalPhotos: calculatedTotalPhotos,
@@ -128,7 +182,6 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     return null;
   }
 
-  // --- Dynamic Message Generation ---
   const getDietSummary = () => {
     switch (challenge.rules.dietRule) {
       case 'strict':
@@ -175,14 +228,15 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             <span className="text-[var(--color-primary)] font-bold">{challenge.name}</span>.
           </p>
           <div className="text-sm text-[var(--color-text-muted)] italic space-y-1">
-            <p>&quot;{getDietSummary()}&quot;</p>
-            <p>&quot;You showed up and logged progress for {stats.activeDayCount} days.&quot;</p>
+            <p>"{getDietSummary()}"</p>
+            {challenge.rules.outdoorWorkout && stats.outdoorSessions > 0 && (
+              <p>"You braved the elements for {stats.outdoorSessions} outdoor sessions."</p>
+            )}
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {/* Workouts */}
           <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
             <FontAwesomeIcon icon={faRunning} className="text-2xl text-blue-400 mb-2" />
             <p className="text-2xl font-bold font-orbitron">{stats.totalWorkouts}</p>
@@ -191,7 +245,17 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </p>
           </div>
 
-          {/* Water */}
+          {/* New Outdoor Card */}
+          {challenge.rules.outdoorWorkout && (
+            <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
+              <FontAwesomeIcon icon={faCloudSun} className="text-2xl text-yellow-500 mb-2" />
+              <p className="text-2xl font-bold font-orbitron">{stats.outdoorSessions}</p>
+              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
+                Outdoor Sessions
+              </p>
+            </div>
+          )}
+
           <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
             <FontAwesomeIcon icon={faTint} className="text-2xl text-cyan-400 mb-2" />
             <p className="text-2xl font-bold font-orbitron">{stats.totalGallons}</p>
@@ -200,7 +264,6 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </p>
           </div>
 
-          {/* Reading */}
           <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
             <FontAwesomeIcon icon={faBook} className="text-2xl text-purple-400 mb-2" />
             <p className="text-2xl font-bold font-orbitron">{stats.totalPages}</p>
@@ -209,7 +272,6 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </p>
           </div>
 
-          {/* Dynamic: Weight */}
           {challenge.rules.trackWeight && (
             <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
               <FontAwesomeIcon icon={faWeight} className="text-2xl text-green-400 mb-2" />
@@ -220,40 +282,16 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </div>
           )}
 
-          {/* Dynamic: Photos */}
           {challenge.rules.photoRule !== 'none' && (
             <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
               <FontAwesomeIcon icon={faImage} className="text-2xl text-pink-400 mb-2" />
               <p className="text-2xl font-bold font-orbitron">{stats.totalPhotos}</p>
               <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-                Photos Taken
+                Photos Required
               </p>
             </div>
           )}
 
-          {/* Dynamic: Journal */}
-          {challenge.rules.useDailyJournal && (
-            <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
-              <FontAwesomeIcon icon={faPenFancy} className="text-2xl text-yellow-400 mb-2" />
-              <p className="text-2xl font-bold font-orbitron">{stats.journalEntries}</p>
-              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-                Entries Written
-              </p>
-            </div>
-          )}
-
-          {/* Dynamic: Measurements */}
-          {challenge.rules.trackMeasurements && stats.measurementLogs > 0 && (
-            <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
-              <FontAwesomeIcon icon={faRulerCombined} className="text-2xl text-orange-400 mb-2" />
-              <p className="text-2xl font-bold font-orbitron">{stats.measurementLogs}</p>
-              <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-                Body Checks
-              </p>
-            </div>
-          )}
-
-          {/* Generic: Perfect Days */}
           <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
             <FontAwesomeIcon icon={faUtensils} className="text-2xl text-red-400 mb-2" />
             <p className="text-2xl font-bold font-orbitron">{stats.perfectDaysCount}</p>
@@ -262,6 +300,35 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </p>
           </div>
         </div>
+
+        {/* Physical Transformation Sub-Section */}
+        {stats.measurementChanges.length > 0 && (
+          <div className="animate-fadeIn">
+            <h4 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2 border-b border-[var(--color-surface-border)] pb-2">
+              <FontAwesomeIcon icon={faRulerCombined} /> Physical Transformation
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {stats.measurementChanges.map((m) => (
+                <div
+                  key={m.key}
+                  className="bg-[var(--color-background)] p-3 rounded-lg border border-[var(--color-surface-border)] flex flex-col items-center">
+                  <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] mb-1">
+                    {m.key}
+                  </span>
+                  <span
+                    className={`text-lg font-bold font-orbitron ${m.diff.startsWith('-') ? 'text-green-400' : 'text-[var(--color-foreground)]'}`}>
+                    {m.diff}
+                  </span>
+                  <div className="flex items-center gap-1 text-[10px] text-[var(--color-text-muted)] opacity-60">
+                    <span>{m.start}</span>
+                    <FontAwesomeIcon icon={faArrowRight} size="xs" />
+                    <span>{m.end}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-2 text-center">
           <p className="text-sm text-[var(--color-text-muted)] mb-4">

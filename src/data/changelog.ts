@@ -57,6 +57,7 @@ export const CHANGELOG_DATA: YearLog[] = [
           'Refined the setup wizard to clearly indicate which rules are locked presets and which tracking options remain flexible.',
           'Introduced the "Protocol Rulebook" in settings for a comprehensive, read-only view of your active challenge rules, including a new "Name Your Vice" feature for custom accountability.',
           'Upgraded Completion Summary: Implemented a new calculation engine that tracks individual task completions (workouts, water, reading) rather than just total days, providing a more accurate reflection of effort even on partial days.',
+          'Added a "Physical Transformation" report to the completion screen, calculating the exact change (delta) for every measurement, alongside a dedicated tracker for Outdoor Workouts.',
         ],
       },
       {
