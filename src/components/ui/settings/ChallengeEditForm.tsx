@@ -109,7 +109,11 @@ export const ChallengeEditForm = ({
         </button>
       </div>
 
-      <ProtocolRulebook rules={challenge.rules} />
+      <ProtocolRulebook
+        rules={challenge.rules}
+        duration={challenge.duration}
+        challengeType={challenge.type}
+      />
     </>
   );
 };

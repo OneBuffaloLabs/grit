@@ -7,6 +7,7 @@ import {
   faDumbbell,
   faUtensils,
   faChartBar,
+  faTrophy,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   ChallengeDoc,
@@ -18,9 +19,11 @@ import {
 
 interface ProtocolRulebookProps {
   rules: ChallengeDoc['rules'];
+  duration: number;
+  challengeType: string;
 }
 
-// Strictly typed maps to prevent "Element implicitly has an 'any' type" errors
+// Strictly typed maps
 const READING_LABELS: Record<ReadingRuleType, string> = {
   non_fiction: 'Non-Fiction',
   any_book: 'Any Book',
@@ -46,13 +49,13 @@ const PHOTO_LABELS: Record<PhotoRuleType, string> = {
   daily: 'Daily',
 };
 
-export const ProtocolRulebook = ({ rules }: ProtocolRulebookProps) => {
+export const ProtocolRulebook = ({ rules, duration, challengeType }: ProtocolRulebookProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Helper to check for custom vice and format display
   const getDietDisplay = () => {
     if (rules.dietRule === 'cut_vice' && rules.vice) {
-      return `No ${rules.vice}`; // Displays "No Soda", "No Candy", etc.
+      return `No ${rules.vice}`;
     }
     return DIET_LABELS[rules.dietRule] || rules.dietRule;
   };
@@ -74,6 +77,24 @@ export const ProtocolRulebook = ({ rules }: ProtocolRulebookProps) => {
 
       {isOpen && (
         <div className="p-4 bg-[var(--color-background)] text-xs space-y-6 animate-fadeIn border-t border-gray-700">
+          {/* Program Overview - NEW SECTION */}
+          <div>
+            <h5 className="flex items-center gap-2 font-bold text-[var(--color-primary)] uppercase tracking-wider mb-3 border-b border-gray-800 pb-2">
+              <FontAwesomeIcon icon={faTrophy} /> Program Overview
+            </h5>
+            <div className="grid grid-cols-2 gap-y-2 text-[var(--color-text-muted)]">
+              <span>Program Mode</span>
+              <span className="text-right font-bold text-[var(--color-foreground)] capitalize">
+                {challengeType}
+              </span>
+
+              <span>Total Duration</span>
+              <span className="text-right font-bold text-[var(--color-foreground)]">
+                {duration} Days
+              </span>
+            </div>
+          </div>
+
           {/* Training Section */}
           <div>
             <h5 className="flex items-center gap-2 font-bold text-[var(--color-primary)] uppercase tracking-wider mb-3 border-b border-gray-800 pb-2">
