@@ -12,7 +12,7 @@ const initialTaskState = {
   diet: false,
   workout1: false,
   workout2: false,
-  workout3: false, // Added initial state for workout3
+  workout3: false,
   water: false,
   reading: false,
   progressPhoto: false,
@@ -60,8 +60,7 @@ const DailyDashboard = ({
         if (rules.dietRule === 'strict') return 'Diet: Strict (No Cheats)';
         if (rules.dietRule === 'one_cheat_week') return 'Diet: Stick to plan';
         if (rules.dietRule === 'cut_vice') {
-          // Use the custom vice if available
-          return rules.vice ? `Diet: No ${rules.vice}` : 'Diet: Avoid your Vice';
+          return rules.vice ? `No ${rules.vice}` : 'Diet: Avoid your Vice';
         }
         return 'Follow Diet';
       case 'workout1':
@@ -98,7 +97,6 @@ const DailyDashboard = ({
       { id: 'reading', label: getTaskLabel('reading', challenge.rules) },
     ];
 
-    // Add Workout 2
     if (challenge.rules.workouts >= 2) {
       items.splice(2, 0, {
         id: 'workout2',
@@ -106,7 +104,6 @@ const DailyDashboard = ({
       });
     }
 
-    // Add Workout 3
     if (challenge.rules.workouts >= 3) {
       items.splice(3, 0, {
         id: 'workout3',
@@ -199,16 +196,25 @@ const DailyDashboard = ({
   const handleFinishChallenge = async () => {
     if (!challenge) return;
 
-    const updatedChallenge = {
-      ...challenge,
-      status: 'completed' as const,
-      completionDate: new Date().toISOString(),
-    };
+    // Deep copy
+    const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+
+    // 1. Mark the FINAL day as completed in the data structure
+    if (updatedChallenge.days[selectedDay]) {
+      updatedChallenge.days[selectedDay].completed = true;
+    } else {
+      updatedChallenge.days[selectedDay] = { completed: true, photoAttached: false, tasks };
+    }
+
+    // 2. Mark the Challenge itself as completed
+    updatedChallenge.status = 'completed';
+    updatedChallenge.completionDate = new Date().toISOString();
 
     try {
       const savedChallenge = await updateChallenge(updatedChallenge);
       if (savedChallenge) {
         dispatch({ type: 'SET_CHALLENGE', payload: savedChallenge });
+        // 3. Trigger the modal
         onFinishChallenge();
       }
     } catch (error) {
