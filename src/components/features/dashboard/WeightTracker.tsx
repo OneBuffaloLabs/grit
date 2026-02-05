@@ -4,63 +4,122 @@ import React, { useState, useEffect } from 'react';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { updateChallenge } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave, faSpinner, faWeightScale, faCheck } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSave,
+  faSpinner,
+  faWeightScale,
+  faCheck,
+  faRulerCombined,
+} from '@fortawesome/free-solid-svg-icons';
 import WeightChangeIndicator from '@/components/ui/WeightChangeIndicator';
+import { DailyMeasurements } from '@/types';
 
 interface WeightTrackerProps {
   currentDay: number;
   isReadOnly?: boolean;
 }
 
+// Keys for iteration
+const MEASUREMENT_KEYS: (keyof DailyMeasurements)[] = [
+  'neck',
+  'chest',
+  'waist',
+  'hips',
+  'thighs',
+  'calves',
+  'biceps',
+  'forearms',
+];
+
 const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) => {
   const { challenge } = useChallengeState();
   const dispatch = useChallengeDispatch();
+
+  // Rules
+  const showWeight = challenge?.rules.trackWeight ?? false;
+  const showMeasurements = challenge?.rules.trackMeasurements ?? false;
+
+  // State
   const [weight, setWeight] = useState('');
+  const [measurements, setMeasurements] = useState<Record<keyof DailyMeasurements, string>>({
+    neck: '',
+    chest: '',
+    waist: '',
+    hips: '',
+    thighs: '',
+    calves: '',
+    biceps: '',
+    forearms: '',
+  });
+
+  // Tracking original state for dirty checking
   const [originalWeight, setOriginalWeight] = useState('');
+  const [originalMeasurements, setOriginalMeasurements] = useState<Record<string, string>>({});
+
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState('');
 
   const startingWeight = challenge?.days[1]?.weight;
 
+  // --- Load Data on Mount or Day Change ---
   useEffect(() => {
-    const dailyWeight = challenge?.days[currentDay]?.weight;
-    const weightStr = dailyWeight != null ? String(dailyWeight) : '';
+    const dayData = challenge?.days[currentDay];
+
+    // Load Weight
+    const weightStr = dayData?.weight != null ? String(dayData.weight) : '';
     setWeight(weightStr);
     setOriginalWeight(weightStr);
-  }, [challenge, currentDay]);
 
-  useEffect(() => {
+    // Load Measurements
+    const mData = dayData?.measurements || {};
+
+    // Use reduce to create a properly typed object instead of 'any'
+    const newMState = MEASUREMENT_KEYS.reduce(
+      (acc, key) => {
+        acc[key] = mData[key] != null ? String(mData[key]) : '';
+        return acc;
+      },
+      {} as Record<keyof DailyMeasurements, string>
+    );
+
+    // Create a copy for original state tracking
+    const newOriginalMState = { ...newMState };
+
+    setMeasurements(newMState);
+    setOriginalMeasurements(newOriginalMState);
+
     setIsSaved(false);
     setError('');
-  }, [currentDay]);
+  }, [challenge, currentDay]);
+
+  // --- Handlers ---
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     const numValue = parseFloat(value);
-
     if (numValue > 1000) value = '1000';
     if (numValue < 0) value = '0';
-
     setWeight(value);
-    if (error) setError('');
-    if (isSaved) setIsSaved(false);
+    setIsSaved(false);
   };
 
-  const handleSaveWeight = async () => {
-    if (!challenge || weight === originalWeight) return;
+  const handleMeasurementChange = (key: keyof DailyMeasurements, value: string) => {
+    // Basic validation: allow empty or numbers
+    if (value !== '' && isNaN(Number(value))) return;
 
+    setMeasurements((prev) => ({ ...prev, [key]: value }));
+    setIsSaved(false);
+  };
+
+  const handleSave = async () => {
+    if (!challenge) return;
     setError('');
-    const weightValue = parseFloat(weight);
-
-    if (weight !== '' && isNaN(weightValue)) {
-      setError('Please enter a valid number.');
-      return;
-    }
-
     setIsSaving(true);
+
     const updatedChallenge = JSON.parse(JSON.stringify(challenge));
 
+    // Init Day if needed
     if (!updatedChallenge.days[currentDay]) {
       updatedChallenge.days[currentDay] = {
         completed: false,
@@ -76,54 +135,82 @@ const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) =
       };
     }
 
-    updatedChallenge.days[currentDay].weight = weight === '' ? undefined : weightValue;
+    // 1. Save Weight
+    if (showWeight) {
+      const wVal = parseFloat(weight);
+      updatedChallenge.days[currentDay].weight = weight === '' || isNaN(wVal) ? undefined : wVal;
+    }
+
+    // 2. Save Measurements
+    if (showMeasurements) {
+      const mToSave: DailyMeasurements = {};
+      MEASUREMENT_KEYS.forEach((key) => {
+        const valStr = measurements[key];
+        const valNum = parseFloat(valStr);
+        if (valStr !== '' && !isNaN(valNum)) {
+          mToSave[key] = valNum;
+        }
+      });
+      updatedChallenge.days[currentDay].measurements = mToSave;
+    }
 
     try {
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+
+        // Update originals to current to reset "dirty" state
         setOriginalWeight(weight);
+        setOriginalMeasurements({ ...measurements });
+
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 2000);
       }
     } catch (err) {
-      console.error('Failed to save weight:', err);
-      setError('Could not save weight. Please try again.');
+      console.error('Failed to save metrics:', err);
+      setError('Could not save data. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const hasChanged = weight !== originalWeight;
+  // --- Dirty Checking ---
+  const hasWeightChanged = weight !== originalWeight;
+  const hasMeasurementsChanged = MEASUREMENT_KEYS.some(
+    (key) => measurements[key] !== originalMeasurements[key]
+  );
+  const hasChanged = hasWeightChanged || hasMeasurementsChanged;
+
+  if (!showWeight && !showMeasurements) return null;
 
   return (
-    <div className="bg-[var(--color-background)] rounded-lg shadow-lg p-6 sm:p-8 mt-8 lg:mt-0">
-      <h2 className="text-3xl font-bold font-orbitron text-center mb-6">Daily Weight</h2>
-      <div className="flex items-center gap-4">
-        <FontAwesomeIcon icon={faWeightScale} className="text-[var(--color-primary)]" size="2x" />
-        <div className="w-full">
-          <input
-            type="number"
-            min={0}
-            max={1000}
-            value={weight}
-            onChange={handleWeightChange}
-            disabled={isReadOnly}
-            placeholder={isReadOnly ? 'Challenge not active' : 'Enter weight...'}
-            className={`w-full p-2 bg-[var(--color-surface)] text-[var(--color-foreground)] rounded-md border ${
-              error ? 'border-red-500' : 'border-gray-600'
-            } focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] disabled:cursor-not-allowed`}
-          />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 text-[var(--color-primary)]">
+          {showWeight ? (
+            <FontAwesomeIcon icon={faWeightScale} size="lg" />
+          ) : (
+            <FontAwesomeIcon icon={faRulerCombined} size="lg" />
+          )}
+          <span className="font-bold font-orbitron uppercase text-sm tracking-wider">
+            {showWeight && showMeasurements
+              ? 'Body Metrics'
+              : showWeight
+                ? 'Daily Weight'
+                : 'Measurements'}
+          </span>
         </div>
+
         <button
-          onClick={handleSaveWeight}
+          onClick={handleSave}
           disabled={isSaving || !hasChanged || isReadOnly}
-          className={`text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 ${
+          className={`text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 ${
             isSaved
               ? 'bg-green-600'
               : hasChanged && !isSaving
-              ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] cursor-pointer'
-              : 'bg-gray-600 cursor-not-allowed'
+                ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] cursor-pointer'
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
           }`}>
           {isSaving ? (
             <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
@@ -132,13 +219,63 @@ const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) =
           ) : (
             <FontAwesomeIcon icon={faSave} />
           )}
+          <span>{isSaved ? 'Saved' : 'Save'}</span>
         </button>
       </div>
-      {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
-      <WeightChangeIndicator
-        startingWeight={startingWeight}
-        currentWeight={parseFloat(weight) || null}
-      />
+
+      {error && (
+        <p className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded">{error}</p>
+      )}
+
+      {/* Weight Input */}
+      {showWeight && (
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">
+            Weight (lbs)
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={1000}
+            value={weight}
+            onChange={handleWeightChange}
+            disabled={isReadOnly}
+            placeholder={isReadOnly ? '-' : '0.0'}
+            className="w-full p-3 bg-[var(--color-background)] text-[var(--color-text)] font-bold text-lg rounded-lg border border-[var(--color-surface-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors disabled:opacity-50"
+          />
+          <WeightChangeIndicator
+            startingWeight={startingWeight}
+            currentWeight={parseFloat(weight) || null}
+          />
+        </div>
+      )}
+
+      {/* Measurements Grid */}
+      {showMeasurements && (
+        <div className="space-y-3 pt-2">
+          <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase block mb-2">
+            Measurements (in)
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {MEASUREMENT_KEYS.map((key) => (
+              <div key={key} className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] uppercase font-bold text-[var(--color-text-muted)]">
+                  {key}
+                </span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={measurements[key]}
+                  onChange={(e) => handleMeasurementChange(key, e.target.value)}
+                  disabled={isReadOnly}
+                  className="w-full pl-16 pr-2 py-2 bg-[var(--color-background)] text-right text-[var(--color-text)] font-bold text-sm rounded border border-[var(--color-surface-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors disabled:opacity-50"
+                  placeholder="-"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

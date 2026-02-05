@@ -2,6 +2,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Orbitron } from 'next/font/google';
 import AnalyticsInitializer from '@/components/AnalyticsInitializer';
+// --- Context ---
+import { ChallengeProvider } from '@/context/ChallengeContext';
 // --- Utils ---
 import { generateMetadata } from '@/utils/metadata';
 import { generateViewport } from '@/utils/viewport';
@@ -31,8 +33,10 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${orbitron.variable} font-sans antialiased bg-[var(--color-surface)] text-foreground`}>
-        {children}
-        <AnalyticsInitializer />
+        <ChallengeProvider>
+          {children}
+          <AnalyticsInitializer />
+        </ChallengeProvider>
       </body>
     </html>
   );

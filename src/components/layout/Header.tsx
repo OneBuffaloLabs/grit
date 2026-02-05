@@ -1,77 +1,109 @@
 'use client';
 
-import React from 'react';
+import React, { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faRocket, faHistory, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faRocket, faHouse, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useChallengeState } from '@/context/ChallengeContext';
+import SettingsModal from '@/components/ui/SettingsModal';
+import Notification, { NotificationProps } from '@/components/ui/Notification';
 
-interface HeaderProps {
-  onSettingsClick?: () => void;
-}
-
-const Header = ({ onSettingsClick }: HeaderProps) => {
+const Header = () => {
   const { challenge } = useChallengeState();
   const pathname = usePathname();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
+
+  // Route Helpers
   const isHomePage = pathname === '/';
-  const isHistoryPage = pathname === '/app/history/';
-  const isAppPage = pathname === '/app/';
+  const isInApp = pathname?.startsWith('/app');
+
+  // Logic to determine if we should show specific challenge settings
+  const isDashboardList = pathname === '/app' || pathname === '/app/';
+  const isSetupPage = pathname === '/app/setup' || pathname === '/app/setup/';
+
+  // Pass the challenge to settings ONLY if we are actually viewing a specific challenge.
+  // If we are on the Dashboard List OR the Setup Page, we want "Global Settings" (no specific challenge context).
+  const settingsChallengeContext = isDashboardList || isSetupPage ? null : challenge;
+
+  const showNotification = (notif: Omit<NotificationProps, 'onClose'>) => {
+    setNotification(notif);
+    // Auto-hide after 3 seconds
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   return (
-    <header className="bg-[var(--color-background)] py-4 px-8 shadow-md">
-      <nav className="container mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center" aria-label="Grit Homepage">
-          <Image
-            src="/assets/logos/logo-trans.svg"
-            alt="Grit Logo"
-            width={75}
-            height={75}
-            priority
-          />
-        </Link>
-        <div className="flex items-center gap-4">
-          {isHomePage && (
-            <Link
-              href="/app"
-              className="bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-300 flex items-center gap-2">
-              <FontAwesomeIcon icon={faRocket} />
-              <span>Launch App</span>
-            </Link>
-          )}
+    <>
+      <header className="bg-[var(--color-background)] py-4 px-8 shadow-md sticky top-0 z-50">
+        <nav className="container mx-auto flex items-center justify-between">
+          {/* LOGO */}
+          <Link href="/" className="flex items-center group" aria-label="Grit Homepage">
+            <Image
+              src="/assets/logos/logo-trans.svg"
+              alt="Grit Logo"
+              width={75}
+              height={75}
+              priority
+              className="group-hover:scale-105 transition-transform duration-300"
+            />
+          </Link>
 
-          {challenge && isAppPage && (
-            <Link
-              href="/app/history"
-              className="text-md text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer flex items-center gap-2"
-              title="View Challenge History">
-              <FontAwesomeIcon icon={faHistory} />
-              <span>History</span>
-            </Link>
-          )}
+          {/* NAVIGATION ITEMS */}
+          <div className="flex items-center gap-6">
+            {/* 1. HOME LINK (Shows everywhere except Homepage) */}
+            {!isHomePage && (
+              <Link
+                href="/"
+                className="hidden md:flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors font-bold text-sm">
+                <FontAwesomeIcon icon={faHouse} />
+                <span>Home</span>
+              </Link>
+            )}
 
-          {challenge && isHistoryPage && (
-            <Link
-              href="/app"
-              className="text-md text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer flex items-center gap-2"
-              title="View Current Challenge">
-              <FontAwesomeIcon icon={faTasks} />
-              <span>Current</span>
-            </Link>
-          )}
+            {/* 2. LAUNCH APP (Shows on Home/Changelog) */}
+            {!isInApp && (
+              <Link
+                href={challenge ? '/app' : '/app/'}
+                className="bg-[var(--color-primary)] text-white font-bold py-2 px-6 rounded-lg hover:bg-[var(--color-primary-hover)] transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <FontAwesomeIcon icon={challenge ? faArrowRight : faRocket} />
+                <span>{challenge ? 'Dashboard' : 'Launch App'}</span>
+              </Link>
+            )}
 
-          {!isHomePage && challenge && (
-            <button
-              onClick={onSettingsClick}
-              className="text-2xl text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer"
-              aria-label="Open settings">
-              <FontAwesomeIcon icon={faCog} />
-            </button>
-          )}
-        </div>
-      </nav>
-    </header>
+            {/* 3. SETTINGS COG (Only visible inside the app) */}
+            {isInApp && (
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="text-2xl text-[var(--color-text-muted)] hover:text-[var(--color-foreground)] cursor-pointer transition-colors p-2"
+                aria-label="Open settings">
+                <FontAwesomeIcon icon={faCog} />
+              </button>
+            )}
+          </div>
+        </nav>
+      </header>
+
+      <Suspense fallback={null}>
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          challengeOverride={settingsChallengeContext}
+          showNotification={showNotification}
+        />
+      </Suspense>
+
+      {/* Notification Toast */}
+      {notification && (
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => setNotification(null)}
+        />
+      )}
+    </>
   );
 };
 
