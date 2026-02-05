@@ -8,7 +8,7 @@ import {
 } from '@/types';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBan } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faLock } from '@fortawesome/free-solid-svg-icons';
 
 interface HabitsSectionProps {
   rules: ChallengeRules;
@@ -29,6 +29,16 @@ const HabitsSection = ({
 }: HabitsSectionProps) => {
   const waterLiters = Number((rules.water * 0.0295735).toFixed(2));
   const waterGallons = Number((rules.water / 128).toFixed(2));
+
+  // Handler to enforce Alcohol = None when Diet = Strict
+  const handleDietChange = (val: DietRuleType) => {
+    onRuleChange('dietRule', val);
+    if (val === 'strict') {
+      onRuleChange('alcoholRule', 'none');
+    }
+  };
+
+  const isDietStrict = rules.dietRule === 'strict';
 
   return (
     <div className="space-y-6">
@@ -95,7 +105,7 @@ const HabitsSection = ({
         </p>
       </div>
 
-      {/* Diet - STRUCTURE UPDATED for Vice Interaction */}
+      {/* Diet */}
       <div>
         <label className="block text-sm font-bold mb-2">Diet</label>
 
@@ -108,12 +118,12 @@ const HabitsSection = ({
               { id: 'strict', label: 'Strict' },
             ]}
             value={rules.dietRule}
-            onChange={(val) => onRuleChange('dietRule', val)}
+            onChange={handleDietChange}
             theme={theme}
           />
         </div>
 
-        {/* Vice Input - Conditionally Rendered & Always Interactive if visible */}
+        {/* Vice Input */}
         {rules.dietRule === 'cut_vice' && (
           <div className="mt-3 animate-fadeIn">
             <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase mb-1 block">
@@ -140,17 +150,27 @@ const HabitsSection = ({
 
       {/* Alcohol */}
       <div className={!isCustom ? 'opacity-70 pointer-events-none' : ''}>
-        <label className="block text-sm font-bold mb-2">Alcohol</label>
-        <SegmentedControl<AlcoholRuleType>
-          options={[
-            { id: 'no_limit', label: 'No Limit' },
-            { id: 'one_cheat_week', label: '1 Cheat/Wk' },
-            { id: 'none', label: 'None' },
-          ]}
-          value={rules.alcoholRule}
-          onChange={(val) => onRuleChange('alcoholRule', val)}
-          theme={theme}
-        />
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-bold">Alcohol</label>
+          {isDietStrict && (
+            <span className="text-[10px] uppercase font-bold text-[var(--color-primary)] flex items-center gap-1">
+              <FontAwesomeIcon icon={faLock} /> Enforced by Strict Diet
+            </span>
+          )}
+        </div>
+
+        <div className={isDietStrict ? 'opacity-50 pointer-events-none' : ''}>
+          <SegmentedControl<AlcoholRuleType>
+            options={[
+              { id: 'no_limit', label: 'No Limit' },
+              { id: 'one_cheat_week', label: '1 Cheat/Wk' },
+              { id: 'none', label: 'None' },
+            ]}
+            value={rules.alcoholRule}
+            onChange={(val) => onRuleChange('alcoholRule', val)}
+            theme={theme}
+          />
+        </div>
       </div>
 
       {/* Progress Photo */}

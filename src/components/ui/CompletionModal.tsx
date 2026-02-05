@@ -10,7 +10,6 @@ import {
   faImage,
   faRunning,
   faTint,
-  faPenFancy,
   faUtensils,
   faRulerCombined,
   faArrowRight,
@@ -43,49 +42,35 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     const { days, rules, startDate, duration } = challenge;
     const dayValues = Object.values(days);
 
-    // Count fully completed days for the "Perfect Days" stat
+    // Count fully completed days
     const perfectDaysCount = dayValues.filter((d) => d.completed).length;
 
     // --- Task-Based Calculators ---
-
-    // 1. Reading Pages
-    const totalPages = dayValues.reduce((acc, day) => {
-      return acc + (day.tasks.reading ? rules.reading : 0);
-    }, 0);
-
-    // 2. Water Volume
-    const totalOz = dayValues.reduce((acc, day) => {
-      return acc + (day.tasks.water ? rules.water : 0);
-    }, 0);
+    const totalPages = dayValues.reduce(
+      (acc, day) => acc + (day.tasks.reading ? rules.reading : 0),
+      0
+    );
+    const totalOz = dayValues.reduce((acc, day) => acc + (day.tasks.water ? rules.water : 0), 0);
     const totalGallons = (totalOz / 128).toFixed(1);
 
-    // 3. Workouts (Total & Outdoor)
+    // Workouts (Total & Outdoor)
     let totalWorkouts = 0;
     let outdoorSessions = 0;
 
     dayValues.forEach((day) => {
-      // Count Total
       if (day.tasks.workout1) totalWorkouts++;
       if (day.tasks.workout2) totalWorkouts++;
       if (day.tasks.workout3) totalWorkouts++;
 
-      // Count Outdoor Specifics
       if (rules.outdoorWorkout) {
-        // If single workout & outdoor rule = Workout 1 is outdoor
-        if (rules.workouts === 1 && day.tasks.workout1) {
-          outdoorSessions++;
-        }
-        // If multiple workouts = Workout 2 is usually the designated outdoor one
-        else if (rules.workouts >= 2 && day.tasks.workout2) {
-          outdoorSessions++;
-        }
+        if (rules.workouts === 1 && day.tasks.workout1) outdoorSessions++;
+        else if (rules.workouts >= 2 && day.tasks.workout2) outdoorSessions++;
       }
     });
 
-    // 4. Diet Consistency
     const dietDays = dayValues.filter((d) => d.tasks.diet).length;
 
-    // 5. Weight Change
+    // Weight Change
     let weightChangeLabel = 'N/A';
     if (rules.trackWeight) {
       const recordedWeights = Object.keys(days)
@@ -104,7 +89,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
       }
     }
 
-    // 6. Measurement Deltas
+    // Measurement Deltas
     const measurementChanges: { key: string; diff: string; start: number; end: number }[] = [];
     if (rules.trackMeasurements) {
       const sortedDayKeys = Object.keys(days)
@@ -132,13 +117,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
       });
     }
 
-    const measurementLogs = dayValues.filter(
-      (d) => d.measurements && Object.keys(d.measurements).length > 0
-    ).length;
-
-    const journalEntries = dayValues.filter((d) => d.journal && d.journal.length > 0).length;
-
-    // 7. Photos
+    // Photos
     let calculatedTotalPhotos = 0;
     switch (rules.photoRule) {
       case 'daily':
@@ -162,14 +141,12 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
 
     return {
       weightChangeLabel,
-      measurementLogs,
       measurementChanges,
       totalGallons,
       totalPages,
       totalWorkouts,
-      outdoorSessions, // New Stat
+      outdoorSessions,
       dietDays,
-      journalEntries,
       totalPhotos: calculatedTotalPhotos,
       perfectDaysCount,
       formattedStartDate: startObj.toLocaleDateString(),
@@ -182,6 +159,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     return null;
   }
 
+  // --- Dynamic Text Generators ---
   const getDietSummary = () => {
     switch (challenge.rules.dietRule) {
       case 'strict':
@@ -194,6 +172,24 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
         return 'You disciplined your nutrition.';
     }
   };
+
+  const getAlcoholSummary = () => {
+    // Assuming adherence to diet implies adherence to alcohol rule for that day
+    const daysCount = stats.dietDays > 0 ? stats.dietDays : challenge.duration;
+
+    switch (challenge.rules.alcoholRule) {
+      case 'none':
+        return `You went ${daysCount} days without a single drop of alcohol.`;
+      case 'one_cheat_week':
+        return `You minimized your alcohol intake to just once a week for ${daysCount} days.`;
+      case 'no_limit':
+        return null; // Don't show anything for no limit
+      default:
+        return null;
+    }
+  };
+
+  const alcoholMsg = getAlcoholSummary();
 
   return (
     <div
@@ -228,10 +224,8 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             <span className="text-[var(--color-primary)] font-bold">{challenge.name}</span>.
           </p>
           <div className="text-sm text-[var(--color-text-muted)] italic space-y-1">
-            <p>"{getDietSummary()}"</p>
-            {challenge.rules.outdoorWorkout && stats.outdoorSessions > 0 && (
-              <p>"You braved the elements for {stats.outdoorSessions} outdoor sessions."</p>
-            )}
+            <p>&quot;{getDietSummary()}&quot;</p>
+            {alcoholMsg && <p>&quot;{alcoholMsg}&quot;</p>}
           </div>
         </div>
 
@@ -245,7 +239,6 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
             </p>
           </div>
 
-          {/* New Outdoor Card */}
           {challenge.rules.outdoorWorkout && (
             <div className="bg-[var(--color-background)] p-4 rounded-xl text-center border border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-colors">
               <FontAwesomeIcon icon={faCloudSun} className="text-2xl text-yellow-500 mb-2" />
@@ -287,7 +280,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
               <FontAwesomeIcon icon={faImage} className="text-2xl text-pink-400 mb-2" />
               <p className="text-2xl font-bold font-orbitron">{stats.totalPhotos}</p>
               <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">
-                Photos Required
+                Photos Taken
               </p>
             </div>
           )}
