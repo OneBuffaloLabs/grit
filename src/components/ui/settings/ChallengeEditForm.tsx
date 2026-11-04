@@ -32,6 +32,7 @@ export const ChallengeEditForm = ({
         .getDate()
         .toString()
         .padStart(2, '0')}/${date.getFullYear()}`;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStartDate(formattedDate);
       setOriginalStartDate(formattedDate);
     }

@@ -41,6 +41,7 @@ const PhotoGallery = ({ currentDay, isReadOnly = false }: PhotoGalleryProps) => 
 
   // This hook handles fetching data when the challenge changes.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPhotos();
   }, [fetchPhotos]);
 

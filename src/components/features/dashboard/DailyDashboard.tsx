@@ -114,7 +114,7 @@ const DailyDashboard = ({
     }
 
     if (challenge.rules.photoRule !== 'none') {
-      let showPhotoTask = false;
+      let showPhotoTask: boolean;
       const isFirstDay = selectedDay === 1;
       const isLastDay = selectedDay === challenge.duration;
 

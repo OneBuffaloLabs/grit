@@ -21,6 +21,7 @@ const Journal = ({ currentDay, isReadOnly = false }: JournalProps) => {
 
   useEffect(() => {
     const entry = challenge?.days[currentDay]?.journal || '';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setJournalText(entry);
     setOriginalText(entry); // Set original text when component loads or day changes
   }, [challenge, currentDay]);

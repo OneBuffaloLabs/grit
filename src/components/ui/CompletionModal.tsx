@@ -118,7 +118,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     }
 
     // Photos
-    let calculatedTotalPhotos = 0;
+    let calculatedTotalPhotos: number;
     switch (rules.photoRule) {
       case 'daily':
         calculatedTotalPhotos = duration;
