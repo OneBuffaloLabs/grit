@@ -5,6 +5,18 @@ import React from 'react';
 import { siteConfig } from '@/config/site';
 import socialsData from '@/data/socials.json';
 
+interface BusinessConfig {
+  type: string;
+  priceRange?: string;
+  city: string;
+  region: string;
+  country: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
 interface JsonLdProps {
   includeLocalBusiness?: boolean;
 }
@@ -43,25 +55,27 @@ export default function JsonLd({ includeLocalBusiness = false }: JsonLdProps): R
     },
   ];
 
-  if (includeLocalBusiness && siteConfig.business) {
+  const business = siteConfig.business as unknown as BusinessConfig | null | undefined;
+
+  if (includeLocalBusiness && business) {
     graph.push({
-      '@type': siteConfig.business.type,
+      '@type': business.type,
       '@id': `${siteConfig.url}/#business`,
       name: siteConfig.name,
       url: siteConfig.url,
       image: `${siteConfig.url}${siteConfig.ogImage}`,
       description: siteConfig.description,
-      priceRange: siteConfig.business.priceRange,
+      priceRange: business.priceRange,
       address: {
         '@type': 'PostalAddress',
-        addressLocality: siteConfig.business.city,
-        addressRegion: siteConfig.business.region,
-        addressCountry: siteConfig.business.country,
+        addressLocality: business.city,
+        addressRegion: business.region,
+        addressCountry: business.country,
       },
       geo: {
         '@type': 'GeoCoordinates',
-        latitude: siteConfig.business.coordinates.latitude,
-        longitude: siteConfig.business.coordinates.longitude,
+        latitude: business.coordinates.latitude,
+        longitude: business.coordinates.longitude,
       },
       sameAs: sameAsUrls,
     });
