@@ -1,5 +1,17 @@
 [
   {
+    "date": "Nov 04",
+    "title": "Clean Up Your Dashboard",
+    "version": "v2.1.0",
+    "type": "feature",
+    "description": "Keep your workspace tidy. You can now delete any active, completed, or failed challenge directly from your dashboard.",
+    "details": [
+      "Added a quick-delete trash icon right on each challenge card.",
+      "Included a confirmation prompt so you never accidentally wipe out your hard-earned progress.",
+      "Permanently removes the challenge, logs, and photos from your device to keep your local storage clean."
+    ]
+  },
+  {
     "date": "Feb 04",
     "title": "Grit 2.0: The Customization Update",
     "version": "v2.0.0",

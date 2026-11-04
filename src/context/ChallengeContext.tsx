@@ -9,7 +9,7 @@ import React, {
   Dispatch,
 } from 'react';
 import { ChallengeDoc, ChallengeType, ChallengeRules } from '@/types';
-import { getActiveChallenge, createChallenge } from '@/lib/db';
+import { getActiveChallenge, createChallenge, deleteChallengeById } from '@/lib/db';
 
 type State = {
   challenge: ChallengeDoc | null;
@@ -89,6 +89,7 @@ export const useChallengeDispatch = () => {
 // --- Controller Hook ---
 export const useChallengeController = () => {
   const dispatch = useChallengeDispatch();
+  const { challenge } = useChallengeState();
 
   const startChallenge = async (
     name: string,
@@ -107,12 +108,25 @@ export const useChallengeController = () => {
   };
 
   const resetChallenge = async () => {
-    // Implementation for reset if needed
     dispatch({ type: 'SET_CHALLENGE', payload: null });
+  };
+
+  const deleteChallenge = async (id: string) => {
+    try {
+      await deleteChallengeById(id);
+      if (challenge?._id === id) {
+        const nextActive = await getActiveChallenge();
+        dispatch({ type: 'SET_CHALLENGE', payload: nextActive });
+      }
+    } catch (err) {
+      console.error('Error deleting challenge:', err);
+      throw err;
+    }
   };
 
   return {
     startChallenge,
     resetChallenge,
+    deleteChallenge,
   };
 };

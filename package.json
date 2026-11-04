@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "node --experimental-strip-types --test tests/**/*.test.ts",
     "sitemap": "next-sitemap && node sitemap-fix.js"
   },
   "dependencies": {

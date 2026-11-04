@@ -178,6 +178,26 @@ export const getPhotoAttachment = async (
 };
 
 /**
+ * Hard deletes a single challenge and all its attachments by ID.
+ */
+export const deleteChallengeById = async (id: string): Promise<boolean> => {
+  const db = await getDb();
+  if (!db) return false;
+
+  try {
+    const doc = await db.get(id);
+    await db.remove(doc);
+    return true;
+  } catch (err) {
+    if ((err as PouchDB.Core.Error).status === 404) {
+      return false;
+    }
+    console.error(`Error deleting challenge with id ${id}:`, err);
+    throw err;
+  }
+};
+
+/**
  * DANGER: Deletes all challenges from the database.
  * Used for the "Reset App" functionality.
  */
