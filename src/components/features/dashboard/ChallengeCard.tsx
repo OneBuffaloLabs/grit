@@ -13,6 +13,9 @@ import { faCheck, faTimes, faRunning, faTrashCan } from '@fortawesome/free-solid
 // --- Types ---
 import type { ChallengeDoc } from '@/types';
 
+// --- Utils ---
+import { formatDisplayDate } from '@/utils/date';
+
 // --- Data ---
 import { THEME } from '@/data/theme';
 
@@ -141,7 +144,7 @@ export const ChallengeCard = ({ challenge, onDelete }: ChallengeCardProps) => {
         </div>
         <p className="text-sm text-neutral-400 mb-2">{details}</p>
         <p className="text-xs text-text-muted">
-          Started: {new Date(challenge.startDate).toLocaleDateString()}
+          Started: {formatDisplayDate(challenge.startDate)}
         </p>
       </div>
 

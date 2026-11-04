@@ -4,6 +4,7 @@ import { faSpinner, faSave } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeDoc } from '@/types';
 import { updateChallenge } from '@/lib/db';
 import { useChallengeDispatch } from '@/context/ChallengeContext';
+import { formatToMMDDYYYY, parseMMDDYYYYToLocalDateString } from '@/utils/date';
 import { ProtocolRulebook } from './ProtocolRulebook';
 import type { NotificationProps } from '../Notification';
 
@@ -27,11 +28,7 @@ export const ChallengeEditForm = ({
 
   useEffect(() => {
     if (challenge.startDate) {
-      const date = new Date(challenge.startDate);
-      const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
-        .getDate()
-        .toString()
-        .padStart(2, '0')}/${date.getFullYear()}`;
+      const formattedDate = formatToMMDDYYYY(challenge.startDate);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStartDate(formattedDate);
       setOriginalStartDate(formattedDate);
@@ -50,12 +47,11 @@ export const ChallengeEditForm = ({
       return;
     }
 
-    const [month, day, year] = startDate.split('/').map(Number);
-    const newStartDate = new Date(year, month - 1, day);
+    const newStartDate = parseMMDDYYYYToLocalDateString(startDate);
 
     setIsSaving(true);
     try {
-      const updatedChallenge = { ...challenge, startDate: newStartDate.toISOString() };
+      const updatedChallenge = { ...challenge, startDate: newStartDate };
       const newRev = await updateChallenge(updatedChallenge);
       if (newRev) {
         if (contextChallengeId === challenge._id) {

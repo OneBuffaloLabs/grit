@@ -60,7 +60,7 @@ export interface ChallengeDoc {
   _rev?: string;
   docType: 'challenge';
   name: string;
-  startDate: string;
+  startDate: string; // YYYY-MM-DD local calendar date string
   status: 'active' | 'failed' | 'completed';
   type: ChallengeType;
   duration: number;

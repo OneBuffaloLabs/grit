@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
+import { calculateCurrentDay } from '@/utils/date';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHome,
@@ -79,14 +80,15 @@ const ChallengeDetailContent = () => {
   // --- Calculate Active Day ---
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
+    const currentCalendarDay = calculateCurrentDay(challenge.startDate, challenge.duration);
     const completedDays = Object.keys(challenge.days)
       .map(Number)
       .filter((day) => challenge.days[day]?.completed);
 
-    if (completedDays.length === 0) return 1;
+    if (completedDays.length === 0) return currentCalendarDay;
 
     const highestCompletedDay = Math.max(...completedDays);
-    return Math.min(highestCompletedDay + 1, challenge.duration);
+    return Math.min(Math.max(currentCalendarDay, highestCompletedDay + 1), challenge.duration);
   }, [challenge]);
 
   useEffect(() => {

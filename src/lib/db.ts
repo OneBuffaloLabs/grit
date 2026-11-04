@@ -1,4 +1,5 @@
 import type { ChallengeDoc, ChallengeType, ChallengeRules } from '@/types';
+import { getLocalDateString } from '@/utils/date';
 import PouchDB from 'pouchdb';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -47,7 +48,7 @@ export const createChallenge = async (
     _id: uuidv4(),
     docType: 'challenge',
     name,
-    startDate: new Date().toISOString(),
+    startDate: getLocalDateString(),
     status: 'active',
     type,
     duration,
