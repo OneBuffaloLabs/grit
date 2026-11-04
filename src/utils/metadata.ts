@@ -1,7 +1,9 @@
 // --- Next ---
 import type { Metadata } from 'next';
 
-// Define the structure for page-specific metadata
+// --- Config ---
+import { siteConfig } from '@/config/site';
+
 interface PageMetadata {
   title?: string;
   description?: string;
@@ -11,66 +13,39 @@ interface PageMetadata {
   robots?: Metadata['robots'];
 }
 
-// --- Base Metadata ---
-const BASE_URL = 'https://grit.onebuffalolabs.com';
-const SITE_NAME = 'Grit';
-const TWITTER_CREATOR = '@onebuffalolabs';
-const GOOGLE_ADSENSE_ACCOUNT = '';
-const DEFAULT_TITLE = 'Grit: The Privacy-First Discipline Tracker';
-const DEFAULT_DESCRIPTION =
-  'The ultimate privacy-first tracker for 75 Hard, 75 Soft, and 75 Balanced. Grit is an offline-ready PWA that keeps your transformation data 100% on your device. No accounts, no cloud, no compromises.';
-const DEFAULT_OG_IMAGE = ``;
-const DEFAULT_KEYWORDS = [
-  '75 Hard',
-  '75 Soft',
-  '75 Balanced',
-  '75 Hard Tracker',
-  '75 Soft Tracker',
-  '75 Balanced Tracker',
-  'Discipline Tracker',
-  'Mental Toughness',
-  'Habit Tracker',
-  'Privacy First App',
-  'PouchDB',
-  'Offline First',
-  'PWA',
-  'One Buffalo Labs',
-];
-
 /**
- * Generates metadata for a page, merging with site-wide defaults.
+ * Generates page metadata merged against base boilerplate siteConfig.
  */
 export function generateMetadata({
   title,
   description,
   keywords = [],
-  urlPath = '',
+  urlPath = '/',
   imageUrl,
   robots,
 }: PageMetadata = {}): Metadata {
-  const pageTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE;
-  const pageDescription = description || DEFAULT_DESCRIPTION;
-  const pageUrl = `${BASE_URL}${urlPath}`;
-  const allKeywords = [...new Set([...DEFAULT_KEYWORDS, ...keywords])];
-  const ogImageUrl = imageUrl ? `${BASE_URL}${imageUrl}` : DEFAULT_OG_IMAGE;
-  const otherMetadata: Metadata['other'] = {};
-  if (GOOGLE_ADSENSE_ACCOUNT) {
-    otherMetadata['google-adsense-account'] = GOOGLE_ADSENSE_ACCOUNT;
-  }
+  const pageTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.defaultTitle;
+  const pageDescription = description || siteConfig.description;
+  const cleanPath = urlPath === '/' ? '/' : `${urlPath.replace(/\/$/, '')}/`;
+  const pageUrl = `${siteConfig.url}${cleanPath}`;
+  const allKeywords = [...new Set([...siteConfig.keywords, ...keywords])];
+  const ogImageUrl = imageUrl
+    ? `${siteConfig.url}${imageUrl}`
+    : `${siteConfig.url}${siteConfig.ogImage}`;
 
   const metadata: Metadata = {
-    metadataBase: new URL(BASE_URL),
+    metadataBase: new URL(siteConfig.url),
     alternates: {
       canonical: pageUrl,
     },
     title: {
-      template: `%s | ${SITE_NAME}`,
-      default: DEFAULT_TITLE,
+      template: siteConfig.titleTemplate,
+      default: siteConfig.defaultTitle,
     },
-    ...(title && { title: title }),
+    ...(title && { title: { absolute: pageTitle } }),
     description: pageDescription,
     keywords: allKeywords,
-    ...(robots && { robots: robots }),
+    ...(robots && { robots }),
     manifest: '/manifest.json',
     icons: {
       icon: [
@@ -81,7 +56,7 @@ export function generateMetadata({
       apple: '/apple-icon.png',
     },
     appleWebApp: {
-      title: SITE_NAME,
+      title: siteConfig.name,
       capable: true,
       statusBarStyle: 'black-translucent',
     },
@@ -89,28 +64,27 @@ export function generateMetadata({
       title: pageTitle,
       description: pageDescription,
       url: pageUrl,
-      siteName: SITE_NAME,
+      siteName: siteConfig.name,
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${title || 'Grit Discipline Tracker'}`,
+          alt: `${title || siteConfig.name} Preview`,
           type: 'image/png',
         },
       ],
-      locale: 'en_US',
+      locale: siteConfig.locale,
       type: 'website',
     },
-    ...(Object.keys(otherMetadata).length > 0 && { other: otherMetadata }),
   };
 
-  if (TWITTER_CREATOR) {
+  if (siteConfig.creator?.twitter) {
     metadata.twitter = {
       card: 'summary_large_image',
       title: pageTitle,
       description: pageDescription,
-      creator: TWITTER_CREATOR,
+      creator: siteConfig.creator.twitter,
       images: [ogImageUrl],
     };
   }

@@ -1,0 +1,9 @@
+# Cloudflare Pages Redirects
+# Format: <source> <destination> [code]
+# Docs: https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Example 301 Permanent Redirect
+# /old-route/    /new-route/    301
+
+# Example 302 Temporary Redirect
+# /external-link https://example.com 302

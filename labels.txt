@@ -1,0 +1,15 @@
+frontend
+backend
+data
+auth
+api
+ui
+state
+storage
+offline
+testing
+refactor
+perf
+security
+dx
+functional

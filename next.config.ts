@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'export',
   trailingSlash: true,
+  allowedDevOrigins: ['10.5.1.63', 'localhost'],
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production', // Only remove in production
   },

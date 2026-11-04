@@ -11,5 +11,6 @@ module.exports = {
       },
     ],
   },
+  exclude: ['/apple-icon.png', '/icon.png', '/icon.svg', '/favicon-96x96.png', '/manifest.json'],
   outDir: './out',
 };
