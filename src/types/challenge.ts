@@ -1,4 +1,5 @@
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+// --- Types ---
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 export type ChallengeType = 'hard' | 'soft' | 'balanced' | 'custom';
 
@@ -35,6 +36,25 @@ export interface DailyMeasurements {
   forearms?: number;
 }
 
+export interface ChallengeDayTasks {
+  diet: boolean;
+  workout1: boolean;
+  workout2: boolean;
+  workout3?: boolean;
+  water: boolean;
+  reading: boolean;
+  progressPhoto: boolean;
+}
+
+export interface ChallengeDay {
+  completed: boolean;
+  photoAttached: boolean;
+  journal?: string;
+  weight?: number;
+  measurements?: DailyMeasurements;
+  tasks: ChallengeDayTasks;
+}
+
 export interface ChallengeDoc {
   _id: string;
   _rev?: string;
@@ -47,22 +67,7 @@ export interface ChallengeDoc {
   completionDate?: string;
   rules: ChallengeRules;
   days: {
-    [day: number]: {
-      completed: boolean;
-      photoAttached: boolean;
-      journal?: string;
-      weight?: number;
-      measurements?: DailyMeasurements;
-      tasks: {
-        diet: boolean;
-        workout1: boolean;
-        workout2: boolean;
-        workout3?: boolean;
-        water: boolean;
-        reading: boolean;
-        progressPhoto: boolean;
-      };
-    };
+    [day: number]: ChallengeDay;
   };
 }
 
