@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
 import type { ChallengeDoc } from '@/types';
 
@@ -99,5 +99,36 @@ describe('DailyDashboard dynamic dates and countdown', () => {
 
     expect(screen.getByText(/Tasks for Day 75/i)).toBeDefined();
     expect(screen.getByText(/Final day/i)).toBeDefined();
+  });
+
+  it('integrates WaterTracker and updates water consumption in database', async () => {
+    const { updateChallenge } = await import('@/lib/db');
+    vi.mocked(updateChallenge).mockResolvedValue({
+      ...sampleChallenge,
+      _rev: '2-water',
+    });
+
+    render(
+      <DailyDashboard
+        onFinishChallenge={onFinishChallenge}
+        onDaySelect={onDaySelect}
+        selectedDay={1}
+      />
+    );
+
+    expect(screen.getByText('Water Intake')).toBeDefined();
+    const add16Btn = screen.getByRole('button', { name: /\+16 oz/i });
+    fireEvent.click(add16Btn);
+
+    expect(updateChallenge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        days: expect.objectContaining({
+          1: expect.objectContaining({
+            waterConsumed: 16,
+            tasks: expect.objectContaining({ water: false }),
+          }),
+        }),
+      })
+    );
   });
 });

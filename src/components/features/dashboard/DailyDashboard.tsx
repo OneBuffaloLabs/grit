@@ -12,6 +12,7 @@ import {
   getChallengeDayDate,
   formatFriendlyDate,
 } from '@/utils/date';
+import WaterTracker from './WaterTracker';
 
 const initialTaskState = {
   diet: false,
@@ -74,6 +75,15 @@ const DailyDashboard = ({
   }, [challenge, selectedDay]);
 
   const isSelectedDayToday = selectedDay === currentCalendarDay;
+
+  const currentWater = useMemo(() => {
+    if (!challenge) return 0;
+    const dayData = challenge.days[selectedDay];
+    if (dayData?.waterConsumed !== undefined) {
+      return dayData.waterConsumed;
+    }
+    return tasks.water ? challenge.rules.water : 0;
+  }, [challenge, selectedDay, tasks.water]);
 
   // --- Helpers ---
 
@@ -195,6 +205,33 @@ const DailyDashboard = ({
       if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
     } catch (error) {
       console.error('Failed to update task:', error);
+    }
+  };
+
+  const handleUpdateWater = async (newAmount: number) => {
+    if (!challenge || isDayComplete || isReadOnly) return;
+
+    const waterGoal = challenge.rules.water;
+    const clampedAmount = Math.max(0, Math.min(newAmount, waterGoal));
+    const isGoalReached = clampedAmount >= waterGoal;
+
+    const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+    if (!updatedChallenge.days[selectedDay]) {
+      updatedChallenge.days[selectedDay] = {
+        completed: false,
+        photoAttached: false,
+        tasks: initialTaskState,
+      };
+    }
+
+    updatedChallenge.days[selectedDay].waterConsumed = clampedAmount;
+    updatedChallenge.days[selectedDay].tasks.water = isGoalReached;
+
+    try {
+      const newRev = await updateChallenge(updatedChallenge);
+      if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+    } catch (error) {
+      console.error('Failed to update water progress:', error);
     }
   };
 
@@ -332,31 +369,46 @@ const DailyDashboard = ({
 
         <div className="flex flex-col gap-8">
           <div className="space-y-4">
-            {taskItems.map((task) => (
-              <label
-                key={task.id}
-                className={`flex items-center text-lg p-4 rounded-xl border transition-all duration-300 ${
-                  isDayComplete || !isPreviousDayComplete || isReadOnly
-                    ? 'border-transparent bg-[var(--color-background)] opacity-60 cursor-not-allowed'
-                    : 'border-[var(--color-background)] bg-[var(--color-background)] hover:border-[var(--color-primary)] cursor-pointer'
-                }`}>
-                <input
-                  type="checkbox"
-                  checked={tasks[task.id as keyof typeof tasks]}
-                  onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
-                  disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
-                  className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-gray-700 disabled:cursor-not-allowed"
-                />
-                <span
-                  className={`ml-4 font-medium ${
-                    tasks[task.id as keyof typeof tasks]
-                      ? 'text-[var(--color-text-muted)] line-through'
-                      : 'text-[var(--color-text)]'
+            {taskItems.map((task) => {
+              if (task.id === 'water') {
+                return (
+                  <WaterTracker
+                    key="water"
+                    currentWater={currentWater}
+                    waterGoal={challenge?.rules.water || 128}
+                    isCompleted={tasks.water}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
+                    onUpdateWater={handleUpdateWater}
+                  />
+                );
+              }
+
+              return (
+                <label
+                  key={task.id}
+                  className={`flex items-center text-lg p-4 rounded-xl border transition-all duration-300 ${
+                    isDayComplete || !isPreviousDayComplete || isReadOnly
+                      ? 'border-transparent bg-[var(--color-background)] opacity-60 cursor-not-allowed'
+                      : 'border-[var(--color-background)] bg-[var(--color-background)] hover:border-[var(--color-primary)] cursor-pointer'
                   }`}>
-                  {task.label}
-                </span>
-              </label>
-            ))}
+                  <input
+                    type="checkbox"
+                    checked={tasks[task.id as keyof typeof tasks]}
+                    onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
+                    className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-gray-700 disabled:cursor-not-allowed"
+                  />
+                  <span
+                    className={`ml-4 font-medium ${
+                      tasks[task.id as keyof typeof tasks]
+                        ? 'text-[var(--color-text-muted)] line-through'
+                        : 'text-[var(--color-text)]'
+                    }`}>
+                    {task.label}
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
           <button

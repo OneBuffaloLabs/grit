@@ -52,6 +52,7 @@ export interface ChallengeDay {
   journal?: string;
   weight?: number;
   measurements?: DailyMeasurements;
+  waterConsumed?: number;
   tasks: ChallengeDayTasks;
 }
 
