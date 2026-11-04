@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -20,37 +20,88 @@ const PhotoGallery = ({ currentDay, isReadOnly = false }: PhotoGalleryProps) => 
   const [isUploading, setIsUploading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<{ day: number; url: string } | null>(null);
 
-  const fetchPhotos = useCallback(async () => {
-    if (!challenge) return;
-    setIsFetching(true);
-    const newPhotos = new Map<number, string>();
-    const daysWithPhotos = Object.keys(challenge.days)
-      .map(Number)
-      .filter((day) => challenge.days[day]?.photoAttached);
+  const challengeId = challenge?._id;
 
-    for (const day of daysWithPhotos) {
-      // Correctly pass both the challenge ID and the day number
-      const url = await getPhotoAttachment(challenge._id, day);
-      if (url) {
-        newPhotos.set(day, url);
-      }
-    }
-    setPhotos(newPhotos);
-    setIsFetching(false);
-  }, [challenge]);
+  // Stable primitive key representing only the days with photos attached (e.g. "1,3,7")
+  const photoDaysKey = challenge?.days
+    ? Object.keys(challenge.days)
+        .map(Number)
+        .filter((day) => challenge.days[day]?.photoAttached)
+        .sort((a, b) => a - b)
+        .join(',')
+    : '';
 
-  // This hook handles fetching data when the challenge changes.
+  // Ref tracking all active blob URLs for clean incremental loading and safe unmount cleanup
+  const photosRef = useRef<Map<number, string>>(new Map());
+
+  // Fetch only missing photos when challengeId or photoDaysKey changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchPhotos();
-  }, [fetchPhotos]);
+    let isCancelled = false;
 
-  // This hook handles cleaning up object URLs to prevent memory leaks.
+    const syncPhotos = async () => {
+      if (!challengeId || !photoDaysKey) {
+        photosRef.current.forEach((url) => URL.revokeObjectURL(url));
+        photosRef.current.clear();
+        if (!isCancelled) {
+          setPhotos(new Map());
+          setIsFetching(false);
+        }
+        return;
+      }
+
+      const currentMap = new Map(photosRef.current);
+      const targetDays = photoDaysKey.split(',').map(Number);
+      const targetSet = new Set(targetDays);
+
+      // Revoke any removed photo URLs
+      for (const [day, url] of currentMap.entries()) {
+        if (!targetSet.has(day)) {
+          URL.revokeObjectURL(url);
+          currentMap.delete(day);
+        }
+      }
+
+      // Only fetch photos that have not been loaded yet
+      const daysToFetch = targetDays.filter((day) => !currentMap.has(day));
+
+      if (daysToFetch.length === 0) {
+        photosRef.current = currentMap;
+        if (!isCancelled) {
+          setPhotos(new Map(currentMap));
+          setIsFetching(false);
+        }
+        return;
+      }
+
+      for (const day of daysToFetch) {
+        if (isCancelled) return;
+        const url = await getPhotoAttachment(challengeId, day);
+        if (url && !isCancelled) {
+          currentMap.set(day, url);
+        }
+      }
+
+      if (!isCancelled) {
+        photosRef.current = currentMap;
+        setPhotos(new Map(currentMap));
+        setIsFetching(false);
+      }
+    };
+
+    void syncPhotos();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [challengeId, photoDaysKey]);
+
+  // Revoke all created blob URLs on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
-      photos.forEach((url) => URL.revokeObjectURL(url));
+      photosRef.current.forEach((url) => URL.revokeObjectURL(url));
+      photosRef.current.clear();
     };
-  }, [photos]);
+  }, []);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
