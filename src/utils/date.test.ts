@@ -9,6 +9,9 @@ import {
   formatToMMDDYYYY,
   parseMMDDYYYYToLocalDateString,
   formatDisplayDate,
+  formatFriendlyDate,
+  getChallengeDayDate,
+  calculateDaysRemaining,
 } from '@/utils/date';
 
 describe('Date Utilities (Local YYYY-MM-DD)', () => {
@@ -112,6 +115,57 @@ describe('Date Utilities (Local YYYY-MM-DD)', () => {
     it('converts MM/DD/YYYY input back to YYYY-MM-DD local string', () => {
       expect(parseMMDDYYYYToLocalDateString('11/04/2026')).toBe('2026-11-04');
       expect(parseMMDDYYYYToLocalDateString('01/09/2026')).toBe('2026-01-09');
+    });
+  });
+
+  describe('formatFriendlyDate', () => {
+    it('formats dates with correct ordinal suffixes', () => {
+      expect(formatFriendlyDate('2026-02-15')).toBe('Feb 15th');
+      expect(formatFriendlyDate('2026-01-01')).toBe('Jan 1st');
+      expect(formatFriendlyDate('2026-03-02')).toBe('Mar 2nd');
+      expect(formatFriendlyDate('2026-04-03')).toBe('Apr 3rd');
+      expect(formatFriendlyDate('2026-05-04')).toBe('May 4th');
+      expect(formatFriendlyDate('2026-06-11')).toBe('Jun 11th');
+      expect(formatFriendlyDate('2026-07-12')).toBe('Jul 12th');
+      expect(formatFriendlyDate('2026-08-13')).toBe('Aug 13th');
+      expect(formatFriendlyDate('2026-09-21')).toBe('Sep 21st');
+      expect(formatFriendlyDate('2026-10-22')).toBe('Oct 22nd');
+      expect(formatFriendlyDate('2026-11-23')).toBe('Nov 23rd');
+      expect(formatFriendlyDate('2026-12-31')).toBe('Dec 31st');
+    });
+  });
+
+  describe('getChallengeDayDate', () => {
+    it('returns startDate for Day 1', () => {
+      expect(getChallengeDayDate('2026-02-09', 1)).toBe('2026-02-09');
+    });
+
+    it('calculates the exact calendar date for Day 7 (Feb 15th)', () => {
+      const day7Date = getChallengeDayDate('2026-02-09', 7);
+      expect(day7Date).toBe('2026-02-15');
+      expect(formatFriendlyDate(day7Date)).toBe('Feb 15th');
+    });
+
+    it('calculates the date for Day 75', () => {
+      expect(getChallengeDayDate('2026-01-01', 75)).toBe('2026-03-16');
+    });
+  });
+
+  describe('calculateDaysRemaining', () => {
+    it('returns 68 days left when today is Day 7 of 75', () => {
+      // Start Feb 9, today Feb 15 (Day 7)
+      const remaining = calculateDaysRemaining('2026-02-09', 75, '2026-02-15');
+      expect(remaining).toBe(68);
+    });
+
+    it('returns 74 days left on Day 1', () => {
+      const remaining = calculateDaysRemaining('2026-01-01', 75, '2026-01-01');
+      expect(remaining).toBe(74);
+    });
+
+    it('returns 0 days left on the final day', () => {
+      const remaining = calculateDaysRemaining('2026-01-01', 75, '2026-03-16');
+      expect(remaining).toBe(0);
     });
   });
 });

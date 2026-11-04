@@ -118,3 +118,45 @@ export function parseMMDDYYYYToLocalDateString(formattedStr: string): string {
 export function formatDisplayDate(dateStr: string): string {
   return formatToMMDDYYYY(dateStr);
 }
+
+/**
+ * Formats a YYYY-MM-DD date string into a friendly calendar date with an ordinal suffix,
+ * e.g. "2026-02-15" -> "Feb 15th", "2026-01-01" -> "Jan 1st", "2026-03-22" -> "Mar 22nd".
+ */
+export function formatFriendlyDate(dateStr: string): string {
+  const { month, day } = parseDateParts(dateStr);
+  const monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  const monthName = monthNames[month - 1] || '';
+
+  const getOrdinal = (n: number) => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+  };
+
+  return `${monthName} ${day}${getOrdinal(day)}`;
+}
+
+/**
+ * Returns the calendar date string (YYYY-MM-DD) for a specific 1-based day of a challenge.
+ * Day 1 = startDate.
+ */
+export function getChallengeDayDate(startDateStr: string, dayNumber: number): string {
+  return addDaysToDate(startDateStr, Math.max(0, dayNumber - 1));
+}
+
+/**
+ * Calculates remaining days in a challenge countdown.
+ * E.g., if duration is 75 and today is Day 7, returns 68.
+ */
+export function calculateDaysRemaining(
+  startDateStr: string,
+  duration: number = 75,
+  currentDateStr: string = getLocalDateString()
+): number {
+  const currentDay = calculateCurrentDay(startDateStr, duration, currentDateStr);
+  return Math.max(0, duration - currentDay);
+}

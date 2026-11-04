@@ -7,6 +7,11 @@ import type { ChallengeDoc, ChallengeRules } from '@/types';
 import Notification from '@/components/ui/Notification';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
+import {
+  calculateCurrentDay,
+  getChallengeDayDate,
+  formatFriendlyDate,
+} from '@/utils/date';
 
 const initialTaskState = {
   diet: false,
@@ -50,6 +55,25 @@ const DailyDashboard = ({
   const isPreviousDayComplete =
     selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
   const isLastDay = selectedDay === challenge?.duration;
+
+  // --- Dynamic Dates & Countdown ---
+  const currentCalendarDay = useMemo(() => {
+    if (!challenge) return 1;
+    return calculateCurrentDay(challenge.startDate, challenge.duration);
+  }, [challenge]);
+
+  const selectedDayRemaining = useMemo(() => {
+    if (!challenge) return 0;
+    return Math.max(0, challenge.duration - selectedDay);
+  }, [challenge, selectedDay]);
+
+  const selectedDayFriendlyDate = useMemo(() => {
+    if (!challenge) return '';
+    const dateStr = getChallengeDayDate(challenge.startDate, selectedDay);
+    return formatFriendlyDate(dateStr);
+  }, [challenge, selectedDay]);
+
+  const isSelectedDayToday = selectedDay === currentCalendarDay;
 
   // --- Helpers ---
 
@@ -271,14 +295,40 @@ const DailyDashboard = ({
       )}
 
       <div className="p-6 sm:p-8">
-        <h2 className="text-2xl font-bold font-orbitron mb-6 flex items-center gap-2">
-          Tasks for Day {selectedDay}
-          {isDayComplete && (
-            <span className="text-sm bg-green-500/20 text-green-500 px-2 py-1 rounded">
-              Complete
-            </span>
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4 border-b border-[var(--color-background)] pb-4">
+          <div>
+            <h2 className="text-2xl font-bold font-orbitron flex items-center gap-3">
+              Tasks for Day {selectedDay}
+              {isDayComplete && (
+                <span className="text-sm font-sans font-bold bg-green-500/20 text-green-500 px-2.5 py-0.5 rounded">
+                  Complete
+                </span>
+              )}
+            </h2>
+            {selectedDayFriendlyDate && (
+              <p className="text-sm text-[var(--color-text-muted)] font-medium mt-1">
+                {selectedDayFriendlyDate}
+                {isSelectedDayToday && (
+                  <span className="text-[var(--color-primary)] font-semibold ml-1.5">(Today)</span>
+                )}
+              </p>
+            )}
+          </div>
+          {challenge && challenge.status === 'active' && (
+            <div className="text-xs font-orbitron uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-background)] px-3 py-1.5 rounded-lg border border-[var(--color-surface-border)]">
+              {selectedDay === challenge.duration ? (
+                <span className="text-[var(--color-primary)] font-bold">Final day</span>
+              ) : (
+                <>
+                  <span className="text-[var(--color-primary)] font-bold">
+                    {selectedDayRemaining}
+                  </span>{' '}
+                  {selectedDayRemaining === 1 ? 'day' : 'days'} left
+                </>
+              )}
+            </div>
           )}
-        </h2>
+        </div>
 
         <div className="flex flex-col gap-8">
           <div className="space-y-4">
