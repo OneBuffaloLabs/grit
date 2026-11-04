@@ -64,7 +64,6 @@ export const ChallengeEditForm = ({
           message: 'Your challenge start date has been updated.',
         });
         onClose();
-        window.location.reload();
       }
     } catch (error) {
       console.error('Failed to update start date:', error);
