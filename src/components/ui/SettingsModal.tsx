@@ -14,6 +14,7 @@ import type { NotificationProps } from './Notification';
 // Import refactored sub-components
 import { ChallengeEditForm } from './settings/ChallengeEditForm';
 import { DangerZone } from './settings/DangerZone';
+import { DataExport } from './settings/DataExport';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -116,6 +117,10 @@ const SettingsModal = ({
             showNotification={showNotification}
           />
         ) : null}
+
+        <div className="border-t border-gray-700 my-2"></div>
+
+        <DataExport />
 
         <div className="border-t border-gray-700 my-2"></div>
 
