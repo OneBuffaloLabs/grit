@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,6 +14,14 @@ const Header = () => {
   const { challenge } = useChallengeState();
   const pathname = usePathname();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenSettings = () => setIsSettingsOpen(true);
+    window.addEventListener('openSettingsModal', handleOpenSettings);
+    return () => {
+      window.removeEventListener('openSettingsModal', handleOpenSettings);
+    };
+  }, []);
   const [notification, setNotification] = useState<Omit<NotificationProps, 'onClose'> | null>(null);
 
   // Route Helpers

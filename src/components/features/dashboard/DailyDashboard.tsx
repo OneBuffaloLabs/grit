@@ -420,7 +420,14 @@ const DailyDashboard = ({
 
           <p className="text-center text-sm text-[var(--color-text-muted)] flex items-center justify-center gap-1">
             <FontAwesomeIcon icon={faCog} className="text-xs" />
-            <span>Settings allows you to restart if you miss a task.</span>
+            <span>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('openSettingsModal'))}
+                className="text-[var(--color-primary)] hover:underline font-medium cursor-pointer">
+                Settings
+              </button>{' '}
+              allows you to restart if you miss a task.
+            </span>
           </p>
         </div>
       </div>

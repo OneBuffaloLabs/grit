@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useChallengeState } from '@/context/ChallengeContext';
 import { calculateCurrentDay } from '@/utils/date';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faChevronLeft, faChevronRight, faHistory, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faChevronLeft, faChevronRight, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 
 interface GritTimelineProps {
   selectedDay: number;
@@ -124,22 +124,35 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
 
   return (
     <div className="bg-background rounded-lg shadow-lg p-4 mb-8">
+      {/* Catch-up / Missing days banner if user is behind */}
+      {currentDay > lastLoggedDay + 1 && (
+        <div className="mb-4 bg-surface border border-border rounded-lg p-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+          <div className="flex items-center gap-2.5 text-text-secondary text-center sm:text-left">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span>
+              You have unlogged days between Day {lastLoggedDay + 1} and Today (Day {currentDay}). Did you fail or miss tasks? You can restart in{' '}
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('openSettingsModal'))}
+                className="text-primary hover:underline font-medium inline cursor-pointer">
+                Settings
+              </button>.
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => onDaySelect(lastLoggedDay + 1)}
+              className="text-xs bg-primary hover:bg-primary-hover text-white px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer">
+              Fill Missing Days
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
         <h2 className="text-xl font-bold font-orbitron text-center sm:text-left">
           Your {challengeDuration} Day Journey
         </h2>
         <div className="flex items-center gap-2 flex-wrap justify-center">
-          {/* Jump to Last Logged Day */}
-          {lastLoggedDay !== selectedDay && (
-            <button
-              onClick={() => onDaySelect(lastLoggedDay)}
-              className="text-xs bg-surface hover:bg-surface-hover text-text-secondary px-2.5 py-1.5 rounded-md border border-border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
-              title={`Jump to last logged day (Day ${lastLoggedDay})`}>
-              <FontAwesomeIcon icon={faHistory} className="text-primary" />
-              <span>Last Logged (Day {lastLoggedDay})</span>
-            </button>
-          )}
-
           {/* Jump to Current Day */}
           {currentDay <= challengeDuration && currentDay !== selectedDay && (
             <button
