@@ -56,6 +56,41 @@ export interface ChallengeDay {
   tasks: ChallengeDayTasks;
 }
 
+export interface ChallengeMetaDoc {
+  _id: string;
+  _rev?: string;
+  docType: 'challenge_meta';
+  name: string;
+  startDate: string; // YYYY-MM-DD local calendar date string
+  status: 'active' | 'failed' | 'completed';
+  type: ChallengeType;
+  duration: number;
+  completionDate?: string;
+  rules: ChallengeRules;
+}
+
+export interface ChallengeDayDoc extends ChallengeDay {
+  _id: string; // Composite key: day:{challengeId}:{001..075}
+  _rev?: string;
+  docType: 'challenge_day';
+  challengeId: string;
+  day: number;
+}
+
+export interface PhotoDoc {
+  _id: string; // Composite key: photo:{challengeId}:{001..075}
+  _rev?: string;
+  docType: 'photo';
+  challengeId: string;
+  day: number;
+  mimeType: string;
+  updatedAt: string;
+}
+
+/**
+ * Aggregated challenge view model used by React context and UI components,
+ * also matching the legacy v1 monolithic PouchDB document shape.
+ */
 export interface ChallengeDoc {
   _id: string;
   _rev?: string;
@@ -71,6 +106,8 @@ export interface ChallengeDoc {
     [day: number]: ChallengeDay;
   };
 }
+
+export type GritDbDoc = ChallengeMetaDoc | ChallengeDayDoc | PhotoDoc | ChallengeDoc;
 
 export interface ChallengeVariant {
   id: ChallengeType;
