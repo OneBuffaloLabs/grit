@@ -168,7 +168,8 @@ const ChallengeDetailContent = () => {
   const showMeasurements = challenge.rules.trackMeasurements;
   const showJournal = challenge.rules.useDailyJournal;
   const hasSidebarFeatures = showWeight || showMeasurements || showJournal;
-  const isReadOnly = challenge.status !== 'active';
+  const isFutureDay = selectedDay > currentCalendarDay;
+  const isReadOnly = challenge.status !== 'active' || isFutureDay;
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-background)]">

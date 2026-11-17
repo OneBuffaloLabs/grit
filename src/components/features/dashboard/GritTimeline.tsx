@@ -188,8 +188,14 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
             // If challenge is completed, all days are complete. Otherwise, check the day's status.
             const isCompleted =
               challenge?.status === 'completed' || challenge?.days[dayNumber]?.completed || false;
+            // A day is selectable if:
+            // 1. It's day 1, OR
+            // 2. It's already completed, OR
+            // 3. The previous day is completed AND the day number is NOT in the future (dayNumber <= currentDay).
+            const isPreviousCompleted = dayNumber === 1 || (challenge?.days[dayNumber - 1]?.completed || false);
+            const isNotInFuture = dayNumber <= currentDay;
             const isSelectable =
-              dayNumber === 1 || isCompleted || challenge?.days[dayNumber - 1]?.completed || false;
+              dayNumber === 1 || isCompleted || (isPreviousCompleted && isNotInFuture);
 
             const isToday = dayNumber === currentDay;
             const isLastLogged = dayNumber === lastLoggedDay;
