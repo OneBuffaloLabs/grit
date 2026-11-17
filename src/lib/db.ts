@@ -133,7 +133,7 @@ export const updateChallenge = async (challenge: ChallengeDoc): Promise<Challeng
 export const addPhotoAttachment = async (
   doc: ChallengeDoc,
   day: number,
-  photo: File
+  photo: Blob
 ): Promise<ChallengeDoc> => {
   const db = await getDb();
   if (!db) throw new Error('Database not available');

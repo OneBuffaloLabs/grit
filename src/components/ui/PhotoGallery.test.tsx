@@ -1,13 +1,18 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import PhotoGallery from './PhotoGallery';
-import { getPhotoAttachment } from '@/lib/db';
+import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
+import { compressImage } from '@/utils/imageCompression';
 import type { ChallengeDoc } from '@/types';
 
 vi.mock('@/lib/db', () => ({
   getPhotoAttachment: vi.fn(),
   addPhotoAttachment: vi.fn(),
+}));
+
+vi.mock('@/utils/imageCompression', () => ({
+  compressImage: vi.fn(),
 }));
 
 const mockDispatch = vi.fn();
@@ -183,5 +188,37 @@ describe('PhotoGallery - Issue #29', () => {
     unmount();
 
     expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:http://localhost/photo-day-1');
+  });
+
+  it('compresses selected photo before passing it to addPhotoAttachment', async () => {
+    mockChallengeState = { challenge: { ...baseChallenge } };
+    vi.mocked(getPhotoAttachment).mockResolvedValue('blob:http://localhost/photo-day-1');
+
+    const rawFile = new File([new Uint8Array(5_000_000)], 'raw-photo.jpg', {
+      type: 'image/jpeg',
+    });
+    const compressedFile = new File([new Uint8Array(90_000)], 'raw-photo.webp', {
+      type: 'image/webp',
+    });
+    const updatedChallenge: ChallengeDoc = { ...baseChallenge };
+
+    vi.mocked(compressImage).mockResolvedValue(compressedFile);
+    vi.mocked(addPhotoAttachment).mockResolvedValue(updatedChallenge);
+
+    const { container } = render(<PhotoGallery currentDay={2} />);
+
+    const fileInput = container.querySelector('#photo-upload') as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+
+    fireEvent.change(fileInput, { target: { files: [rawFile] } });
+
+    await waitFor(() => {
+      expect(compressImage).toHaveBeenCalledWith(rawFile);
+      expect(addPhotoAttachment).toHaveBeenCalledWith(baseChallenge, 2, compressedFile);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_CHALLENGE',
+        payload: updatedChallenge,
+      });
+    });
   });
 });

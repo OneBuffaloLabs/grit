@@ -1,11 +1,19 @@
 'use client';
 
+// --- React ---
 import React, { useState, useEffect, useRef } from 'react';
+
+// --- Context / Hooks ---
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
-import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
+
+// --- Components ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import PhotoModal from '@/components/features/dashboard/PhotoModal';
+
+// --- Utils / Lib ---
+import { addPhotoAttachment, getPhotoAttachment } from '@/lib/db';
+import { compressImage } from '@/utils/imageCompression';
 
 interface PhotoGalleryProps {
   currentDay: number;
@@ -104,16 +112,19 @@ const PhotoGallery = ({ currentDay, isReadOnly = false }: PhotoGalleryProps) => 
   }, []);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const input = event.currentTarget;
+    const file = input.files?.[0];
     if (file && challenge) {
       setIsUploading(true);
       try {
-        const updatedChallenge = await addPhotoAttachment(challenge, currentDay, file);
+        const compressedFile = await compressImage(file);
+        const updatedChallenge = await addPhotoAttachment(challenge, currentDay, compressedFile);
         dispatch({ type: 'SET_CHALLENGE', payload: updatedChallenge });
       } catch (error) {
         console.error('Error uploading photo:', error);
         alert('Failed to upload photo. Please try again.');
       } finally {
+        input.value = '';
         setIsUploading(false);
       }
     }
