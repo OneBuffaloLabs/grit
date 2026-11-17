@@ -2,8 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useChallengeState } from '@/context/ChallengeContext';
+import { calculateCurrentDay } from '@/utils/date';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faChevronLeft, faChevronRight, faHistory, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 
 interface GritTimelineProps {
   selectedDay: number;
@@ -21,6 +22,36 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
 
   // Use the challenge's duration, with a fallback to 75
   const challengeDuration = challenge?.duration || 75;
+
+  // Calculate current calendar day
+  const currentDay = challenge?.startDate ? calculateCurrentDay(challenge.startDate, challengeDuration) : 1;
+
+  // Find the last logged/active day (highest day number with any task entry or completed status)
+  const lastLoggedDay = (() => {
+    if (!challenge?.days) return 1;
+    for (let d = challengeDuration; d >= 1; d--) {
+      const dayData = challenge.days[d];
+      if (dayData) {
+        const hasCompleted = dayData.completed;
+        const tasks = dayData.tasks;
+        const hasTaskActivity = tasks && (
+          tasks.workout1 ||
+          tasks.workout2 ||
+          tasks.water ||
+          tasks.reading ||
+          tasks.diet ||
+          dayData.photoAttached ||
+          (dayData.journal && dayData.journal.trim().length > 0) ||
+          (dayData.waterConsumed && dayData.waterConsumed > 0) ||
+          Boolean(dayData.weight)
+        );
+        if (hasCompleted || hasTaskActivity) {
+          return d;
+        }
+      }
+    }
+    return 1;
+  })();
 
   // This effect scrolls the selected day into view when it changes
   useEffect(() => {
@@ -93,9 +124,35 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
 
   return (
     <div className="bg-background rounded-lg shadow-lg p-4 mb-8">
-      <h2 className="text-xl font-bold font-orbitron text-center mb-4">
-        Your {challengeDuration} Day Journey
-      </h2>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
+        <h2 className="text-xl font-bold font-orbitron text-center sm:text-left">
+          Your {challengeDuration} Day Journey
+        </h2>
+        <div className="flex items-center gap-2 flex-wrap justify-center">
+          {/* Jump to Last Logged Day */}
+          {lastLoggedDay !== selectedDay && (
+            <button
+              onClick={() => onDaySelect(lastLoggedDay)}
+              className="text-xs bg-surface hover:bg-surface-hover text-text-secondary px-2.5 py-1.5 rounded-md border border-border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title={`Jump to last logged day (Day ${lastLoggedDay})`}>
+              <FontAwesomeIcon icon={faHistory} className="text-primary" />
+              <span>Last Logged (Day {lastLoggedDay})</span>
+            </button>
+          )}
+
+          {/* Jump to Current Day */}
+          {currentDay <= challengeDuration && currentDay !== selectedDay && (
+            <button
+              onClick={() => onDaySelect(currentDay)}
+              className="text-xs bg-primary/20 hover:bg-primary/30 text-primary px-2.5 py-1.5 rounded-md border border-primary/30 transition-colors flex items-center gap-1.5 font-medium cursor-pointer shadow-sm"
+              title={`Jump to today (Day ${currentDay})`}>
+              <FontAwesomeIcon icon={faCalendarDay} />
+              <span>Today (Day {currentDay})</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="relative flex items-center">
         {showChevrons && (
           <button
@@ -121,6 +178,9 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
             const isSelectable =
               dayNumber === 1 || isCompleted || challenge?.days[dayNumber - 1]?.completed || false;
 
+            const isToday = dayNumber === currentDay;
+            const isLastLogged = dayNumber === lastLoggedDay;
+
             let dayStyles = 'bg-surface';
             if (isCompleted) dayStyles = 'bg-primary';
             if (selectedDay === dayNumber)
@@ -132,14 +192,25 @@ const GritTimeline = ({ selectedDay, onDaySelect }: GritTimelineProps) => {
                 key={dayNumber}
                 ref={selectedDay === dayNumber ? selectedDayRef : null}
                 onClick={() => isSelectable && onDaySelect(dayNumber)}
-                className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-md font-mono text-sm transition-all duration-200 ${
+                className={`relative flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-md font-mono text-sm transition-all duration-200 ${
                   isSelectable ? 'cursor-pointer' : ''
-                } ${dayStyles}`}>
+                } ${dayStyles}`}
+                title={`Day ${dayNumber}${isToday ? ' (Today)' : ''}${isLastLogged ? ' (Last Logged)' : ''}`}>
                 {isCompleted ? (
                   <FontAwesomeIcon icon={faTimes} className="text-white text-lg" />
                 ) : (
                   dayNumber
                 )}
+
+                {/* Indicator dots for Today / Last Logged */}
+                <div className="absolute -top-1 -right-1 flex items-center gap-0.5">
+                  {isToday && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-white border-2 border-background shadow-sm" title="Today" />
+                  )}
+                  {isLastLogged && !isToday && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary-hover border-2 border-background shadow-sm" title="Last Logged" />
+                  )}
+                </div>
               </div>
             );
           })}
