@@ -31,3 +31,38 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Global overrides for @onebuffalolabs/adapter-webrtc SyncModal to enforce dark minimalist Grit theme */
+.fixed.inset-0 div[style*="background-color: rgb(255, 255, 255)"],
+.fixed.inset-0 div[style*="background-color: #fff"],
+.fixed.inset-0 div[style*="background-color: white"],
+.fixed.inset-0 div[style*="background-color: rgb(255,255,255)"],
+div[style*="max-width: 420px"][style*="background-color"] {
+  background-color: var(--color-secondary, #1a1a1a) !important;
+  color: var(--color-foreground, #f5f5f5) !important;
+  border: 1px solid var(--color-surface-border, #333) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+}
+
+div[style*="max-width: 420px"] h2,
+div[style*="max-width: 420px"] h3,
+div[style*="max-width: 420px"] p,
+div[style*="max-width: 420px"] span {
+  color: var(--color-foreground, #f5f5f5) !important;
+}
+
+div[style*="max-width: 420px"] button {
+  background-color: var(--color-surface, #2c2c2c) !important;
+  color: var(--color-foreground, #f5f5f5) !important;
+  border: 1px solid var(--color-surface-border, #444) !important;
+  border-radius: 8px !important;
+  font-family: var(--font-orbitron), sans-serif !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+div[style*="max-width: 420px"] button:hover {
+  background-color: var(--color-primary, #e53e3e) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary, #e53e3e) !important;
+}

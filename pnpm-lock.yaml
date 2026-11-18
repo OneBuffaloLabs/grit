@@ -181,12 +181,21 @@ importers:
       '@fortawesome/react-fontawesome':
         specifier: ^3.1.1
         version: 3.5.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.3.1)
+      '@onebuffalolabs/adapter-webrtc':
+        specifier: ^0.1.1
+        version: 0.1.1(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@onebuffalolabs/herd-sync':
+        specifier: ^0.1.1
+        version: 0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       next:
         specifier: 16.4.6
         version: 16.4.6(@babel/core@7.29.7(supports-color@7.2.0))(@types/node@25.9.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       pouchdb:
         specifier: ^9.0.0
         version: 9.0.0
+      qrcode.react:
+        specifier: ^4.2.0
+        version: 4.2.0(react@19.3.1)
       react:
         specifier: ^19.2.3
         version: 19.3.1
@@ -758,6 +767,20 @@ packages:
   '@nolyfill/is-core-module@1.0.39':
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
+
+  '@onebuffalolabs/adapter-webrtc@0.1.1':
+    resolution: {integrity: sha512-pQcQsWI3O0tSw236Kv+ZGJ/7dsf4o5LBh3EU0q2lj7H1oXC9R3LYZrqxTPJfeSBdjcmQKOoA1HcvNSYqctGqSQ==}
+    peerDependencies:
+      '@onebuffalolabs/herd-sync': 0.1.1
+      pouchdb-browser: ^9.0.0
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@onebuffalolabs/herd-sync@0.1.1':
+    resolution: {integrity: sha512-ZybFC0VRsya5C35YLpb05Awdx7+odpiXqs3bOlCkAQlyE7/2Jx695hLB3FBm+9eKSBSnVSzfr8X9T1pBvR8KOQ==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
@@ -2111,6 +2134,9 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
+  jsqr@1.4.0:
+    resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
+
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
@@ -2484,6 +2510,9 @@ packages:
     resolution: {integrity: sha512-LJlKCCAUFKOuZxipUdYw1NzIITEsPcgyOG9LkvRJvuKj/bRzbuRY0ARXvL0pWGpsZvn8jku+LMep2eU0seHp8g==}
     engines: {node: ^10 || ^12 || >=14}
 
+  pouchdb-browser@9.0.0:
+    resolution: {integrity: sha512-0uKFWhsTtiVOF0+aGo7mvtCTP40f6dlsLNmJUvc/lwjsX1C3v+eBfVbvykyxpFl7UTAoJkXl+g/GOzNvyMtV1g==}
+
   pouchdb@9.0.0:
     resolution: {integrity: sha512-6wjFc/PzwaWz86rmMXoqdBlR/fBSkNoWO1mEJO7RZNS6n3xf+fhhXWAWtws741KpLKx84IkmmJ48tp+fhFzj4A==}
 
@@ -2507,6 +2536,11 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
+
+  qrcode.react@4.2.0:
+    resolution: {integrity: sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
@@ -3464,6 +3498,22 @@ snapshots:
       fastq: 1.20.3
 
   '@nolyfill/is-core-module@1.0.39': {}
+
+  '@onebuffalolabs/adapter-webrtc@0.1.1(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@onebuffalolabs/herd-sync': 0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      jsqr: 1.4.0
+      lz-string: 1.5.0
+      pouchdb-browser: 9.0.0
+      qrcode.react: 4.2.0(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+
+  '@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      pouchdb-browser: 9.0.0
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
 
   '@oxc-project/types@0.156.0': {}
 
@@ -4947,6 +4997,8 @@ snapshots:
 
   json5@2.2.3: {}
 
+  jsqr@1.4.0: {}
+
   jsx-ast-utils@3.3.5:
     dependencies:
       array-includes: 3.2.0
@@ -5293,6 +5345,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
+  pouchdb-browser@9.0.0:
+    dependencies:
+      spark-md5: 3.0.2
+      uuid: 8.3.2
+      vuvuzela: 1.0.3
+
   pouchdb@9.0.0:
     dependencies:
       double-ended-queue: 2.1.0-0
@@ -5333,6 +5391,10 @@ snapshots:
       punycode: 2.3.1
 
   punycode@2.3.1: {}
+
+  qrcode.react@4.2.0(react@19.3.1):
+    dependencies:
+      react: 19.3.1
 
   querystringify@2.2.0: {}
 

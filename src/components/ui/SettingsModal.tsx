@@ -15,6 +15,7 @@ import type { NotificationProps } from './Notification';
 import { ChallengeEditForm } from './settings/ChallengeEditForm';
 import { DangerZone } from './settings/DangerZone';
 import { DataExport } from './settings/DataExport';
+import { SyncStatusModal } from './settings/SyncStatusModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -77,7 +78,7 @@ const SettingsModal = ({
          if content exceeds viewport height.
       */}
       <div
-        className="relative bg-[var(--color-secondary)] p-6 rounded-lg max-w-md w-full flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl"
+        className="relative bg-[var(--color-secondary)] p-6 rounded-lg max-w-lg w-full flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl"
         onClick={(e) => e.stopPropagation()}>
         <header className="flex justify-between items-center">
           <h3 className="text-2xl font-bold font-orbitron">
@@ -121,6 +122,10 @@ const SettingsModal = ({
         <div className="border-t border-gray-700 my-2"></div>
 
         <DataExport />
+
+        <div className="border-t border-gray-700 my-2"></div>
+
+        <SyncStatusModal />
 
         <div className="border-t border-gray-700 my-2"></div>
 
