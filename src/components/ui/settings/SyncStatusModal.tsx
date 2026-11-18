@@ -33,6 +33,13 @@ export const SyncStatusModal = () => {
     };
   }, [db]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash.includes('pair=')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOpen(true);
+    }
+  }, []);
+
   return (
     <div className="bg-[var(--color-surface)] p-4 rounded-lg border border-[var(--color-surface-border)] mt-4">
       <div className="flex items-center justify-between mb-3">
@@ -68,6 +75,19 @@ export const SyncStatusModal = () => {
         <SyncModal
           adapter={adapter}
           onClose={() => setOpen(false)}
+          colors={{
+            background: '#1a1a1a',
+            text: '#f5f5f5',
+            primary: '#e53e3e',
+            primaryText: '#ffffff',
+            border: '#333333',
+            inputBackground: '#2c2c2c',
+          }}
+          classNames={{
+            dialog: 'shadow-2xl border border-[var(--color-surface-border)] rounded-xl bg-[var(--color-secondary)]',
+            primaryButton: 'rounded-lg font-bold bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white',
+            secondaryButton: 'rounded-lg border border-[var(--color-surface-border)] text-sm text-[var(--color-text-muted)] hover:text-white',
+          }}
         />
       )}
     </div>

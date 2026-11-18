@@ -182,8 +182,8 @@ importers:
         specifier: ^3.1.1
         version: 3.5.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.3.1)
       '@onebuffalolabs/adapter-webrtc':
-        specifier: ^0.1.1
-        version: 0.1.1(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: ^0.2.0
+        version: 0.2.0(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@onebuffalolabs/herd-sync':
         specifier: ^0.1.1
         version: 0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -768,8 +768,8 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@onebuffalolabs/adapter-webrtc@0.1.1':
-    resolution: {integrity: sha512-pQcQsWI3O0tSw236Kv+ZGJ/7dsf4o5LBh3EU0q2lj7H1oXC9R3LYZrqxTPJfeSBdjcmQKOoA1HcvNSYqctGqSQ==}
+  '@onebuffalolabs/adapter-webrtc@0.2.0':
+    resolution: {integrity: sha512-UixZO5Sb3GoT4Zv+EUos+U9K2amWlE/+h44eCrQ0ONSxrtyJZLEJtpYCX/1L65cRmkga6FW+vkppbROCW9jJGg==}
     peerDependencies:
       '@onebuffalolabs/herd-sync': 0.1.1
       pouchdb-browser: ^9.0.0
@@ -3499,7 +3499,7 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@onebuffalolabs/adapter-webrtc@0.1.1(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@onebuffalolabs/adapter-webrtc@0.2.0(@onebuffalolabs/herd-sync@0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pouchdb-browser@9.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@onebuffalolabs/herd-sync': 0.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       jsqr: 1.4.0
