@@ -5,6 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useChallengeState, useChallengeDispatch } from '@/context/ChallengeContext';
 import { getChallengeById } from '@/lib/db';
+import {
+  calculateCurrentDay,
+  calculateDaysRemaining,
+  getChallengeDayDate,
+  formatFriendlyDate,
+} from '@/utils/date';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHome,
@@ -12,6 +18,7 @@ import {
   faCalendarAlt,
   faTrophy,
   faArrowLeft,
+  faHourglassHalf,
 } from '@fortawesome/free-solid-svg-icons';
 
 import DailyDashboard from '@/components/features/dashboard/DailyDashboard';
@@ -76,20 +83,38 @@ const ChallengeDetailContent = () => {
   // Dependency on 'challenge' ensures that if Context overwrites us with 'Active' challenge,
   // we re-fire and fetch the correct ID again.
 
-  // --- Calculate Active Day ---
+  // --- Calendar Day & Countdown Calculations ---
+  const currentCalendarDay = useMemo(() => {
+    if (!challenge) return 1;
+    return calculateCurrentDay(challenge.startDate, challenge.duration);
+  }, [challenge]);
+
+  const daysRemaining = useMemo(() => {
+    if (!challenge) return 0;
+    return calculateDaysRemaining(challenge.startDate, challenge.duration);
+  }, [challenge]);
+
+  const currentDayCalendarDate = useMemo(() => {
+    if (!challenge) return '';
+    const dateStr = getChallengeDayDate(challenge.startDate, currentCalendarDay);
+    return formatFriendlyDate(dateStr);
+  }, [challenge, currentCalendarDay]);
+
+  // --- Calculate Active Day to Show ---
   const nextDayToShow = useMemo(() => {
     if (!challenge) return 1;
     const completedDays = Object.keys(challenge.days)
       .map(Number)
       .filter((day) => challenge.days[day]?.completed);
 
-    if (completedDays.length === 0) return 1;
+    if (completedDays.length === 0) return currentCalendarDay;
 
     const highestCompletedDay = Math.max(...completedDays);
-    return Math.min(highestCompletedDay + 1, challenge.duration);
-  }, [challenge]);
+    return Math.min(Math.max(currentCalendarDay, highestCompletedDay + 1), challenge.duration);
+  }, [challenge, currentCalendarDay]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedDay(nextDayToShow);
   }, [nextDayToShow]);
 
@@ -143,7 +168,8 @@ const ChallengeDetailContent = () => {
   const showMeasurements = challenge.rules.trackMeasurements;
   const showJournal = challenge.rules.useDailyJournal;
   const hasSidebarFeatures = showWeight || showMeasurements || showJournal;
-  const isReadOnly = challenge.status !== 'active';
+  const isFutureDay = selectedDay > currentCalendarDay;
+  const isReadOnly = challenge.status !== 'active' || isFutureDay;
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-background)]">
@@ -166,10 +192,22 @@ const ChallengeDetailContent = () => {
                 <h1 className="text-3xl md:text-4xl font-bold font-orbitron text-[var(--color-text)] mb-2">
                   {challenge.name}
                 </h1>
-                <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
-                  <span className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCalendarAlt} /> {challenge.duration} Days
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-2 text-[var(--color-foreground)] font-medium">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="text-[var(--color-primary)]" />
+                    <span>Today: Day {currentCalendarDay} of {challenge.duration}</span>
+                    {currentDayCalendarDate && (
+                      <span className="text-[var(--color-text-muted)] font-normal">
+                        ({currentDayCalendarDate})
+                      </span>
+                    )}
                   </span>
+                  {challenge.status === 'active' && (
+                    <span className="flex items-center gap-2 text-[var(--color-foreground)] font-medium">
+                      <FontAwesomeIcon icon={faHourglassHalf} className="text-[var(--color-primary)]" />
+                      {daysRemaining === 0 ? 'Final Day!' : `${daysRemaining} ${daysRemaining === 1 ? 'Day' : 'Days'} Left`}
+                    </span>
+                  )}
                   <span className="flex items-center gap-2 uppercase tracking-wider font-bold text-[var(--color-primary)]">
                     <FontAwesomeIcon icon={faTrophy} /> {challenge.type} Mode
                   </span>

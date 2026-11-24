@@ -1,0 +1,16 @@
+[
+  {
+    "date": "Sep 19",
+    "title": "Celebrate Your Wins",
+    "version": "v1.1.0",
+    "type": "feature",
+    "description": "Crossing the finish line is a massive achievement. We overhauled the Completion Modal to show more detailed stats and introduced a 'View Summary' feature."
+  },
+  {
+    "date": "Aug 18",
+    "title": "Grit is Born",
+    "version": "v1.0.0",
+    "type": "launch",
+    "description": "The day it all started. We launched Grit with a simple mission: a privacy-first, offline-capable tracker for the 75 Hard challenge."
+  }
+]

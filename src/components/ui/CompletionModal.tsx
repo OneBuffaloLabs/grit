@@ -16,6 +16,7 @@ import {
   faCloudSun,
 } from '@fortawesome/free-solid-svg-icons';
 import { ChallengeDoc, DailyMeasurements } from '@/types';
+import { formatDisplayDate, calculateEndDate } from '@/utils/date';
 
 interface CompletionModalProps {
   isOpen: boolean;
@@ -118,7 +119,7 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
     }
 
     // Photos
-    let calculatedTotalPhotos = 0;
+    let calculatedTotalPhotos: number;
     switch (rules.photoRule) {
       case 'daily':
         calculatedTotalPhotos = duration;
@@ -135,9 +136,8 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
         break;
     }
 
-    const startObj = new Date(startDate);
-    const endObj = new Date(startObj);
-    endObj.setDate(startObj.getDate() + duration - 1);
+    const formattedStartDate = formatDisplayDate(startDate);
+    const formattedEndDate = formatDisplayDate(calculateEndDate(startDate, duration));
 
     return {
       weightChangeLabel,
@@ -149,8 +149,8 @@ const CompletionModal = ({ isOpen, onClose, challenge }: CompletionModalProps) =
       dietDays,
       totalPhotos: calculatedTotalPhotos,
       perfectDaysCount,
-      formattedStartDate: startObj.toLocaleDateString(),
-      formattedEndDate: endObj.toLocaleDateString(),
+      formattedStartDate,
+      formattedEndDate,
       activeDayCount: Object.keys(days).length,
     };
   }, [challenge]);

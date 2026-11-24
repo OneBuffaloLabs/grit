@@ -1,14 +1,10 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import reactPlugin from 'eslint-plugin-react';
-import hooksPlugin from 'eslint-plugin-react-hooks';
-import nextPlugin from '@next/eslint-plugin-next';
-import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
+import nextConfig from 'eslint-config-next/core-web-vitals';
 import globals from 'globals';
 
 export default tseslint.config(
   // 1. GLOBAL IGNORES
-  // 'out/' ignores the directory and EVERYTHING inside it recursively.
   {
     ignores: [
       '.next/',
@@ -22,63 +18,23 @@ export default tseslint.config(
   },
 
   // 2. GLOBAL SETTINGS (Browser + Node variables)
-  {
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-    },
-  },
+  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
 
-  // 3. BASE CONFIGS
+  // 3. BASE ESLINT & TYPESCRIPT CONFIGS
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
-  // 4. REACT & ACCESSIBILITY
-  {
-    files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    plugins: {
-      react: reactPlugin,
-      'jsx-a11y': jsxA11yPlugin,
-    },
-    rules: {
-      ...reactPlugin.configs.recommended.rules,
-      ...reactPlugin.configs['jsx-runtime'].rules,
-      ...jsxA11yPlugin.configs.recommended.rules,
+  // 4. NEXT.JS & REACT BUILT-IN FLAT CONFIG (Includes React, Hooks, & Next.js core-web-vitals)
+  ...nextConfig,
 
+  // 5. YOUR CUSTOM RULES & TEMPORARY DISABLES
+  {
+    files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
+    rules: {
       // TEMPORARY DISABLES (To unblock build)
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
       'jsx-a11y/label-has-associated-control': 'off', // Fixes form label errors
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
-  },
-
-  // 5. REACT HOOKS
-  {
-    files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    plugins: {
-      'react-hooks': hooksPlugin,
-    },
-    rules: {
-      ...hooksPlugin.configs.recommended.rules,
-    },
-  },
-
-  // 6. NEXT.JS SPECIFIC
-  {
-    files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    plugins: {
-      '@next/next': nextPlugin,
-    },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
     },
   }
 );

@@ -68,6 +68,7 @@ const WeightTracker = ({ currentDay, isReadOnly = false }: WeightTrackerProps) =
 
     // Load Weight
     const weightStr = dayData?.weight != null ? String(dayData.weight) : '';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWeight(weightStr);
     setOriginalWeight(weightStr);
 

@@ -52,10 +52,12 @@ export const DangerZone = ({ challenge, contextChallengeId, onClose }: DangerZon
       try {
         await deleteAllChallenges();
         dispatch({ type: 'SET_CHALLENGE', payload: null });
-        window.location.reload();
+        onClose();
+        router.push('/app');
       } catch (error) {
         console.error('Failed to delete all data:', error);
         alert('Failed to reset app.');
+      } finally {
         setIsDeleting(false);
       }
     }

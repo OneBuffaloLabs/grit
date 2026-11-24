@@ -7,6 +7,12 @@ import type { ChallengeDoc, ChallengeRules } from '@/types';
 import Notification from '@/components/ui/Notification';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
+import {
+  calculateCurrentDay,
+  getChallengeDayDate,
+  formatFriendlyDate,
+} from '@/utils/date';
+import WaterTracker from './WaterTracker';
 
 const initialTaskState = {
   diet: false,
@@ -50,6 +56,34 @@ const DailyDashboard = ({
   const isPreviousDayComplete =
     selectedDay === 1 || challenge?.days[selectedDay - 1]?.completed || false;
   const isLastDay = selectedDay === challenge?.duration;
+
+  // --- Dynamic Dates & Countdown ---
+  const currentCalendarDay = useMemo(() => {
+    if (!challenge) return 1;
+    return calculateCurrentDay(challenge.startDate, challenge.duration);
+  }, [challenge]);
+
+  const selectedDayRemaining = useMemo(() => {
+    if (!challenge) return 0;
+    return Math.max(0, challenge.duration - selectedDay);
+  }, [challenge, selectedDay]);
+
+  const selectedDayFriendlyDate = useMemo(() => {
+    if (!challenge) return '';
+    const dateStr = getChallengeDayDate(challenge.startDate, selectedDay);
+    return formatFriendlyDate(dateStr);
+  }, [challenge, selectedDay]);
+
+  const isSelectedDayToday = selectedDay === currentCalendarDay;
+
+  const currentWater = useMemo(() => {
+    if (!challenge) return 0;
+    const dayData = challenge.days[selectedDay];
+    if (dayData?.waterConsumed !== undefined) {
+      return dayData.waterConsumed;
+    }
+    return tasks.water ? challenge.rules.water : 0;
+  }, [challenge, selectedDay, tasks.water]);
 
   // --- Helpers ---
 
@@ -114,7 +148,7 @@ const DailyDashboard = ({
     }
 
     if (challenge.rules.photoRule !== 'none') {
-      let showPhotoTask = false;
+      let showPhotoTask: boolean;
       const isFirstDay = selectedDay === 1;
       const isLastDay = selectedDay === challenge.duration;
 
@@ -171,6 +205,33 @@ const DailyDashboard = ({
       if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
     } catch (error) {
       console.error('Failed to update task:', error);
+    }
+  };
+
+  const handleUpdateWater = async (newAmount: number) => {
+    if (!challenge || isDayComplete || isReadOnly) return;
+
+    const waterGoal = challenge.rules.water;
+    const clampedAmount = Math.max(0, Math.min(newAmount, waterGoal));
+    const isGoalReached = clampedAmount >= waterGoal;
+
+    const updatedChallenge: ChallengeDoc = JSON.parse(JSON.stringify(challenge));
+    if (!updatedChallenge.days[selectedDay]) {
+      updatedChallenge.days[selectedDay] = {
+        completed: false,
+        photoAttached: false,
+        tasks: initialTaskState,
+      };
+    }
+
+    updatedChallenge.days[selectedDay].waterConsumed = clampedAmount;
+    updatedChallenge.days[selectedDay].tasks.water = isGoalReached;
+
+    try {
+      const newRev = await updateChallenge(updatedChallenge);
+      if (newRev) dispatch({ type: 'SET_CHALLENGE', payload: newRev });
+    } catch (error) {
+      console.error('Failed to update water progress:', error);
     }
   };
 
@@ -271,42 +332,83 @@ const DailyDashboard = ({
       )}
 
       <div className="p-6 sm:p-8">
-        <h2 className="text-2xl font-bold font-orbitron mb-6 flex items-center gap-2">
-          Tasks for Day {selectedDay}
-          {isDayComplete && (
-            <span className="text-sm bg-green-500/20 text-green-500 px-2 py-1 rounded">
-              Complete
-            </span>
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-4 border-b border-[var(--color-background)] pb-4">
+          <div>
+            <h2 className="text-2xl font-bold font-orbitron flex items-center gap-3">
+              Tasks for Day {selectedDay}
+              {isDayComplete && (
+                <span className="text-sm font-sans font-bold bg-green-500/20 text-green-500 px-2.5 py-0.5 rounded">
+                  Complete
+                </span>
+              )}
+            </h2>
+            {selectedDayFriendlyDate && (
+              <p className="text-sm text-[var(--color-text-muted)] font-medium mt-1">
+                {selectedDayFriendlyDate}
+                {isSelectedDayToday && (
+                  <span className="text-[var(--color-primary)] font-semibold ml-1.5">(Today)</span>
+                )}
+              </p>
+            )}
+          </div>
+          {challenge && challenge.status === 'active' && (
+            <div className="text-xs font-orbitron uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-background)] px-3 py-1.5 rounded-lg border border-[var(--color-surface-border)]">
+              {selectedDay === challenge.duration ? (
+                <span className="text-[var(--color-primary)] font-bold">Final day</span>
+              ) : (
+                <>
+                  <span className="text-[var(--color-primary)] font-bold">
+                    {selectedDayRemaining}
+                  </span>{' '}
+                  {selectedDayRemaining === 1 ? 'day' : 'days'} left
+                </>
+              )}
+            </div>
           )}
-        </h2>
+        </div>
 
         <div className="flex flex-col gap-8">
           <div className="space-y-4">
-            {taskItems.map((task) => (
-              <label
-                key={task.id}
-                className={`flex items-center text-lg p-4 rounded-xl border transition-all duration-300 ${
-                  isDayComplete || !isPreviousDayComplete || isReadOnly
-                    ? 'border-transparent bg-[var(--color-background)] opacity-60 cursor-not-allowed'
-                    : 'border-[var(--color-background)] bg-[var(--color-background)] hover:border-[var(--color-primary)] cursor-pointer'
-                }`}>
-                <input
-                  type="checkbox"
-                  checked={tasks[task.id as keyof typeof tasks]}
-                  onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
-                  disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
-                  className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-gray-700 disabled:cursor-not-allowed"
-                />
-                <span
-                  className={`ml-4 font-medium ${
-                    tasks[task.id as keyof typeof tasks]
-                      ? 'text-[var(--color-text-muted)] line-through'
-                      : 'text-[var(--color-text)]'
+            {taskItems.map((task) => {
+              if (task.id === 'water') {
+                return (
+                  <WaterTracker
+                    key="water"
+                    currentWater={currentWater}
+                    waterGoal={challenge?.rules.water || 128}
+                    isCompleted={tasks.water}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
+                    onUpdateWater={handleUpdateWater}
+                  />
+                );
+              }
+
+              return (
+                <label
+                  key={task.id}
+                  className={`flex items-center text-lg p-4 rounded-xl border transition-all duration-300 ${
+                    isDayComplete || !isPreviousDayComplete || isReadOnly
+                      ? 'border-transparent bg-[var(--color-background)] opacity-60 cursor-not-allowed'
+                      : 'border-[var(--color-background)] bg-[var(--color-background)] hover:border-[var(--color-primary)] cursor-pointer'
                   }`}>
-                  {task.label}
-                </span>
-              </label>
-            ))}
+                  <input
+                    type="checkbox"
+                    checked={tasks[task.id as keyof typeof tasks]}
+                    onChange={() => handleTaskChange(task.id as keyof typeof tasks)}
+                    disabled={isDayComplete || !isPreviousDayComplete || isReadOnly}
+                    className="h-6 w-6 rounded-md border-gray-500 text-[var(--color-primary)] focus:ring-[var(--color-primary)] bg-gray-700 disabled:cursor-not-allowed"
+                  />
+                  <span
+                    className={`ml-4 font-medium ${
+                      tasks[task.id as keyof typeof tasks]
+                        ? 'text-[var(--color-text-muted)] line-through'
+                        : 'text-[var(--color-text)]'
+                    }`}>
+                    {task.label}
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
           <button
@@ -318,7 +420,14 @@ const DailyDashboard = ({
 
           <p className="text-center text-sm text-[var(--color-text-muted)] flex items-center justify-center gap-1">
             <FontAwesomeIcon icon={faCog} className="text-xs" />
-            <span>Settings allows you to restart if you miss a task.</span>
+            <span>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('openSettingsModal'))}
+                className="text-[var(--color-primary)] hover:underline font-medium cursor-pointer">
+                Settings
+              </button>{' '}
+              allows you to restart if you miss a task.
+            </span>
           </p>
         </div>
       </div>

@@ -1,32 +1,16 @@
+// --- React ---
 import React from 'react';
+
+// --- Icons ---
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faRocket,
-  faPaintRoller,
-  faTrophy,
-  faCodeBranch,
-  faBug,
-} from '@fortawesome/free-solid-svg-icons';
+
+// --- Components ---
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CHANGELOG_DATA, ChangeType } from '@/data/changelog';
-import packageInfo from '../../../package.json'; // <--- Import Package Info
 
-// Helper to map string types to Icons
-const getIconForType = (type: ChangeType) => {
-  switch (type) {
-    case 'launch':
-      return faRocket;
-    case 'feature':
-      return faTrophy;
-    case 'update':
-      return faPaintRoller;
-    case 'fix':
-      return faBug;
-    default:
-      return faCodeBranch;
-  }
-};
+// --- Data ---
+import { CHANGELOG_DATA, getIconForType } from '@/data/changelog';
+import packageInfo from '../../../package.json';
 
 const ChangelogPage = () => {
   return (

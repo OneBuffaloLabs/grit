@@ -1,0 +1,38 @@
+[
+  {
+    "id": "github",
+    "platform": "GitHub",
+    "handle": "OneBuffaloLabs/replace-repo-name",
+    "url": "https://github.com/OneBuffaloLabs/replace-repo-name",
+    "iconKey": "faGithub",
+    "category": "repository",
+    "showInFooter": true
+  },
+  {
+    "id": "x",
+    "platform": "X / Twitter",
+    "handle": "@replace_handle",
+    "url": "https://x.com/replace_handle",
+    "iconKey": "faXTwitter",
+    "category": "social",
+    "showInFooter": true
+  },
+  {
+    "id": "instagram",
+    "platform": "Instagram",
+    "handle": "@replace_handle",
+    "url": "https://instagram.com/replace_handle",
+    "iconKey": "faInstagram",
+    "category": "social",
+    "showInFooter": true
+  },
+  {
+    "id": "bluesky",
+    "platform": "Bluesky",
+    "handle": "@replace_handle.bsky.social",
+    "url": "https://bsky.app/profile/replace_handle.bsky.social",
+    "iconKey": "faBluesky",
+    "category": "social",
+    "showInFooter": true
+  }
+]
